@@ -14,4 +14,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
         "b.status = 'CONFIRMED'"
     )
     List<Booking> findByRoomIdAndCheckInAndCheckOutOverlap(Integer id, LocalDate checkIn, LocalDate checkOut);
+
+    List<Booking> findByUserId(Integer userId);
 }

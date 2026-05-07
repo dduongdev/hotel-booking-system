@@ -13,6 +13,7 @@ import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.exception.RoomAlreadyBookedException;
 import com.dduongdev.hotel.mapper.BookingMapper;
 import com.dduongdev.hotel.payload.request.MakeBookingRequest;
+import com.dduongdev.hotel.payload.response.BookingResponse;
 import com.dduongdev.hotel.payload.response.MakeBookingResponse;
 import com.dduongdev.hotel.repository.BookingRepository;
 import com.dduongdev.hotel.repository.RoomRepository;
@@ -76,5 +77,9 @@ public class BookingService {
         bookingRepository.save(booking);
 
         return bookingMapper.toMakeBookingResponse(booking);
+    }
+
+    public List<BookingResponse> getByUserId(Integer userId) {
+        return bookingRepository.findByUserId(userId).stream().map(bookingMapper::toBookingResponse).toList();
     }
 }

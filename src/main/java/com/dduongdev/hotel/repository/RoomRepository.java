@@ -14,7 +14,9 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     Page<Room> findAll(Pageable pageable);
     Optional<Room> findById(Integer id);
 
-    @Query("SELECT r FROM Room r WHERE r.id NOT IN ( " +
+    @Query("SELECT r FROM Room r " +
+        "JOIN FETCH r.roomType " +
+        "WHERE r.id NOT IN ( " +
         "SELECT b.room.id FROM Booking b " +
         "WHERE b.checkOut > :checkIn AND b.checkIn < :checkOut AND " + 
         "b.status = 'CONFIRMED'" +

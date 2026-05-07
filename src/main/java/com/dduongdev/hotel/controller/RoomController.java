@@ -1,5 +1,7 @@
 package com.dduongdev.hotel.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,5 +53,16 @@ public class RoomController {
     ) {
         RoomResponse response = roomService.update(id, request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<Page<RoomResponse>> getAvailableRoomsByCheckInAndCheckOut(
+        @RequestParam String checkIn,
+        @RequestParam String checkOut,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(roomService.getAvailableRoomsByCheckInAndCheckOut(LocalDate.parse(checkIn), LocalDate.parse(checkOut), pageable));
     }
 }

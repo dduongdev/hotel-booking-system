@@ -1,5 +1,7 @@
 package com.dduongdev.hotel.service;
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -67,5 +69,10 @@ public class RoomService {
         roomRepository.save(room);
 
         return roomMapper.toRoomResponse(room);
+    }
+
+    public Page<RoomResponse> getAvailableRoomsByCheckInAndCheckOut(LocalDate checkIn, LocalDate checkOut, Pageable pageable) {
+        Page<Room> roomsPage = roomRepository.findAvailableRoomsByCheckInAndCheckOut(checkIn, checkOut, pageable);
+        return roomsPage.map(roomMapper::toRoomResponse);
     }
 }

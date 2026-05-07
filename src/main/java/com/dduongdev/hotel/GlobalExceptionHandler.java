@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, RoomAlreadyBookedException.class})
+    @ExceptionHandler({IllegalArgumentException.class, RoomAlreadyBookedException.class, IllegalStateException.class})
     public ResponseEntity<?> handleIllegalArgumentException(RuntimeException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());

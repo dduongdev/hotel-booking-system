@@ -1,7 +1,6 @@
 package com.dduongdev.hotel.service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -98,5 +97,35 @@ public class BookingService {
 
     public Page<BookingResponse> getAll(Pageable pageable) {
         return bookingRepository.findAll(pageable).map(bookingMapper::toBookingResponse);
+    }
+
+    public BookingResponse confirm(Integer id) {
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Booking with id " + id + " not found"));
+
+        if (!(booking.getStatus().equals(Booking.Status.PENDING))) {
+            throw new IllegalStateException("Only pending bookings can be confirmed");
+        }
+
+        booking.setStatus(Booking.Status.CONFIRMED);
+        bookingRepository.save(booking);
+
+        return bookingMapper.toBookingResponse(booking);
+    }
+
+    public BookingResponse cancel(Integer id) {
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Booking with id " + id + " not found"));
+
+        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDate.now())) {
+            throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
+        }
+
+        if (booking.getStatus().equals(Booking.Status.CANCELLED)) {
+            throw new IllegalStateException("Booking is already cancelled");
+        }
+
+        booking.setStatus(Booking.Status.CANCELLED);
+        bookingRepository.save(booking);
+
+        return bookingMapper.toBookingResponse(booking);
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,5 +68,17 @@ public class BookingController {
         Pageable pageable = PageRequest.of(page, size);
         Page<BookingResponse> responses = bookingService.getAll(pageable);
         return ResponseEntity.ok(responses);
+    }
+
+    @PatchMapping("/{id}/confirm")
+    public ResponseEntity<BookingResponse> confirmBooking(@PathVariable Integer id) {
+        BookingResponse response = bookingService.confirm(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Integer id) {
+        BookingResponse response = bookingService.cancel(id);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,0 +1,25 @@
+package com.dduongdev.hotel.payload.request;
+
+import org.hibernate.validator.constraints.Length;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+
+@Getter
+public class UserRegisterRequest {
+    
+    @NotNull(message = "Username is required")
+    @NotBlank(message = "Username cannot be blank")
+    @NotEmpty(message = "Username cannot be empty")
+    @Length(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+    private String username;
+
+    @NotNull(message = "Password is required")
+    @NotBlank(message = "Password cannot be blank")
+    @NotEmpty(message = "Password cannot be empty")
+    @Length(min = 8, message = "Password must be at least 8 characters long")
+    private String password;
+
+}

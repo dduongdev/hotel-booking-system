@@ -3,6 +3,8 @@ package com.dduongdev.hotel.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,13 +46,13 @@ public class BookingService {
             throw new IllegalArgumentException("Check-in date cannot be after check-out date");
         }
 
-        List<Booking> overlappingBookings = bookingRepository.findByRoomIdAndCheckInAndCheckOutOverlap(
+        boolean isRoomBooked = bookingRepository.existsByRoomIdAndCheckInAndCheckOutOverlap(
             request.getRoomId(),
             request.getCheckIn(),
             request.getCheckOut()
         );
 
-        if (!overlappingBookings.isEmpty()) {
+        if (isRoomBooked) {
             throw new RoomAlreadyBookedException(
                 request.getRoomId(),
                 request.getCheckIn().toString(),
@@ -80,8 +82,8 @@ public class BookingService {
         return bookingMapper.toMakeBookingResponse(booking);
     }
 
-    public List<BookingResponse> getByUserId(Integer userId) {
-        return bookingRepository.findByUserId(userId).stream().map(bookingMapper::toBookingResponse).toList();
+    public Page<BookingResponse> getByUserId(Integer userId, Pageable pageable) {
+        return bookingRepository.findByUserId(userId, pageable).map(bookingMapper::toBookingResponse);
     }
 
     public void cancel(Integer userId, CancelOwnBookingRequest request) {
@@ -92,5 +94,9 @@ public class BookingService {
         }
 
         bookingRepository.delete(booking);
+    }
+
+    public Page<BookingResponse> getAll(Pageable pageable) {
+        return bookingRepository.findAll(pageable).map(bookingMapper::toBookingResponse);
     }
 }

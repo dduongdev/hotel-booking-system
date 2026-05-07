@@ -1,7 +1,8 @@
 package com.dduongdev.hotel.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
@@ -36,9 +38,16 @@ public class BookingController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<BookingResponse>> getBookingsOfCurrentUser(@AuthenticationPrincipal HotelUserDetails userDetails) {
+    public ResponseEntity<Page<BookingResponse>> getBookingsOfCurrentUser(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @AuthenticationPrincipal HotelUserDetails userDetails
+    ) {
         Integer userId = userDetails.getId();
-        List<BookingResponse> responses = bookingService.getByUserId(userId);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<BookingResponse> responses = bookingService.getByUserId(userId, pageable);
         return ResponseEntity.ok(responses);
     }
 
@@ -47,5 +56,15 @@ public class BookingController {
         Integer userId = userDetails.getId();
         bookingService.cancel(userId, request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<BookingResponse>> getAll(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<BookingResponse> responses = bookingService.getAll(pageable);
+        return ResponseEntity.ok(responses);
     }
 }

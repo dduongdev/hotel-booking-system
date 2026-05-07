@@ -33,7 +33,7 @@ public class Room {
     @Column(nullable = false)
     private String name;
 
-    private Status status = Status.AVAILABLE;
+    private boolean hidden = false;
     
     @ManyToOne
     @JoinColumn(name = "room_type_id")
@@ -46,10 +46,4 @@ public class Room {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public static enum Status {
-        AVAILABLE,
-        OCCUPIED,
-        HIDDEN
-    }
 }

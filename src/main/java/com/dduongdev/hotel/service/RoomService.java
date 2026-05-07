@@ -9,7 +9,6 @@ import com.dduongdev.hotel.entity.Room;
 import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.mapper.RoomMapper;
-import com.dduongdev.hotel.payload.request.ChangeRoomStatusRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomRequest;
 import com.dduongdev.hotel.payload.request.UpdateRoomRequest;
 import com.dduongdev.hotel.payload.response.CreateRoomResponse;
@@ -60,20 +59,10 @@ public class RoomService {
 
         Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room with id " + id + " not found"));
         room.setName(request.getName());
-        room.setStatus(request.getStatus());
+        room.setHidden(request.isHidden());
 
         RoomType roomTypeProxy = entityManager.getReference(RoomType.class, request.getRoomTypeId());
         room.setRoomType(roomTypeProxy);
-
-        roomRepository.save(room);
-
-        return roomMapper.toRoomResponse(room);
-    }
-
-    @Transactional
-    public RoomResponse changeStatus(Integer id, ChangeRoomStatusRequest request) {
-        Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room with id " + id + " not found"));
-        room.setStatus(request.getStatus());
 
         roomRepository.save(room);
 

@@ -18,7 +18,7 @@ public class RoomMapper {
         return new RoomResponse(
             room.getId(),
             room.getName(),
-            room.getStatus(),
+            room.isHidden(),
             roomTypeMapper.toRoomTypeResponse(room.getRoomType()),
             room.getCreatedAt(),
             room.getUpdatedAt()
@@ -29,7 +29,6 @@ public class RoomMapper {
         return new CreateRoomResponse(
             room.getId(),
             room.getName(),
-            room.getStatus(),
             roomTypeMapper.toRoomTypeResponse(room.getRoomType()),
             room.getCreatedAt()
         );

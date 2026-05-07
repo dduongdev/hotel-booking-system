@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dduongdev.hotel.entity.RoomType;
-import com.dduongdev.hotel.exception.RoomTypeNotFoundException;
+import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.mapper.RoomTypeMapper;
 import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
@@ -44,7 +44,7 @@ public class RoomTypeService {
 
     @Transactional
     public RoomTypeResponse update(Integer id, UpdateRoomTypeRequest request) {
-        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new RoomTypeNotFoundException(id));
+        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type with id " + id + " not found"));
         
         storedroomType.setName(request.getName());
         storedroomType.setDescription(request.getDescription());
@@ -58,7 +58,7 @@ public class RoomTypeService {
 
     @Transactional
     public RoomTypeResponse changeHiddenState(Integer id, ChangeRoomTypeHiddenStateRequest request) {
-        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new RoomTypeNotFoundException(id));
+        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type with id " + id + " not found"));
         
         storedroomType.setHidden(request.isHidden());
 

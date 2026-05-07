@@ -3,10 +3,11 @@ package com.dduongdev.hotel.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.dduongdev.hotel.entity.Room;
 import com.dduongdev.hotel.entity.RoomType;
-import com.dduongdev.hotel.exception.RoomNotFoundException;
+import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.mapper.RoomMapper;
 import com.dduongdev.hotel.payload.request.ChangeRoomStatusRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomRequest;
@@ -44,8 +45,9 @@ public class RoomService {
         return roomsPage.map(roomMapper::toRoomResponse);
     }
 
+    @Transactional
     public RoomResponse update(Integer id, UpdateRoomRequest request) {
-        Room room = roomRepository.findById(id).orElseThrow(() -> new RoomNotFoundException(id));
+        Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room with id " + id + " not found"));
         room.setName(request.getName());
         room.setStatus(request.getStatus());
 
@@ -57,8 +59,9 @@ public class RoomService {
         return roomMapper.toRoomResponse(room);
     }
 
+    @Transactional
     public RoomResponse changeStatus(Integer id, ChangeRoomStatusRequest request) {
-        Room room = roomRepository.findById(id).orElseThrow(() -> new RoomNotFoundException(id));
+        Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room with id " + id + " not found"));
         room.setStatus(request.getStatus());
 
         roomRepository.save(room);

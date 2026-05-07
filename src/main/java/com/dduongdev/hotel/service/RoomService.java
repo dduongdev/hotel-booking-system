@@ -15,6 +15,7 @@ import com.dduongdev.hotel.payload.request.UpdateRoomRequest;
 import com.dduongdev.hotel.payload.response.CreateRoomResponse;
 import com.dduongdev.hotel.payload.response.RoomResponse;
 import com.dduongdev.hotel.repository.RoomRepository;
+import com.dduongdev.hotel.repository.RoomTypeRepository;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,13 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final EntityManager entityManager;
     private final RoomMapper roomMapper;
+    private final RoomTypeRepository roomTypeRepository;
 
     public CreateRoomResponse create(CreateRoomRequest request) {
+
+        if (!roomTypeRepository.existsById(request.getRoomTypeId())) {
+            throw new ResourceNotFoundException("Room type with id " + request.getRoomTypeId() + " not found");
+        }
 
         RoomType roomTypeProxy = entityManager.getReference(RoomType.class, request.getRoomTypeId());
 
@@ -47,6 +53,11 @@ public class RoomService {
 
     @Transactional
     public RoomResponse update(Integer id, UpdateRoomRequest request) {
+
+        if (!roomTypeRepository.existsById(request.getRoomTypeId())) {
+            throw new ResourceNotFoundException("Room type with id " + request.getRoomTypeId() + " not found");
+        }
+
         Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room with id " + id + " not found"));
         room.setName(request.getName());
         room.setStatus(request.getStatus());

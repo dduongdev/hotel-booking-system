@@ -44,7 +44,7 @@ public class RoomTypeService {
 
     @Transactional
     public RoomTypeResponse update(Integer id, UpdateRoomTypeRequest request) {
-        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new RoomTypeNotFoundException("Room type not found with id: " + id));
+        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new RoomTypeNotFoundException(id));
         
         storedroomType.setName(request.getName());
         storedroomType.setDescription(request.getDescription());
@@ -58,7 +58,7 @@ public class RoomTypeService {
 
     @Transactional
     public RoomTypeResponse changeHiddenState(Integer id, ChangeRoomTypeHiddenStateRequest request) {
-        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new RoomTypeNotFoundException("Room type not found with id: " + id));
+        RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new RoomTypeNotFoundException(id));
         
         storedroomType.setHidden(request.isHidden());
 

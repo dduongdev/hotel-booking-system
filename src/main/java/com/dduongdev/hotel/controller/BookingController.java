@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
 import com.dduongdev.hotel.payload.request.MakeBookingRequest;
 import com.dduongdev.hotel.payload.response.BookingResponse;
 import com.dduongdev.hotel.payload.response.MakeBookingResponse;
@@ -38,5 +40,12 @@ public class BookingController {
         Integer userId = userDetails.getId();
         List<BookingResponse> responses = bookingService.getByUserId(userId);
         return ResponseEntity.ok(responses);
+    }
+
+    @DeleteMapping("/me/cancel")
+    public ResponseEntity<?> cancelBookingOfCurrentUser(@Valid @RequestBody CancelOwnBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
+        Integer userId = userDetails.getId();
+        bookingService.cancel(userId, request);
+        return ResponseEntity.ok().build();
     }
 }

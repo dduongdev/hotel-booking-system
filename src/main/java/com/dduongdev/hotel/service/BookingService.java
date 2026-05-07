@@ -12,6 +12,7 @@ import com.dduongdev.hotel.entity.User;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.exception.RoomAlreadyBookedException;
 import com.dduongdev.hotel.mapper.BookingMapper;
+import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
 import com.dduongdev.hotel.payload.request.MakeBookingRequest;
 import com.dduongdev.hotel.payload.response.BookingResponse;
 import com.dduongdev.hotel.payload.response.MakeBookingResponse;
@@ -81,5 +82,15 @@ public class BookingService {
 
     public List<BookingResponse> getByUserId(Integer userId) {
         return bookingRepository.findByUserId(userId).stream().map(bookingMapper::toBookingResponse).toList();
+    }
+
+    public void cancel(Integer userId, CancelOwnBookingRequest request) {
+        Booking booking = bookingRepository.findByIdAndUserId(request.getBookingId(), userId).orElseThrow(() -> new ResourceNotFoundException("Booking with id " + request.getBookingId() + " not found for user with id " + userId));
+
+        if (!(booking.getStatus().equals(Booking.Status.PENDING))) {
+            throw new IllegalStateException("Only pending bookings can be canceled");
+        }
+
+        bookingRepository.delete(booking);
     }
 }

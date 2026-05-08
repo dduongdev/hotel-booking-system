@@ -25,7 +25,7 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
                 "FROM RoomType rt\r\n" + //
                 "LEFT JOIN Room r\r\n" + //
                 "ON r.roomType.id = rt.id\r\n" + //
-                "WHERE r.id NOT IN (\r\n" + //
+                "WHERE rt.hidden = false AND r.id NOT IN (\r\n" + //
                 "\tSELECT sr.id\r\n" + //
                 "\tFROM Room sr\r\n" + //
                 "\tJOIN Booking b\r\n" + //

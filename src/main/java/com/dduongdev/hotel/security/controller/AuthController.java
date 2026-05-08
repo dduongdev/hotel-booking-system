@@ -1,20 +1,15 @@
 package com.dduongdev.hotel.security.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dduongdev.hotel.security.entity.HotelUserDetails;
 import com.dduongdev.hotel.security.payload.request.LoginRequest;
 import com.dduongdev.hotel.security.payload.request.RefreshTokenRequest;
 import com.dduongdev.hotel.security.payload.response.LoginResponse;
 import com.dduongdev.hotel.security.service.AuthService;
-import com.dduongdev.hotel.security.service.JwtService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

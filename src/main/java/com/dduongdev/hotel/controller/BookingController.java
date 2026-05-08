@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<MakeBookingResponse> make(@Valid @RequestBody MakeBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
         Integer userId = userDetails.getId();
         MakeBookingResponse response = bookingService.make(userId, request);
@@ -40,6 +42,7 @@ public class BookingController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<Page<BookingResponse>> getBookingsOfCurrentUser(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
@@ -54,6 +57,7 @@ public class BookingController {
     }
 
     @DeleteMapping("/me/cancel")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> cancelBookingOfCurrentUser(@Valid @RequestBody CancelOwnBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
         Integer userId = userDetails.getId();
         bookingService.cancel(userId, request);
@@ -61,6 +65,7 @@ public class BookingController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Page<BookingResponse>> getAll(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
@@ -71,12 +76,14 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}/confirm")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<BookingResponse> confirmBooking(@PathVariable Integer id) {
         BookingResponse response = bookingService.confirm(id);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Integer id) {
         BookingResponse response = bookingService.cancel(id);
         return ResponseEntity.ok(response);

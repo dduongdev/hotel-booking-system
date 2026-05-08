@@ -2,6 +2,7 @@ package com.dduongdev.hotel.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -31,6 +32,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/register").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/room-types").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/rooms").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/rooms/available").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

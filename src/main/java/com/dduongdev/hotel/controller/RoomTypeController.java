@@ -1,5 +1,8 @@
 package com.dduongdev.hotel.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +22,7 @@ import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
 import com.dduongdev.hotel.payload.request.UpdateRoomTypeRequest;
 import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
+import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeResponse;
 import com.dduongdev.hotel.service.RoomTypeService;
 
@@ -56,6 +60,14 @@ public class RoomTypeController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RoomTypeResponse> changeRoomTypeHiddenState(@PathVariable Integer id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
         RoomTypeResponse response = roomTypeService.changeHiddenState(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/availability")
+    public ResponseEntity<List<RoomTypeAvailabilityResponse>> getRoomTypeAvailability(
+        @RequestParam String checkIn, 
+        @RequestParam String checkOut) {
+        List<RoomTypeAvailabilityResponse> response = roomTypeService.getRoomTypeAvailability(LocalDate.parse(checkIn), LocalDate.parse(checkOut));
         return ResponseEntity.ok(response);
     }
 }

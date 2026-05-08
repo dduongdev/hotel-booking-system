@@ -1,5 +1,6 @@
 package com.dduongdev.hotel;
 
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, RoomAlreadyBookedException.class, IllegalStateException.class})
+    @ExceptionHandler({IllegalArgumentException.class, RoomAlreadyBookedException.class, IllegalStateException.class, DateTimeParseException.class})
     public ResponseEntity<?> handleIllegalArgumentException(RuntimeException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());

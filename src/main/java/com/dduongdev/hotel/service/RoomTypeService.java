@@ -1,5 +1,8 @@
 package com.dduongdev.hotel.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
 import com.dduongdev.hotel.payload.request.UpdateRoomTypeRequest;
 import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
+import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeResponse;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
 
@@ -65,5 +69,17 @@ public class RoomTypeService {
         roomTypeRepository.save(storedroomType);
 
         return roomTypeMapper.toRoomTypeResponse(storedroomType);
+    }
+
+    public List<RoomTypeAvailabilityResponse> getRoomTypeAvailability(LocalDate checkIn, LocalDate checkOut) {
+        if (checkIn.isAfter(checkOut)) {
+            throw new IllegalArgumentException("Check-in date must be before check-out date");
+        }
+
+         if (checkIn.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Check-in date cannot be in the past");
+        }
+
+        return roomTypeRepository.findRoomTypeAvailabilityByCheckInAndCheckOut(checkIn, checkOut);
     }
 }

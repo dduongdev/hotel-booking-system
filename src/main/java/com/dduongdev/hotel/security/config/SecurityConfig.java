@@ -1,5 +1,8 @@
 package com.dduongdev.hotel.security.config;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -50,5 +53,15 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecureRandom secureRandom() {
+        return new SecureRandom();
+    }
+
+    @Bean
+    public Base64.Encoder base64Encoder() {
+        return Base64.getUrlEncoder().withoutPadding();
     }
 }

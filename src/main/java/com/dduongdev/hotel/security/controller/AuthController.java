@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dduongdev.hotel.security.entity.HotelUserDetails;
 import com.dduongdev.hotel.security.payload.request.LoginRequest;
+import com.dduongdev.hotel.security.payload.request.RefreshTokenRequest;
 import com.dduongdev.hotel.security.payload.response.LoginResponse;
+import com.dduongdev.hotel.security.service.AuthService;
 import com.dduongdev.hotel.security.service.JwtService;
 
 import jakarta.validation.Valid;
@@ -22,17 +24,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
     
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        UsernamePasswordAuthenticationToken unauthenticatedToken = new UsernamePasswordAuthenticationToken(
-            loginRequest.getUsername(), loginRequest.getPassword());
-        Authentication authentication = authenticationManager.authenticate(unauthenticatedToken);
-        
-        HotelUserDetails userDetails = (HotelUserDetails) authentication.getPrincipal();
-        String jwtToken = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(new LoginResponse(jwtToken));
+        LoginResponse response = authService.authenticate(loginRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        LoginResponse response = authService.refreshToken(request);
+        return ResponseEntity.ok(response);
     }
 }

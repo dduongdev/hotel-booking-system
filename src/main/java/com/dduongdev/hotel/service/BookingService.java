@@ -83,8 +83,8 @@ public class BookingService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Booking with id " + request.getBookingId() + " not found for user with id " + userId));
 
-        if (!(booking.getStatus().equals(Booking.Status.PENDING))) {
-            throw new IllegalStateException("Only pending bookings can be canceled");
+        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDate.now())) {
+            throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
         }
 
         bookingRepository.delete(booking);

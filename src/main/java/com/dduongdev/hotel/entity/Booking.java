@@ -34,7 +34,7 @@ public class Booking {
     private int id;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING;
+    private Status status = Status.CONFIRMED;
 
     @Column(name = "check_in", nullable = false)
     private LocalDate checkIn;
@@ -59,7 +59,6 @@ public class Booking {
     private LocalDateTime updatedAt;
 
     public static enum Status {
-        PENDING,
         CONFIRMED,
         CANCELLED
     }

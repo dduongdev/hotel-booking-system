@@ -3,9 +3,6 @@ package com.dduongdev.hotel.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,28 +34,27 @@ public class RoomTypeController {
     private final RoomTypeService roomTypeService;
 
     @PostMapping
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<CreateRoomTypeResponse> createRoomType(@Valid @RequestBody CreateRoomTypeRequest request) {
+    // @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<CreateRoomTypeResponse> create(@Valid @RequestBody CreateRoomTypeRequest request) {
         CreateRoomTypeResponse response = roomTypeService.create(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<Page<RoomTypeResponse>> getAllRoomTypes(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(roomTypeService.getAll(pageable));
+    public ResponseEntity<List<RoomTypeResponse>> getAll() {
+        return ResponseEntity.ok(roomTypeService.getAll());
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<RoomTypeResponse> updateRoomType(@PathVariable Integer id, @Valid @RequestBody UpdateRoomTypeRequest request) {
+    public ResponseEntity<RoomTypeResponse> update(@PathVariable Integer id, @Valid @RequestBody UpdateRoomTypeRequest request) {
         RoomTypeResponse response = roomTypeService.update(id, request);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/hidden")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<RoomTypeResponse> changeRoomTypeHiddenState(@PathVariable Integer id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
+    public ResponseEntity<RoomTypeResponse> changeHiddenState(@PathVariable Integer id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
         RoomTypeResponse response = roomTypeService.changeHiddenState(id, request);
         return ResponseEntity.ok(response);
     }

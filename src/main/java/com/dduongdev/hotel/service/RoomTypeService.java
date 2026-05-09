@@ -41,9 +41,9 @@ public class RoomTypeService {
         return roomTypeMapper.toCreateRoomTypeResponse(roomType);
     }
 
-    public Page<RoomTypeResponse> getAll(Pageable pageable) {
-        Page<RoomType> roomTypesPage = roomTypeRepository.findAll(pageable);
-        return roomTypesPage.map(roomTypeMapper::toRoomTypeResponse);
+    public List<RoomTypeResponse> getAll() {
+        List<RoomType> roomTypes = roomTypeRepository.findAllByOrderByPricePerNightAsc();
+        return roomTypes.stream().map(roomTypeMapper::toRoomTypeResponse).toList();
     }
 
     @Transactional
@@ -80,6 +80,8 @@ public class RoomTypeService {
             throw new IllegalArgumentException("Check-in date cannot be in the past");
         }
 
-        return roomTypeRepository.findRoomTypeAvailabilityByCheckInAndCheckOut(checkIn, checkOut);
+        List<RoomTypeAvailabilityResponse> roomTypes = roomTypeRepository.findRoomTypeAvailabilityByCheckInAndCheckOut(checkIn, checkOut);
+        roomTypes.sort((a, b) -> Double.compare(a.getPricePerNight(), b.getPricePerNight()));
+        return roomTypes;
     }
 }

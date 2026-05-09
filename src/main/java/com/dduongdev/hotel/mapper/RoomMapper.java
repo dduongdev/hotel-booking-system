@@ -3,8 +3,8 @@ package com.dduongdev.hotel.mapper;
 import org.springframework.stereotype.Component;
 
 import com.dduongdev.hotel.entity.Room;
-import com.dduongdev.hotel.payload.response.v1.CreateRoomResponse;
-import com.dduongdev.hotel.payload.response.v1.RoomResponse;
+import com.dduongdev.hotel.payload.response.CreateRoomResponse;
+import com.dduongdev.hotel.payload.response.RoomResponse;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.payload.request.v1;
+package com.dduongdev.hotel.payload.request;
 
 import java.time.LocalDate;
 
@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 public class MakeBookingRequest {
     
-    @NotNull(message = "Room ID is required")
-    private int roomId;
+    @NotNull(message = "Room Type ID is required")
+    private int roomTypeId;
 
     @NotNull(message = "Check-in date is required")
     private LocalDate checkIn;
@@ -17,3 +17,4 @@ public class MakeBookingRequest {
     @NotNull(message = "Check-out date is required")
     private LocalDate checkOut;
 }
+

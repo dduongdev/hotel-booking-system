@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.payload.response.v1;
+package com.dduongdev.hotel.payload.response;
 
 import java.time.LocalDateTime;
 
@@ -6,14 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+@AllArgsConstructor
 @Setter
 @Getter
-@AllArgsConstructor
-public class RoomResponse {
+public class RoomTypeResponse {
     private int id;
     private String name;
-    private boolean hidden;
-    private RoomTypeResponse roomType;
+    private String description;
+    private int capacity;
+    private double pricePerNight;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

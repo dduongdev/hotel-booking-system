@@ -3,8 +3,8 @@ package com.dduongdev.hotel.mapper;
 import org.springframework.stereotype.Component;
 
 import com.dduongdev.hotel.entity.Booking;
-import com.dduongdev.hotel.payload.response.v1.BookingResponse;
-import com.dduongdev.hotel.payload.response.v1.MakeBookingResponse;
+import com.dduongdev.hotel.payload.response.BookingResponse;
+import com.dduongdev.hotel.payload.response.MakeBookingResponse;
 
 import lombok.RequiredArgsConstructor;
 

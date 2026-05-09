@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.payload.request.v1;
+package com.dduongdev.hotel.payload.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -7,7 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class CreateRoomTypeRequest {
+public class UpdateRoomTypeRequest {
+
     @NotNull(message = "Name is required")
     @NotEmpty(message = "Name cannot be empty")
     @NotBlank(message = "Name cannot be blank")

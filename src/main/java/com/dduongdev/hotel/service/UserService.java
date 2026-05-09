@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dduongdev.hotel.entity.User;
 import com.dduongdev.hotel.exception.UsernameAlreadyExistsException;
-import com.dduongdev.hotel.payload.request.v1.UserRegisterRequest;
-import com.dduongdev.hotel.payload.response.v1.UserRegisterResponse;
+import com.dduongdev.hotel.payload.request.UserRegisterRequest;
+import com.dduongdev.hotel.payload.response.UserRegisterResponse;
 import com.dduongdev.hotel.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;

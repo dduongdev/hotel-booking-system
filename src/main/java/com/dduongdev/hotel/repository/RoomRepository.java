@@ -39,5 +39,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
                 "\t\t\tb.status = 'CONFIRMED'\r\n" + //
                 "\t)\r\n" + //
                 "GROUP BY r.id")
-    List<RoomBookingCount> countBookingsOfAvailableRoomsByRoomTypeIdAndCheckInAndCheckOut(int roomTypeId, LocalDate checkIn, LocalDate checkOut);
+    List<RoomBookingCount> countBookingsForAvailableRoomsByRoomType(int roomTypeId, LocalDate checkIn, LocalDate checkOut);
 }

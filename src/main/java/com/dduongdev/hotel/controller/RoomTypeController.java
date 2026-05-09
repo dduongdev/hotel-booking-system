@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.controller.v1;
+package com.dduongdev.hotel.controller;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dduongdev.hotel.payload.request.v1.ChangeRoomTypeHiddenStateRequest;
-import com.dduongdev.hotel.payload.request.v1.CreateRoomTypeRequest;
-import com.dduongdev.hotel.payload.request.v1.UpdateRoomTypeRequest;
-import com.dduongdev.hotel.payload.response.v1.CreateRoomTypeResponse;
-import com.dduongdev.hotel.payload.response.v1.RoomTypeAvailabilityResponse;
-import com.dduongdev.hotel.payload.response.v1.RoomTypeResponse;
+import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
+import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
+import com.dduongdev.hotel.payload.request.UpdateRoomTypeRequest;
+import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
+import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
+import com.dduongdev.hotel.payload.response.RoomTypeResponse;
 import com.dduongdev.hotel.service.RoomTypeService;
 
 import jakarta.validation.Valid;
@@ -37,7 +37,7 @@ public class RoomTypeController {
     private final RoomTypeService roomTypeService;
 
     @PostMapping
-    // @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<CreateRoomTypeResponse> createRoomType(@Valid @RequestBody CreateRoomTypeRequest request) {
         CreateRoomTypeResponse response = roomTypeService.create(request);
         return ResponseEntity.ok(response);

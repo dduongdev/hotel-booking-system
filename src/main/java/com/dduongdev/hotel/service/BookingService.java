@@ -13,17 +13,15 @@ import com.dduongdev.hotel.entity.Booking;
 import com.dduongdev.hotel.entity.Room;
 import com.dduongdev.hotel.entity.User;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
-import com.dduongdev.hotel.exception.RoomAlreadyBookedException;
 import com.dduongdev.hotel.mapper.BookingMapper;
-import com.dduongdev.hotel.payload.request.v1.CancelOwnBookingRequest;
-import com.dduongdev.hotel.payload.request.v1.MakeBookingRequest;
-import com.dduongdev.hotel.payload.response.v1.BookingResponse;
-import com.dduongdev.hotel.payload.response.v1.MakeBookingResponse;
+import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
+import com.dduongdev.hotel.payload.request.MakeBookingRequest;
+import com.dduongdev.hotel.payload.response.BookingResponse;
+import com.dduongdev.hotel.payload.response.MakeBookingResponse;
 import com.dduongdev.hotel.repository.BookingRepository;
 import com.dduongdev.hotel.repository.RoomRepository;
 import com.dduongdev.hotel.repository.UserRepository;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,58 +29,12 @@ import lombok.RequiredArgsConstructor;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
-    private final EntityManager entityManager;
     private final BookingMapper bookingMapper;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
 
     @Transactional
     public MakeBookingResponse make(Integer userId, MakeBookingRequest request) {
-
-        if (request.getCheckIn().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Check-in date cannot be in the past");
-        }
-
-        if (request.getCheckIn().isAfter(request.getCheckOut())) {
-            throw new IllegalArgumentException("Check-in date cannot be after check-out date");
-        }
-
-        boolean isRoomBooked = bookingRepository.existsByRoomIdAndCheckInAndCheckOutOverlap(
-                request.getRoomId(),
-                request.getCheckIn(),
-                request.getCheckOut());
-
-        if (isRoomBooked) {
-            throw new RoomAlreadyBookedException(
-                    request.getRoomId(),
-                    request.getCheckIn().toString(),
-                    request.getCheckOut().toString());
-        }
-
-        if (!roomRepository.existsById(request.getRoomId())) {
-            throw new ResourceNotFoundException("Room with id " + request.getRoomId() + " not found");
-        }
-
-        if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("User with id " + userId + " not found");
-        }
-
-        Room roomProxy = entityManager.getReference(Room.class, request.getRoomId());
-        User userProxy = entityManager.getReference(User.class, userId);
-
-        Booking booking = new Booking();
-        booking.setCheckIn(request.getCheckIn());
-        booking.setCheckOut(request.getCheckOut());
-        booking.setRoom(roomProxy);
-        booking.setUser(userProxy);
-
-        bookingRepository.save(booking);
-
-        return bookingMapper.toMakeBookingResponse(booking);
-    }
-
-    @Transactional
-    public MakeBookingResponse make(Integer userId, com.dduongdev.hotel.payload.request.v2.MakeBookingRequest request) {
         if (request.getCheckIn().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Check-in date cannot be in the past");
         }
@@ -92,7 +44,7 @@ public class BookingService {
         }
 
         List<RoomBookingCount> availableRoomBookingCounts = roomRepository
-                .countBookingsOfAvailableRoomsByRoomTypeIdAndCheckInAndCheckOut(
+                .countBookingsForAvailableRoomsByRoomType(
                         request.getRoomTypeId(),
                         request.getCheckIn(),
                         request.getCheckOut()
@@ -113,6 +65,7 @@ public class BookingService {
         Booking booking = new Booking();
         booking.setCheckIn(request.getCheckIn());
         booking.setCheckOut(request.getCheckOut());
+        booking.setStatus(Booking.Status.CONFIRMED);
         booking.setRoom(roomProxy);
         booking.setUser(userProxy);
 
@@ -139,20 +92,6 @@ public class BookingService {
 
     public Page<BookingResponse> getAll(Pageable pageable) {
         return bookingRepository.findAll(pageable).map(bookingMapper::toBookingResponse);
-    }
-
-    public BookingResponse confirm(Integer id) {
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking with id " + id + " not found"));
-
-        if (!(booking.getStatus().equals(Booking.Status.PENDING))) {
-            throw new IllegalStateException("Only pending bookings can be confirmed");
-        }
-
-        booking.setStatus(Booking.Status.CONFIRMED);
-        bookingRepository.save(booking);
-
-        return bookingMapper.toBookingResponse(booking);
     }
 
     public BookingResponse cancel(Integer id) {

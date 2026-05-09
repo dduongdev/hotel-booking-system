@@ -3,8 +3,8 @@ package com.dduongdev.hotel.mapper;
 import org.springframework.stereotype.Component;
 
 import com.dduongdev.hotel.entity.RoomType;
-import com.dduongdev.hotel.payload.response.v1.CreateRoomTypeResponse;
-import com.dduongdev.hotel.payload.response.v1.RoomTypeResponse;
+import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
+import com.dduongdev.hotel.payload.response.RoomTypeResponse;
 
 @Component
 public class RoomTypeMapper {

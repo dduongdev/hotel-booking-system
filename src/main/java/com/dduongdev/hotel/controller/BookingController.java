@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.controller.v1;
+package com.dduongdev.hotel.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dduongdev.hotel.payload.request.v1.CancelOwnBookingRequest;
-import com.dduongdev.hotel.payload.request.v1.MakeBookingRequest;
-import com.dduongdev.hotel.payload.response.v1.BookingResponse;
-import com.dduongdev.hotel.payload.response.v1.MakeBookingResponse;
+import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
+import com.dduongdev.hotel.payload.request.MakeBookingRequest;
+import com.dduongdev.hotel.payload.response.BookingResponse;
+import com.dduongdev.hotel.payload.response.MakeBookingResponse;
 import com.dduongdev.hotel.security.entity.HotelUserDetails;
 import com.dduongdev.hotel.service.BookingService;
 
@@ -73,13 +73,6 @@ public class BookingController {
         Pageable pageable = PageRequest.of(page, size);
         Page<BookingResponse> responses = bookingService.getAll(pageable);
         return ResponseEntity.ok(responses);
-    }
-
-    @PatchMapping("/{id}/confirm")
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<BookingResponse> confirmBooking(@PathVariable Integer id) {
-        BookingResponse response = bookingService.confirm(id);
-        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/cancel")

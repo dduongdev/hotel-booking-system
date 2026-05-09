@@ -26,7 +26,7 @@ import com.dduongdev.hotel.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController
+@RestController("BookingControllerV1")
 @RequestMapping("/api/v1/bookings")
 @RequiredArgsConstructor
 public class BookingController {
@@ -73,13 +73,6 @@ public class BookingController {
         Pageable pageable = PageRequest.of(page, size);
         Page<BookingResponse> responses = bookingService.getAll(pageable);
         return ResponseEntity.ok(responses);
-    }
-
-    @PatchMapping("/{id}/confirm")
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<BookingResponse> confirmBooking(@PathVariable Integer id) {
-        BookingResponse response = bookingService.confirm(id);
-        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/cancel")

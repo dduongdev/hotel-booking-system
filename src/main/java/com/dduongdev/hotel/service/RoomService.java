@@ -11,10 +11,10 @@ import com.dduongdev.hotel.entity.Room;
 import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.mapper.RoomMapper;
-import com.dduongdev.hotel.payload.request.CreateRoomRequest;
-import com.dduongdev.hotel.payload.request.UpdateRoomRequest;
-import com.dduongdev.hotel.payload.response.CreateRoomResponse;
-import com.dduongdev.hotel.payload.response.RoomResponse;
+import com.dduongdev.hotel.payload.request.v1.CreateRoomRequest;
+import com.dduongdev.hotel.payload.request.v1.UpdateRoomRequest;
+import com.dduongdev.hotel.payload.response.v1.CreateRoomResponse;
+import com.dduongdev.hotel.payload.response.v1.RoomResponse;
 import com.dduongdev.hotel.repository.RoomRepository;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
 

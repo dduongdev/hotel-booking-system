@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.controller;
+package com.dduongdev.hotel.controller.v1;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,17 +16,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
-import com.dduongdev.hotel.payload.request.MakeBookingRequest;
-import com.dduongdev.hotel.payload.response.BookingResponse;
-import com.dduongdev.hotel.payload.response.MakeBookingResponse;
+import com.dduongdev.hotel.payload.request.v1.CancelOwnBookingRequest;
+import com.dduongdev.hotel.payload.request.v1.MakeBookingRequest;
+import com.dduongdev.hotel.payload.response.v1.BookingResponse;
+import com.dduongdev.hotel.payload.response.v1.MakeBookingResponse;
 import com.dduongdev.hotel.security.entity.HotelUserDetails;
 import com.dduongdev.hotel.service.BookingService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController
+@RestController("BookingControllerV1")
 @RequestMapping("/api/v1/bookings")
 @RequiredArgsConstructor
 public class BookingController {

@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.mapper.RoomTypeMapper;
-import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
-import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
-import com.dduongdev.hotel.payload.request.UpdateRoomTypeRequest;
-import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
-import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
-import com.dduongdev.hotel.payload.response.RoomTypeResponse;
+import com.dduongdev.hotel.payload.request.v1.ChangeRoomTypeHiddenStateRequest;
+import com.dduongdev.hotel.payload.request.v1.CreateRoomTypeRequest;
+import com.dduongdev.hotel.payload.request.v1.UpdateRoomTypeRequest;
+import com.dduongdev.hotel.payload.response.v1.CreateRoomTypeResponse;
+import com.dduongdev.hotel.payload.response.v1.RoomTypeAvailabilityResponse;
+import com.dduongdev.hotel.payload.response.v1.RoomTypeResponse;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
 
 import lombok.RequiredArgsConstructor;

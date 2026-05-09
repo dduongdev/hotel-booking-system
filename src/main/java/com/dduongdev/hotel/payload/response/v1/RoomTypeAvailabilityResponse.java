@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.payload.response;
+package com.dduongdev.hotel.payload.response.v1;
 
 import lombok.Getter;
 import lombok.Setter;

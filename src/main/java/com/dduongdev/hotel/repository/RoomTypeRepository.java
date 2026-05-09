@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.dduongdev.hotel.entity.RoomType;
-import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
+import com.dduongdev.hotel.payload.response.v1.RoomTypeAvailabilityResponse;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
     Page<RoomType> findAll(Pageable pageable);
 
-    @Query("SELECT new com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse(\r\n" + //
+    @Query("SELECT new com.dduongdev.hotel.payload.response.v1.RoomTypeAvailabilityResponse(\r\n" + //
                 "\trt.id,\r\n" + //
                 "\trt.name,\r\n" + //
                 "\trt.description,\r\n" + //

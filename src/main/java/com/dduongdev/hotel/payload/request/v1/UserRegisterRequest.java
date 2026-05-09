@@ -1,4 +1,4 @@
-package com.dduongdev.hotel.payload.request;
+package com.dduongdev.hotel.payload.request.v1;
 
 import org.hibernate.validator.constraints.Length;
 

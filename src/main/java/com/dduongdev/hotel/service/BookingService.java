@@ -1,14 +1,12 @@
 package com.dduongdev.hotel.service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dduongdev.hotel.dto.RoomBookingCount;
 import com.dduongdev.hotel.entity.Booking;
 import com.dduongdev.hotel.entity.Room;
 import com.dduongdev.hotel.entity.User;
@@ -43,30 +41,26 @@ public class BookingService {
             throw new IllegalArgumentException("Check-in date cannot be after check-out date");
         }
 
-        List<RoomBookingCount> availableRoomBookingCounts = roomRepository
-                .countBookingsForAvailableRoomsByRoomType(
+        Room availableRoom = roomRepository
+                .findTopAvailableByRoomTypeIdAndDateRange(
                         request.getRoomTypeId(),
                         request.getCheckIn(),
                         request.getCheckOut()
-                );
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Room type " + request.getRoomTypeId()
+                        + " not found or has no available rooms for the selected dates"));
 
-        if (availableRoomBookingCounts.isEmpty()) {
-            throw new IllegalArgumentException("Room type " + request.getRoomTypeId()
-                    + " not found or has no available rooms for the selected dates");
-        }
+        
+        availableRoom.setBookingCount(availableRoom.getBookingCount() + 1);
+        roomRepository.save(availableRoom);
 
-        RoomBookingCount leastBookedRoom = availableRoomBookingCounts.stream()
-                .min((a, b) -> Long.compare(a.getBookingCount(), b.getBookingCount()))
-                .orElseThrow(() -> new IllegalStateException("No available rooms found for the selected dates"));
-
-        Room roomProxy = roomRepository.getReferenceById(leastBookedRoom.getId());
         User userProxy = userRepository.getReferenceById(userId);
 
         Booking booking = new Booking();
         booking.setCheckIn(request.getCheckIn());
         booking.setCheckOut(request.getCheckOut());
         booking.setStatus(Booking.Status.CONFIRMED);
-        booking.setRoom(roomProxy);
+        booking.setRoom(availableRoom);
         booking.setUser(userProxy);
 
         bookingRepository.save(booking);
@@ -87,6 +81,14 @@ public class BookingService {
             throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
         }
 
+        if (booking.getStatus().equals(Booking.Status.CANCELLED)) {
+            throw new IllegalStateException("Booking is already cancelled");
+        }
+
+        Room bookedRoom = booking.getRoom();
+        bookedRoom.setBookingCount(bookedRoom.getBookingCount() - 1);
+        roomRepository.save(bookedRoom);
+
         bookingRepository.delete(booking);
     }
 
@@ -105,6 +107,10 @@ public class BookingService {
         if (booking.getStatus().equals(Booking.Status.CANCELLED)) {
             throw new IllegalStateException("Booking is already cancelled");
         }
+
+        Room bookedRoom = booking.getRoom();
+        bookedRoom.setBookingCount(bookedRoom.getBookingCount() - 1);
+        roomRepository.save(bookedRoom);
 
         booking.setStatus(Booking.Status.CANCELLED);
         bookingRepository.save(booking);

@@ -39,6 +39,8 @@ public class Room {
     @JoinColumn(name = "room_type_id")
     private RoomType roomType;
 
+    private int bookingCount = 0;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

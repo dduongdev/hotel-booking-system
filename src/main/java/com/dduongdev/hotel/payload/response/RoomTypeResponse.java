@@ -7,14 +7,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 @AllArgsConstructor
-@Setter
 @Getter
+@Setter
 public class RoomTypeResponse {
     private int id;
     private String name;
     private String description;
     private int capacity;
     private double pricePerNight;
+    private boolean hidden;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="script">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Set default dates: today and tomorrow
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                document.getElementById('check-in').value = today.toISOString().split('T')[0];
+                document.getElementById('check-out').value = tomorrow.toISOString().split('T')[0];
+            });
+
+            async function searchAvailability() {
+                const checkIn = document.getElementById('check-in').value;
+                const checkOut = document.getElementById('check-out').value;
+                const resultsDiv = document.getElementById('availability-results');
+                
+                if (!checkIn || !checkOut) {
+                    showToast('Please select both check-in and check-out dates.', 'warning');
+                    return;
+                }
+                
+                if (checkIn >= checkOut) {
+                    showToast('Check-out date must be after check-in date.', 'warning');
+                    return;
+                }
+                
+                resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Searching availability...</p></div>';
+                
+                try {
+                    const results = await RoomTypeAPI.getAvailability(checkIn, checkOut);
+                    
+                    if (!results || results.length === 0) {
+                        resultsDiv.innerHTML = '<div class="empty-state"><div class="icon">&#128716;</div><h3>No Rooms Available</h3><p>No rooms are available for the selected dates. Please try different dates.</p></div>';
+                        return;
+                    }
+                    
+                    resultsDiv.innerHTML = results.map(rt => `
+                        <div class="room-type-card">
+                            <div class="card-image">&#127968;</div>
+                            <div class="card-content">
+                                <h3>${escapeHtml(rt.name)}</h3>
+                                <p>${escapeHtml(rt.description || 'No description available.')}</p>
+                                <div class="card-meta">
+                                    <span class="meta-item">&#128101; ${rt.capacity} guests</span>
+                                    <span class="meta-item">&#128197; ${rt.availableRoomCount} room(s) available</span>
+                                </div>
+                                <div class="price">${formatCurrency(rt.pricePerNight)} <small>/ night</small></div>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    resultsDiv.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Search Failed</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                    showToast(error.message, 'error');
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

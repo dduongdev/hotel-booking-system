@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="script">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Set default dates: today and tomorrow
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+
+                document.getElementById('check-in').value = today.toISOString().split('T')[0];
+                document.getElementById('check-out').value = tomorrow.toISOString().split('T')[0];
+
+                // Auto-load availability with default dates
+                searchAvailability();
+            });
+
+            async function searchAvailability() {
+                const checkIn = document.getElementById('check-in').value;
+                const checkOut = document.getElementById('check-out').value;
+                const grid = document.getElementById('room-types-grid');
+
+                if (!checkIn || !checkOut) {
+                    showToast('Please select both check-in and check-out dates.', 'warning');
+                    return;
+                }
+
+                if (checkIn >= checkOut) {
+                    showToast('Check-out date must be after check-in date.', 'warning');
+                    return;
+                }
+
+                grid.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading available rooms...</p></div>';
+
+                try {
+                    const results = await RoomTypeAPI.getAvailability(checkIn, checkOut);
+
+                    if (!results || results.length === 0) {
+                        grid.innerHTML = '<div class="empty-state"><div class="icon">&#128716;</div><h3>No Rooms Available</h3><p>No rooms are available for the selected dates. Please try different dates.</p></div>';
+                        return;
+                    }
+
+                    const isAuth = TokenManager.isAuthenticated();
+
+                    grid.innerHTML = results.map(rt => `
+                        <div class="room-type-card">
+                            <div class="card-image">&#127968;</div>
+                            <div class="card-content">
+                                <h3>${escapeHtml(rt.name)}</h3>
+                                <p>${escapeHtml(rt.description || 'No description available.')}</p>
+                                <div class="card-meta">
+                                    <span class="meta-item">&#128101; ${rt.capacity} guests</span>
+                                    <span class="meta-item">&#128197; ${rt.availableRoomCount} room(s) available</span>
+                                </div>
+                                <div class="price">${formatCurrency(rt.pricePerNight)} <small>/ night</small></div>
+                                ${isAuth ? `<button onclick="bookNow(${rt.id}, '${checkIn}', '${checkOut}', this)" class="btn btn-primary btn-sm" style="margin-top: 12px;">Book Now</button>` : `<a href="/login" class="btn btn-outline btn-sm" style="margin-top: 12px;">Sign in to Book</a>`}
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    grid.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Room Types</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                }
+            }
+
+            async function bookNow(roomTypeId, checkIn, checkOut, btn) {
+                btn.disabled = true;
+                btn.textContent = 'Booking...';
+                try {
+                    const result = await BookingAPI.make({
+                        roomTypeId: roomTypeId,
+                        checkIn: checkIn,
+                        checkOut: checkOut
+                    });
+                    showToast(`Booking confirmed! ID #${result.id}. Redirecting...`, 'success');
+                    setTimeout(() => { window.location.href = '/bookings/my'; }, 1500);
+                } catch (error) {
+                    showToast(error.message || 'Booking failed. Please try again.', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Book Now';
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

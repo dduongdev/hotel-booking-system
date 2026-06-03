@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="script">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!TokenManager.isAuthenticated()) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const user = TokenManager.getUser();
+                if (!user || user.role !== 'MANAGER') {
+                    window.location.href = '/';
+                    return;
+                }
+                loadDashboard();
+            });
+
+            async function loadDashboard() {
+                const statsDiv = document.getElementById('dashboard-stats');
+                
+                try {
+                    const [roomTypeResult, roomsResult, bookingsResult] = await Promise.all([
+                        RoomTypeAPI.getAll(),
+                        RoomAPI.getAll(0, 1),
+                        BookingAPI.getAll(0, 1)
+                    ]);
+                    
+                    const roomTypes = roomTypeResult.content || [];
+                    const totalRoomTypes = roomTypes.length;
+                    const totalRooms = roomsResult?.totalElements || 0;
+                    const totalBookings = bookingsResult?.totalElements || 0;
+                    const maxPrice = totalRoomTypes > 0 ? Math.max(...roomTypes.map(rt => rt.pricePerNight)) : 0;
+                    
+                    statsDiv.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-icon">&#127968;</div>
+                            <div class="stat-value">${totalRoomTypes}</div>
+                            <div class="stat-label">Room Types</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">&#128719;</div>
+                            <div class="stat-value">${totalRooms}</div>
+                            <div class="stat-label">Total Rooms</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">&#128203;</div>
+                            <div class="stat-value">${totalBookings}</div>
+                            <div class="stat-label">Total Bookings</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">&#128176;</div>
+                            <div class="stat-value">${formatCurrency(maxPrice)}</div>
+                            <div class="stat-label">Max Price/Night</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    statsDiv.innerHTML = '<div style="grid-column: 1/-1;" class="alert alert-danger">Failed to load dashboard data: ' + escapeHtml(error.message) + '</div>';
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

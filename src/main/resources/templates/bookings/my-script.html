@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="script">
+        <script>
+            let myBookingsPage = 0;
+            const myBookingsPageSize = 10;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!TokenManager.isAuthenticated()) {
+                    window.location.href = '/login';
+                    return;
+                }
+                loadMyBookings();
+            });
+
+            async function loadMyBookings(page = 0) {
+                myBookingsPage = page;
+                const container = document.getElementById('my-bookings-container');
+                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading your bookings...</p></div>';
+                
+                try {
+                    const result = await BookingAPI.getMyBookings(page, myBookingsPageSize);
+                    const bookings = result.content || [];
+                    const totalPages = result.totalPages || 0;
+                    
+                    if (bookings.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="icon">&#128230;</div>
+                                <h3>No Bookings Yet</h3>
+                                <p>You haven't made any bookings yet.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Room</th><th>Room Type</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
+                    
+                    bookings.forEach(booking => {
+                        const statusClass = getStatusBadgeClass(booking.status);
+                        const statusText = getStatusText(booking.status);
+                        const canCancel = booking.status === 'CONFIRMED';
+                        
+                        html += `<tr>
+                            <td><strong>#${booking.id}</strong></td>
+                            <td>${escapeHtml(booking.room?.name || 'N/A')}</td>
+                            <td>${escapeHtml(booking.room?.roomType?.name || 'N/A')}</td>
+                            <td>${formatDate(booking.checkIn)}</td>
+                            <td>${formatDate(booking.checkOut)}</td>
+                            <td><span class="${statusClass}">${statusText}</span></td>
+                            <td>${formatDateTime(booking.createdAt)}</td>
+                            <td>
+                                ${canCancel ? `<button onclick="cancelMyBooking(${booking.id})" class="btn btn-danger btn-sm">Cancel</button>` : '<span class="badge badge-secondary">-</span>'}
+                            </td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table></div></div>';
+                    
+                    // Pagination
+                    if (totalPages > 1) {
+                        html += '<div class="pagination">';
+                        html += `<button onclick="loadMyBookings(0)" ${page === 0 ? 'disabled' : ''}>&#171; First</button>`;
+                        html += `<button onclick="loadMyBookings(${page - 1})" ${page === 0 ? 'disabled' : ''}>&#8249; Prev</button>`;
+                        html += `<span class="page-info">Page ${page + 1} of ${totalPages}</span>`;
+                        html += `<button onclick="loadMyBookings(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Next &#8250;</button>`;
+                        html += `<button onclick="loadMyBookings(${totalPages - 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Last &#187;</button>`;
+                        html += '</div>';
+                    }
+                    
+                    container.innerHTML = html;
+                } catch (error) {
+                    container.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Bookings</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                }
+            }
+
+            async function cancelMyBooking(bookingId) {
+                if (!confirm('Are you sure you want to cancel this booking?')) return;
+                
+                try {
+                    await BookingAPI.cancelMyBooking(bookingId);
+                    showToast('Booking cancelled successfully.', 'success');
+                    loadMyBookings(myBookingsPage);
+                } catch (error) {
+                    showToast(error.message || 'Failed to cancel booking.', 'error');
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

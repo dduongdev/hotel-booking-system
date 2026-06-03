@@ -30,6 +30,8 @@ public class BookingMapper {
                 booking.getCheckIn(),
                 booking.getCheckOut(),
                 roomMapper.toRoomResponse(booking.getRoom()),
+                booking.getUser() != null ? booking.getUser().getId() : null,
+                booking.getUser() != null ? booking.getUser().getUsername() : null,
                 booking.getCreatedAt(),
                 booking.getUpdatedAt());
     }

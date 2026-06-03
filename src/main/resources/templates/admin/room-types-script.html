@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="script">
+        <script>
+            let adminRoomTypesPage = 0;
+            const adminRoomTypesPageSize = 12;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!TokenManager.isAuthenticated()) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const user = TokenManager.getUser();
+                if (!user || user.role !== 'MANAGER') {
+                    window.location.href = '/';
+                    return;
+                }
+                loadAdminRoomTypes();
+            });
+
+            async function loadAdminRoomTypes(page = 0) {
+                adminRoomTypesPage = page;
+                const container = document.getElementById('admin-room-types-container');
+                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading room types...</p></div>';
+                
+                try {
+                    const result = await RoomTypeAPI.getAll(page, adminRoomTypesPageSize);
+                    const roomTypes = result.content || [];
+                    const totalPages = result.totalPages || 0;
+                    
+                    if (roomTypes.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><div class="icon">&#127968;</div><h3>No Room Types</h3><p>No room types have been created yet.</p></div>';
+                        return;
+                    }
+                    
+                    let html = '<div class="grid-2">';
+                    
+                    roomTypes.forEach(rt => {
+                        const hiddenBadge = rt.hidden ? '<span class="badge badge-danger" style="margin-top: 8px;">Hidden</span>' : '<span class="badge badge-success" style="margin-top: 8px;">Visible</span>';
+                        html += `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>${escapeHtml(rt.name)}</h3>
+                                    <div>
+                                        <button class="btn btn-outline btn-sm edit-rt-btn" 
+                                            data-id="${rt.id}">Edit</button>
+                                        <button class="btn btn-sm toggle-rt-btn ${rt.hidden ? 'btn-success' : 'btn-warning'}"
+                                            data-id="${rt.id}" data-hidden="${rt.hidden}">
+                                            ${rt.hidden ? 'Show' : 'Hide'}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p style="color: var(--gray-600); margin-bottom: 16px;">${escapeHtml(rt.description || 'No description.')}</p>
+                                    <div class="card-meta" style="display: flex; gap: 16px; flex-wrap: wrap;">
+                                        <span class="meta-item" style="display: flex; align-items: center; gap: 6px;">
+                                            &#128101; ${rt.capacity} guests
+                                        </span>
+                                        <span class="meta-item" style="display: flex; align-items: center; gap: 6px;">
+                                            &#128176; ${formatCurrency(rt.pricePerNight)} / night
+                                        </span>
+                                    </div>
+                                    ${hiddenBadge}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    
+                    // Pagination
+                    if (totalPages > 1) {
+                        html += '<div class="pagination">';
+                        html += `<button onclick="loadAdminRoomTypes(0)" ${page === 0 ? 'disabled' : ''}>&#171; First</button>`;
+                        html += `<button onclick="loadAdminRoomTypes(${page - 1})" ${page === 0 ? 'disabled' : ''}>&#8249; Prev</button>`;
+                        html += `<span class="page-info">Page ${page + 1} of ${totalPages}</span>`;
+                        html += `<button onclick="loadAdminRoomTypes(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Next &#8250;</button>`;
+                        html += `<button onclick="loadAdminRoomTypes(${totalPages - 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Last &#187;</button>`;
+                        html += '</div>';
+                    }
+                    
+                    container.innerHTML = html;
+                    
+                    // Attach event listeners
+                    container.querySelectorAll('.edit-rt-btn').forEach(btn => {
+                        btn.addEventListener('click', () => editRoomType(parseInt(btn.dataset.id)));
+                    });
+                    container.querySelectorAll('.toggle-rt-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const id = parseInt(btn.dataset.id);
+                            const hidden = btn.dataset.hidden === 'true';
+                            toggleRoomTypeHidden(id, !hidden);
+                        });
+                    });
+                } catch (error) {
+                    container.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Room Types</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                }
+            }
+
+            async function showAddRoomTypeModal() {
+                document.getElementById('room-type-modal-title').textContent = 'Add Room Type';
+                document.getElementById('room-type-id').value = '';
+                document.getElementById('rt-name').value = '';
+                document.getElementById('rt-description').value = '';
+                document.getElementById('rt-capacity').value = '2';
+                document.getElementById('rt-price').value = '';
+                document.getElementById('rt-hidden').checked = false;
+                document.getElementById('rt-hidden-group').style.display = 'none';
+                document.getElementById('room-type-form-error').style.display = 'none';
+                document.getElementById('room-type-modal').classList.add('active');
+            }
+
+            async function editRoomType(id) {
+                document.getElementById('room-type-modal-title').textContent = 'Edit Room Type';
+                document.getElementById('room-type-form-error').style.display = 'none';
+                
+                try {
+                    const roomTypes = (await RoomTypeAPI.getAll()).content;
+                    const rt = roomTypes.find(r => r.id === id);
+                    
+                    if (!rt) {
+                        showToast('Room type not found.', 'error');
+                        return;
+                    }
+                    
+                    document.getElementById('room-type-id').value = rt.id;
+                    document.getElementById('rt-name').value = rt.name;
+                    document.getElementById('rt-description').value = rt.description || '';
+                    document.getElementById('rt-capacity').value = rt.capacity;
+                    document.getElementById('rt-price').value = rt.pricePerNight;
+                    document.getElementById('rt-hidden').checked = rt.hidden || false;
+                    document.getElementById('rt-hidden-group').style.display = 'block';
+                    document.getElementById('room-type-modal').classList.add('active');
+                } catch (error) {
+                    showToast('Failed to load room type details.', 'error');
+                }
+            }
+
+            function closeRoomTypeModal() {
+                document.getElementById('room-type-modal').classList.remove('active');
+            }
+
+            async function saveRoomType(event) {
+                event.preventDefault();
+                const errorDiv = document.getElementById('room-type-form-error');
+                errorDiv.style.display = 'none';
+                
+                const id = document.getElementById('room-type-id').value;
+                const name = document.getElementById('rt-name').value;
+                const description = document.getElementById('rt-description').value;
+                const capacity = parseInt(document.getElementById('rt-capacity').value);
+                const pricePerNight = parseFloat(document.getElementById('rt-price').value);
+                
+                if (!name || !capacity || !pricePerNight) {
+                    errorDiv.textContent = 'Please fill in all required fields.';
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
+                
+                try {
+                    if (id) {
+                        await RoomTypeAPI.update(parseInt(id), { name, description, capacity, pricePerNight });
+                        showToast('Room type updated successfully.', 'success');
+                    } else {
+                        await RoomTypeAPI.create({ name, description, capacity, pricePerNight });
+                        showToast('Room type created successfully.', 'success');
+                    }
+                    closeRoomTypeModal();
+                    loadAdminRoomTypes(adminRoomTypesPage);
+                } catch (error) {
+                    errorDiv.textContent = error.message || 'Operation failed.';
+                    errorDiv.style.display = 'block';
+                }
+                return false;
+            }
+
+            async function toggleRoomTypeHidden(id, hidden) {
+                try {
+                    await RoomTypeAPI.changeHiddenState(id, hidden);
+                    showToast(`Room type is now ${hidden ? 'hidden' : 'visible'}.`, 'success');
+                    loadAdminRoomTypes(adminRoomTypesPage);
+                } catch (error) {
+                    showToast(error.message || 'Operation failed.', 'error');
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

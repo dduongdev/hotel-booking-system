@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <nav class="navbar" th:fragment="navbar" id="main-navbar">
+        <div style="display: flex; align-items: center; gap: 32px;">
+            <a href="/" class="navbar-brand">
+                <span>&#127976;</span>
+                <span>Hotel Booking</span>
+            </a>
+            <ul class="navbar-menu" id="navbar-menu">
+                <li><a href="/" class="nav-link">Phòng</a></li>
+                <li id="nav-my-bookings" style="display: none;"><a href="/bookings/my" class="nav-link">Đặt của tôi</a></li>
+                <li id="nav-admin" style="display: none;"><a href="/admin/dashboard" class="nav-link">Quản lý</a></li>
+            </ul>
+        </div>
+        <div class="navbar-right" id="navbar-right">
+            <div id="user-badge" class="user-badge" style="display: none;">
+                <span id="user-name-display">User</span>
+                <span id="user-role-display" class="role-tag">ROLE</span>
+            </div>
+            <a id="btn-login" href="/login" class="btn btn-primary btn-sm">Đăng nhập</a>
+            <a id="btn-register" href="/register" class="btn btn-outline btn-sm">Đăng ký</a>
+            <a id="btn-logout" href="#" onclick="event.preventDefault(); AuthAPI.logout();" class="btn btn-outline btn-sm" style="display: none;">Đăng xuất</a>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const user = TokenManager.getUser();
+                const isAuth = TokenManager.isAuthenticated();
+                const path = window.location.pathname;
+                
+                // Highlight active link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (path === href || (href !== '/' && path.startsWith(href))) {
+                        link.classList.add('active');
+                    } else if (href === '/' && (path === '/' || path.startsWith('/room-types') || path.startsWith('/rooms'))) {
+                        link.classList.add('active');
+                    }
+                });
+                
+                if (isAuth && user) {
+                    document.getElementById('user-badge').style.display = 'flex';
+                    document.getElementById('user-name-display').textContent = user.username;
+                    document.getElementById('user-role-display').textContent = user.role;
+                    document.getElementById('btn-login').style.display = 'none';
+                    document.getElementById('btn-register').style.display = 'none';
+                    document.getElementById('btn-logout').style.display = 'inline-flex';
+                    
+                    if (user.role === 'CUSTOMER') {
+                        document.getElementById('nav-my-bookings').style.display = 'list-item';
+                    } else if (user.role === 'MANAGER') {
+                        document.getElementById('nav-admin').style.display = 'list-item';
+                    }
+                }
+            });
+        </script>
+    </nav>
+</body>
+</html>

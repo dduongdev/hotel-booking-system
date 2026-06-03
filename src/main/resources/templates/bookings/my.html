@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <div class="page-header">
+            <h1>My Bookings</h1>
+            <p>View and manage your hotel bookings.</p>
+        </div>
+        
+        <div id="my-bookings-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading your bookings...</p>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <div class="page-header">
+            <h1>Manager Dashboard</h1>
+            <p>Overview and management tools for the hotel system.</p>
+        </div>
+
+        <div id="dashboard-stats" class="stats-grid">
+            <div class="loading" style="grid-column: 1/-1;">
+                <div class="loading-spinner"></div>
+                <p>Loading dashboard data...</p>
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 32px;">
+            <div class="feature-card" onclick="window.location.href='/admin/bookings'" style="cursor: pointer;">
+                <div class="icon">&#128203;</div>
+                <h3>Manage Bookings</h3>
+                <p>View and manage all hotel bookings.</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='/admin/rooms'" style="cursor: pointer;">
+                <div class="icon">&#128719;</div>
+                <h3>Manage Rooms</h3>
+                <p>Add, edit, and manage hotel rooms.</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='/admin/room-types'" style="cursor: pointer;">
+                <div class="icon">&#127968;</div>
+                <h3>Manage Room Types</h3>
+                <p>Configure room types, prices, and capacity.</p>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

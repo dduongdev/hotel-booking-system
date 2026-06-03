@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="script">
+        <script>
+            let currentPage = 0;
+            const pageSize = 12;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadRooms();
+            });
+
+            async function loadRooms(page = 0) {
+                currentPage = page;
+                const container = document.getElementById('rooms-container');
+                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading rooms...</p></div>';
+                
+                try {
+                    const result = await RoomAPI.getAll(page, pageSize);
+                    const rooms = result.content || [];
+                    const totalPages = result.totalPages || 0;
+                    
+                    if (rooms.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><div class="icon">&#128716;</div><h3>No Rooms Found</h3><p>There are no rooms available at the moment.</p></div>';
+                        return;
+                    }
+                    
+                    let html = '<div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Room Type</th><th>Price/Night</th><th>Capacity</th><th>Status</th></tr></thead><tbody>';
+                    
+                    rooms.forEach(room => {
+                        const statusBadge = room.hidden ? '<span class="badge badge-danger">Hidden</span>' : '<span class="badge badge-success">Active</span>';
+                        html += `<tr>
+                            <td>${room.id}</td>
+                            <td><strong>${escapeHtml(room.name)}</strong></td>
+                            <td>${escapeHtml(room.roomType?.name || 'N/A')}</td>
+                            <td>${formatCurrency(room.roomType?.pricePerNight || 0)}</td>
+                            <td>${room.roomType?.capacity || 0} guests</td>
+                            <td>${statusBadge}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table></div>';
+                    
+                    // Pagination
+                    if (totalPages > 1) {
+                        html += '<div class="pagination">';
+                        html += `<button onclick="loadRooms(0)" ${page === 0 ? 'disabled' : ''}>&#171; First</button>`;
+                        html += `<button onclick="loadRooms(${page - 1})" ${page === 0 ? 'disabled' : ''}>&#8249; Prev</button>`;
+                        html += `<span class="page-info">Page ${page + 1} of ${totalPages}</span>`;
+                        html += `<button onclick="loadRooms(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Next &#8250;</button>`;
+                        html += `<button onclick="loadRooms(${totalPages - 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Last &#187;</button>`;
+                        html += '</div>';
+                    }
+                    
+                    container.innerHTML = html;
+                } catch (error) {
+                    container.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Rooms</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

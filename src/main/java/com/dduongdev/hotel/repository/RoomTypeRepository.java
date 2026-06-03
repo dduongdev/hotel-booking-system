@@ -3,6 +3,8 @@ package com.dduongdev.hotel.repository;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,7 +12,7 @@ import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
-    List<RoomType> findAllByOrderByPricePerNightAsc();
+    Page<RoomType> findAllByOrderByPricePerNightAsc(Pageable pageable);
 
     @Query("SELECT new com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse(\r\n" + //
                 "\trt.id,\r\n" + //

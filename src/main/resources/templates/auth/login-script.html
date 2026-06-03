@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <script>
+            async function handleLogin(event) {
+                event.preventDefault();
+                const errorDiv = document.getElementById('login-error');
+                errorDiv.style.display = 'none';
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    const data = await AuthAPI.login(username, password);
+                    
+                    // Decode JWT to get user info
+                    const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
+                    const auth = payload.authorities && payload.authorities[0];
+                    const role = payload.role || (typeof auth === 'string' ? auth.replace('ROLE_', '') : auth?.authority?.replace('ROLE_', ''));
+                    
+                    TokenManager.saveUser({
+                        username: payload.sub,
+                        role: role || 'CUSTOMER'
+                    });
+                    
+                    // Redirect based on role
+                    if (role === 'MANAGER') {
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        window.location.href = '/';
+                    }
+                } catch (error) {
+                    const msg = error.data?.error || error.message || 'Invalid username or password';
+                    errorDiv.textContent = msg;
+                    errorDiv.style.display = 'block';
+                }
+                return false;
+            }
+
+            // Auto-redirect if already logged in
+            if (TokenManager.isAuthenticated()) {
+                const user = TokenManager.getUser();
+                if (user && user.role === 'MANAGER') {
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    window.location.href = '/';
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

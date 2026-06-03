@@ -18,6 +18,8 @@ public class BookingResponse {
     private LocalDate checkIn;
     private LocalDate checkOut;
     private RoomResponse room;
+    private Integer userId;
+    private String username;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

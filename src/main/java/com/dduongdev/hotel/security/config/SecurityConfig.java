@@ -41,9 +41,17 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/room-types").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/room-types/availability").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/rooms").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/rooms/available").permitAll()
                 .requestMatchers("/error").permitAll()
+                .requestMatchers("/", "/index.html").permitAll()
+                .requestMatchers("/css/**", "/js/**").permitAll()
+                .requestMatchers("/login", "/register").permitAll()
+                .requestMatchers("/room-types/**").permitAll()
+                .requestMatchers("/rooms/**").permitAll()
+                .requestMatchers("/admin/**").permitAll()
+                .requestMatchers("/bookings/**").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -55,7 +63,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-            "http://localhost:5173"
+            "http://localhost:5173",
+            "http://localhost:8080"
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

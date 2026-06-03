@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Hotel Booking System</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar">Navbar</div>
+    
+    <main class="main-content">
+        <div class="container">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+            <th:block th:replace="~{__${view}__}"></th:block>
+        </div>
+    </main>
+    
+    <div id="toast-container" class="toast-container"></div>
+    
+    <footer class="footer">
+        &copy; 2026 Hotel Booking System. All rights reserved.
+    </footer>
+    
+    <script src="/js/api.js"></script>
+    <th:block th:if="${extraScript}">
+        <th:block th:replace="~{__${extraScript}__}"></th:block>
+    </th:block>
+</body>
+</html>

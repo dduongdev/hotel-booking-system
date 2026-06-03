@@ -15,6 +15,7 @@ public class RoomTypeMapper {
                 roomType.getDescription(),
                 roomType.getCapacity(),
                 roomType.getPricePerNight(),
+                roomType.isHidden(),
                 roomType.getCreatedAt(),
                 roomType.getUpdatedAt()
         );

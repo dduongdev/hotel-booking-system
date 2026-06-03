@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Manage Room Types</h1>
+                <p>Configure room types, pricing, and availability.</p>
+            </div>
+            <button onclick="showAddRoomTypeModal()" class="btn btn-primary">+ Add Room Type</button>
+        </div>
+
+        <div id="admin-room-types-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading room types...</p>
+            </div>
+        </div>
+
+        <!-- Add/Edit Room Type Modal -->
+        <div id="room-type-modal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 id="room-type-modal-title">Add Room Type</h3>
+                    <button class="close-btn" onclick="closeRoomTypeModal()">&times;</button>
+                </div>
+                <form id="room-type-form" onsubmit="return saveRoomType(event)">
+                    <div class="modal-body">
+                        <div id="room-type-form-error" class="alert alert-danger" style="display: none;"></div>
+                        <input type="hidden" id="room-type-id">
+                        <div class="form-group">
+                            <label class="form-label" for="rt-name">Name</label>
+                            <input type="text" id="rt-name" class="form-control" placeholder="e.g. Deluxe Suite" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="rt-description">Description</label>
+                            <textarea id="rt-description" class="form-control" rows="3" placeholder="Describe this room type..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="rt-capacity">Capacity (guests)</label>
+                                <input type="number" id="rt-capacity" class="form-control" min="1" placeholder="e.g. 2" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="rt-price">Price per Night (VND)</label>
+                                <input type="number" id="rt-price" class="form-control" min="0" step="10000" placeholder="e.g. 500000" required>
+                            </div>
+                        </div>
+                        <div class="form-group" id="rt-hidden-group" style="display: none;">
+                            <label class="form-label">
+                                <input type="checkbox" id="rt-hidden"> Hidden
+                            </label>
+                            <small style="color: var(--gray-500); display: block; margin-top: 4px;">Hidden room types won't be shown to customers searching for availability.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="closeRoomTypeModal()" class="btn btn-outline">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

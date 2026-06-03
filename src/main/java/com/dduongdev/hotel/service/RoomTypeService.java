@@ -3,6 +3,8 @@ package com.dduongdev.hotel.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,9 +41,9 @@ public class RoomTypeService {
         return roomTypeMapper.toCreateRoomTypeResponse(roomType);
     }
 
-    public List<RoomTypeResponse> getAll() {
-        List<RoomType> roomTypes = roomTypeRepository.findAllByOrderByPricePerNightAsc();
-        return roomTypes.stream().map(roomTypeMapper::toRoomTypeResponse).toList();
+    public Page<RoomTypeResponse> getAll(Pageable pageable) {
+        Page<RoomType> roomTypes = roomTypeRepository.findAllByOrderByPricePerNightAsc(pageable);
+        return roomTypes.map(roomTypeMapper::toRoomTypeResponse);
     }
 
     @Transactional

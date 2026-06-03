@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <section class="hero">
+            <h1>Hotel Booking System</h1>
+            <p>Discover the perfect room for your stay. Browse our room types, check availability, and book with ease.</p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <a href="/room-types" class="btn btn-lg">Explore Rooms</a>
+                <a href="/room-types/availability" class="btn btn-lg" style="background: rgba(255,255,255,0.2);">Check Availability</a>
+            </div>
+        </section>
+
+        <div class="grid-3" style="margin-bottom: 40px;">
+            <div class="feature-card">
+                <div class="icon">&#128719;</div>
+                <h3>Wide Selection</h3>
+                <p>Choose from various room types to suit your needs and budget.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128197;</div>
+                <h3>Easy Booking</h3>
+                <p>Simple and fast booking process with instant confirmation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128179;</div>
+                <h3>Best Prices</h3>
+                <p>Competitive prices with transparent pricing and no hidden fees.</p>
+            </div>
+        </div>
+
+        <div id="guest-cta" style="text-align: center; margin: 40px 0;">
+            <h2 style="margin-bottom: 16px;">Ready to Book?</h2>
+            <p style="color: var(--gray-600); margin-bottom: 24px;">Sign in to your account or create a new one to start booking.</p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <a href="/login" class="btn btn-primary">Sign In</a>
+                <a href="/register" class="btn btn-outline">Create Account</a>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (TokenManager.isAuthenticated()) {
+                    document.getElementById('guest-cta').style.display = 'none';
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

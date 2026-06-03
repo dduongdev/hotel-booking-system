@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <div class="auth-page">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>Hotel Booking</h1>
+                    <p>Create a new account</p>
+                </div>
+                <div id="register-error" class="alert alert-danger" style="display: none;"></div>
+                <div id="register-success" class="alert alert-success" style="display: none;"></div>
+                <form id="register-form" onsubmit="return handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="reg-username">Username</label>
+                        <input type="text" id="reg-username" class="form-control" placeholder="Choose a username (3-20 characters)" required minlength="3" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-password">Password</label>
+                        <input type="password" id="reg-password" class="form-control" placeholder="Choose a password (8+ characters)" required minlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-confirm">Confirm Password</label>
+                        <input type="password" id="reg-confirm" class="form-control" placeholder="Confirm your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+                </form>
+                <div class="auth-footer">
+                    Already have an account? <a href="/login">Sign in</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            async function handleRegister(event) {
+                event.preventDefault();
+                const errorDiv = document.getElementById('register-error');
+                const successDiv = document.getElementById('register-success');
+                errorDiv.style.display = 'none';
+                successDiv.style.display = 'none';
+                
+                const username = document.getElementById('reg-username').value;
+                const password = document.getElementById('reg-password').value;
+                const confirm = document.getElementById('reg-confirm').value;
+                
+                if (password !== confirm) {
+                    errorDiv.textContent = 'Passwords do not match!';
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
+                
+                try {
+                    const result = await AuthAPI.register(username, password);
+                    successDiv.textContent = 'Account created successfully! Redirecting to login...';
+                    successDiv.style.display = 'block';
+                    setTimeout(() => window.location.href = '/login', 1500);
+                } catch (error) {
+                    errorDiv.textContent = error.message || 'Registration failed. Please try again.';
+                    errorDiv.style.display = 'block';
+                }
+                return false;
+            }
+        </script>
+    </th:block>
+</body>
+</html>

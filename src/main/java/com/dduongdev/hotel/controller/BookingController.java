@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
 import com.dduongdev.hotel.payload.request.MakeBookingRequest;
+import com.dduongdev.hotel.payload.response.ApiResponse;
 import com.dduongdev.hotel.payload.response.BookingResponse;
 import com.dduongdev.hotel.payload.response.MakeBookingResponse;
 import com.dduongdev.hotel.security.entity.HotelUserDetails;
@@ -35,15 +36,15 @@ public class BookingController {
 
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<MakeBookingResponse> make(@Valid @RequestBody MakeBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
+    public ResponseEntity<ApiResponse<MakeBookingResponse>> make(@Valid @RequestBody MakeBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
         Integer userId = userDetails.getId();
         MakeBookingResponse response = bookingService.make(userId, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Booking created successfully", response));
     }
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<Page<BookingResponse>> getBookingsOfCurrentUser(
+    public ResponseEntity<ApiResponse<Page<BookingResponse>>> getBookingsOfCurrentUser(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @AuthenticationPrincipal HotelUserDetails userDetails
@@ -53,32 +54,32 @@ public class BookingController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<BookingResponse> responses = bookingService.getByUserId(userId, pageable);
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @DeleteMapping("/me/cancel")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> cancelBookingOfCurrentUser(@Valid @RequestBody CancelOwnBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
+    public ResponseEntity<ApiResponse<Void>> cancelBookingOfCurrentUser(@Valid @RequestBody CancelOwnBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
         Integer userId = userDetails.getId();
         bookingService.cancel(userId, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", null));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<Page<BookingResponse>> getAll(
+    public ResponseEntity<ApiResponse<Page<BookingResponse>>> getAll(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<BookingResponse> responses = bookingService.getAll(pageable);
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(@PathVariable Integer id) {
         BookingResponse response = bookingService.cancel(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", response));
     }
 }

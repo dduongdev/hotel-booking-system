@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dduongdev.hotel.payload.request.CreateRoomRequest;
 import com.dduongdev.hotel.payload.request.UpdateRoomRequest;
+import com.dduongdev.hotel.payload.response.ApiResponse;
 import com.dduongdev.hotel.payload.response.CreateRoomResponse;
 import com.dduongdev.hotel.payload.response.RoomResponse;
 import com.dduongdev.hotel.service.RoomService;
@@ -33,39 +34,39 @@ public class RoomController {
     private final RoomService roomService;
 
     @GetMapping
-    public ResponseEntity<Page<RoomResponse>> getAll(
+    public ResponseEntity<ApiResponse<Page<RoomResponse>>> getAll(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(roomService.getAll(pageable));
+        return ResponseEntity.ok(ApiResponse.success(roomService.getAll(pageable)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<CreateRoomResponse> create(@Valid @RequestBody CreateRoomRequest request) {
+    public ResponseEntity<ApiResponse<CreateRoomResponse>> create(@Valid @RequestBody CreateRoomRequest request) {
         CreateRoomResponse response = roomService.create(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Room created successfully", response));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<RoomResponse> update(
+    public ResponseEntity<ApiResponse<RoomResponse>> update(
         @PathVariable Integer id,
         @Valid @RequestBody UpdateRoomRequest request
     ) {
         RoomResponse response = roomService.update(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Room updated successfully", response));
     }
 
     @GetMapping("/available")
-    public ResponseEntity<Page<RoomResponse>> getAvailableRoomsByCheckInAndCheckOut(
+    public ResponseEntity<ApiResponse<Page<RoomResponse>>> getAvailableRoomsByCheckInAndCheckOut(
         @RequestParam String checkIn,
         @RequestParam String checkOut,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(roomService.getAvailableRoomsByCheckInAndCheckOut(LocalDate.parse(checkIn), LocalDate.parse(checkOut), pageable));
+        return ResponseEntity.ok(ApiResponse.success(roomService.getAvailableRoomsByCheckInAndCheckOut(LocalDate.parse(checkIn), LocalDate.parse(checkOut), pageable)));
     }
 }

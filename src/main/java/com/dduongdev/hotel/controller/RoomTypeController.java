@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
 import com.dduongdev.hotel.payload.request.UpdateRoomTypeRequest;
+import com.dduongdev.hotel.payload.response.ApiResponse;
 import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeResponse;
@@ -37,40 +38,40 @@ public class RoomTypeController {
     private final RoomTypeService roomTypeService;
 
     @PostMapping
-    // @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<CreateRoomTypeResponse> create(@Valid @RequestBody CreateRoomTypeRequest request) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<ApiResponse<CreateRoomTypeResponse>> create(@Valid @RequestBody CreateRoomTypeRequest request) {
         CreateRoomTypeResponse response = roomTypeService.create(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Room type created successfully", response));
     }
 
     @GetMapping
-    public ResponseEntity<Page<RoomTypeResponse>> getAll(
+    public ResponseEntity<ApiResponse<Page<RoomTypeResponse>>> getAll(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(roomTypeService.getAll(pageable));
+        return ResponseEntity.ok(ApiResponse.success(roomTypeService.getAll(pageable)));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<RoomTypeResponse> update(@PathVariable Integer id, @Valid @RequestBody UpdateRoomTypeRequest request) {
+    public ResponseEntity<ApiResponse<RoomTypeResponse>> update(@PathVariable Integer id, @Valid @RequestBody UpdateRoomTypeRequest request) {
         RoomTypeResponse response = roomTypeService.update(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Room type updated successfully", response));
     }
 
     @PatchMapping("/{id}/hidden")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<RoomTypeResponse> changeHiddenState(@PathVariable Integer id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
+    public ResponseEntity<ApiResponse<RoomTypeResponse>> changeHiddenState(@PathVariable Integer id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
         RoomTypeResponse response = roomTypeService.changeHiddenState(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Room type hidden state changed successfully", response));
     }
 
     @GetMapping("/availability")
-    public ResponseEntity<List<RoomTypeAvailabilityResponse>> getRoomTypeAvailability(
+    public ResponseEntity<ApiResponse<List<RoomTypeAvailabilityResponse>>> getRoomTypeAvailability(
         @RequestParam String checkIn, 
         @RequestParam String checkOut) {
         List<RoomTypeAvailabilityResponse> response = roomTypeService.getRoomTypeAvailability(LocalDate.parse(checkIn), LocalDate.parse(checkOut));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

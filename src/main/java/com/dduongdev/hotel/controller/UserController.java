@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dduongdev.hotel.payload.request.UserRegisterRequest;
+import com.dduongdev.hotel.payload.response.ApiResponse;
 import com.dduongdev.hotel.payload.response.UserRegisterResponse;
 import com.dduongdev.hotel.service.UserService;
 
@@ -21,8 +22,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request) {
+    public ResponseEntity<ApiResponse<UserRegisterResponse>> register(@Valid @RequestBody UserRegisterRequest request) {
         UserRegisterResponse response = userService.register(request);
-        return ResponseEntity.ok(response);
+        ApiResponse<UserRegisterResponse> wrappedResponse = ApiResponse.success("Register successfully", response); 
+        return ResponseEntity.ok(wrappedResponse);
     }
 }

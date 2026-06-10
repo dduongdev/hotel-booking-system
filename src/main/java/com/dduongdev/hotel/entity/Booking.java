@@ -42,6 +42,10 @@ public class Booking {
     private LocalDateTime checkOut;
 
     @ManyToOne
+    @JoinColumn(name = "room_type_id")
+    private RoomType roomType;
+
+    @ManyToOne
     @JoinColumn(name = "room_id")
     private Room room;
 
@@ -59,6 +63,8 @@ public class Booking {
 
     public static enum Status {
         CONFIRMED,
-        CANCELLED
+        CANCELLED,
+        CHECKED_IN,
+        CHECKED_OUT
     }
 }

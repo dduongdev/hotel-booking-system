@@ -67,11 +67,11 @@ public class RoomTypeController {
         return ResponseEntity.ok(ApiResponse.success("Room type hidden state changed successfully", response));
     }
 
-    @GetMapping("/availability")
-    public ResponseEntity<ApiResponse<List<RoomTypeAvailabilityResponse>>> getRoomTypeAvailability(
+    @GetMapping("/all/availability")
+    public ResponseEntity<ApiResponse<List<RoomTypeAvailabilityResponse>>> getAllRoomTypeAvailability(
         @RequestParam String checkIn, 
         @RequestParam String checkOut) {
-        List<RoomTypeAvailabilityResponse> response = roomTypeService.getRoomTypeAvailability(LocalDate.parse(checkIn), LocalDate.parse(checkOut));
+        List<RoomTypeAvailabilityResponse> response = roomTypeService.getAllRoomTypeAvailability(LocalDate.parse(checkIn), LocalDate.parse(checkOut));
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

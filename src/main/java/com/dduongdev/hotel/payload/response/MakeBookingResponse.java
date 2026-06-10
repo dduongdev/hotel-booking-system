@@ -13,6 +13,5 @@ public class MakeBookingResponse {
     private int id;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
-    private RoomResponse room;
     private LocalDateTime createdAt;
 }

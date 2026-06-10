@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dduongdev.hotel.dto.RoomTypeAvailability;
 import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.mapper.RoomTypeMapper;
@@ -73,7 +74,7 @@ public class RoomTypeService {
         return roomTypeMapper.toRoomTypeResponse(storedroomType);
     }
 
-    public List<RoomTypeAvailabilityResponse> getRoomTypeAvailability(LocalDate checkIn, LocalDate checkOut) {
+    public List<RoomTypeAvailabilityResponse> getAllRoomTypeAvailability(LocalDate checkIn, LocalDate checkOut) {
         if (checkIn.isAfter(checkOut)) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
         }
@@ -85,8 +86,8 @@ public class RoomTypeService {
         LocalDateTime checkInTime = LocalDateTime.of(checkIn, Constants.CHECK_IN_TIME);
         LocalDateTime checkOutTime = LocalDateTime.of(checkOut, Constants.CHECK_OUT_TIME);
 
-        List<RoomTypeAvailabilityResponse> roomTypes = roomTypeRepository.findRoomTypeAvailabilityByCheckInAndCheckOut(checkInTime, checkOutTime);
+        List<RoomTypeAvailability> roomTypes = roomTypeRepository.findAllRoomTypeAvailabilityByCheckInAndCheckOut(checkInTime, checkOutTime);
         roomTypes.sort((a, b) -> Double.compare(a.getPricePerNight(), b.getPricePerNight()));
-        return roomTypes;
+        return roomTypes.stream().map(roomType -> roomTypeMapper.toRoomTypeAvailabilityResponse(roomType)).toList();
     }
 }

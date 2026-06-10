@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.dduongdev.hotel.exception.BaseBookingException;
 import com.dduongdev.hotel.exception.BaseException;
 import com.dduongdev.hotel.exception.BaseRoomException;
 import com.dduongdev.hotel.payload.response.ApiResponse;
@@ -41,6 +42,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseRoomException.class)
     public ResponseEntity<ApiResponse<Void>> handleRoomException(BaseRoomException ex) {
+        return ResponseEntity.status(ex.getHttpStatusCode())
+                .body(ApiResponse.error(ex.getHttpStatusCode().value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(BaseBookingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBookingException(BaseBookingException ex) {
         return ResponseEntity.status(ex.getHttpStatusCode())
                 .body(ApiResponse.error(ex.getHttpStatusCode().value(), ex.getMessage()));
     }

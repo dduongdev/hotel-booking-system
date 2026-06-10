@@ -24,7 +24,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserRegisterResponse>> register(@Valid @RequestBody UserRegisterRequest request) {
         UserRegisterResponse response = userService.register(request);
-        ApiResponse<UserRegisterResponse> wrappedResponse = ApiResponse.success("Register successfully", response); 
+        ApiResponse<UserRegisterResponse> wrappedResponse = ApiResponse.success("User register successfully", response); 
         return ResponseEntity.ok(wrappedResponse);
     }
 }

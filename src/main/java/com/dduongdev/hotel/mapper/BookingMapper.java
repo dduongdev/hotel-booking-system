@@ -12,14 +12,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookingMapper {
 
-    private final RoomMapper roomMapper;
-
     public MakeBookingResponse toMakeBookingResponse(Booking booking) {
         return new MakeBookingResponse(
                 booking.getId(),
                 booking.getCheckIn(),
                 booking.getCheckOut(),
-                roomMapper.toRoomResponse(booking.getRoom()),
                 booking.getCreatedAt());
     }
 
@@ -29,7 +26,6 @@ public class BookingMapper {
                 booking.getStatus(),
                 booking.getCheckIn(),
                 booking.getCheckOut(),
-                roomMapper.toRoomResponse(booking.getRoom()),
                 booking.getUser() != null ? booking.getUser().getId() : null,
                 booking.getUser() != null ? booking.getUser().getUsername() : null,
                 booking.getCreatedAt(),

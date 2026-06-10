@@ -8,17 +8,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dduongdev.hotel.dto.RoomTypeAvailability;
 import com.dduongdev.hotel.entity.Booking;
-import com.dduongdev.hotel.entity.Room;
+import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.entity.User;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
+import com.dduongdev.hotel.exception.RoomTypeNotAvailableException;
 import com.dduongdev.hotel.mapper.BookingMapper;
 import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
 import com.dduongdev.hotel.payload.request.MakeBookingRequest;
 import com.dduongdev.hotel.payload.response.BookingResponse;
 import com.dduongdev.hotel.payload.response.MakeBookingResponse;
 import com.dduongdev.hotel.repository.BookingRepository;
-import com.dduongdev.hotel.repository.RoomRepository;
+import com.dduongdev.hotel.repository.RoomTypeRepository;
 import com.dduongdev.hotel.repository.UserRepository;
 import com.dduongdev.hotel.util.Constants;
 
@@ -30,8 +32,8 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
-    private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final RoomTypeRepository roomTypeRepository;
 
     @Transactional
     public MakeBookingResponse make(Integer userId, MakeBookingRequest request) {
@@ -43,29 +45,24 @@ public class BookingService {
             throw new IllegalArgumentException("Check-in date cannot be after check-out date");
         }
 
-        LocalDateTime requestCheckInTime = LocalDateTime.of(request.getCheckIn(), Constants.CHECK_IN_TIME);
-        LocalDateTime requestCheckOutTime = LocalDateTime.of(request.getCheckOut(), Constants.CHECK_OUT_TIME);
+        LocalDateTime checkInTime = LocalDateTime.of(request.getCheckIn(), Constants.CHECK_IN_TIME);
+        LocalDateTime checkOutTime = LocalDateTime.of(request.getCheckOut(), Constants.CHECK_OUT_TIME);
 
-        Room availableRoom = roomRepository
-                .findTopAvailableByRoomTypeIdAndDateRange(
-                        request.getRoomTypeId(),
-                        requestCheckInTime,
-                        requestCheckOutTime
-                )
-                .orElseThrow(() -> new IllegalArgumentException("Room type " + request.getRoomTypeId()
-                        + " not found or has no available rooms for the selected dates"));
+        RoomTypeAvailability roomTypeAvailability = roomTypeRepository.findRoomTypeAvailabilityByIdAndCheckInAndCheckOut(request.getRoomTypeId(), checkInTime, checkOutTime);
 
-        
-        availableRoom.setBookingCount(availableRoom.getBookingCount() + 1);
-        roomRepository.save(availableRoom);
+        if (roomTypeAvailability == null || roomTypeAvailability.getAvailableRoomCount() <= 0) {
+            throw new RoomTypeNotAvailableException(request.getRoomTypeId(), request.getCheckIn().toString(), request.getCheckOut().toString());
+        }
+
+        RoomType roomTypeProxy = roomTypeRepository.getReferenceById(roomTypeAvailability.getId());
 
         User userProxy = userRepository.getReferenceById(userId);
 
         Booking booking = new Booking();
-        booking.setCheckIn(LocalDateTime.of(request.getCheckIn(), Constants.CHECK_IN_TIME));
-        booking.setCheckOut(LocalDateTime.of(request.getCheckOut(), Constants.CHECK_OUT_TIME));
+        booking.setCheckIn(checkInTime);
+        booking.setCheckOut(checkOutTime);
         booking.setStatus(Booking.Status.CONFIRMED);
-        booking.setRoom(availableRoom);
+        booking.setRoomType(roomTypeProxy);
         booking.setUser(userProxy);
 
         bookingRepository.save(booking);
@@ -77,45 +74,56 @@ public class BookingService {
         return bookingRepository.findByUserId(userId, pageable).map(bookingMapper::toBookingResponse);
     }
 
+    @Transactional
     public void cancel(Integer userId, CancelOwnBookingRequest request) {
         Booking booking = bookingRepository.findByIdAndUserId(request.getBookingId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Booking with id " + request.getBookingId() + " not found for user with id " + userId));
-
-        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
-        }
+                        "Booking is not found or you don't have permission"));
 
         if (booking.getStatus().equals(Booking.Status.CANCELLED)) {
             throw new IllegalStateException("Booking is already cancelled");
         }
 
-        Room bookedRoom = booking.getRoom();
-        bookedRoom.setBookingCount(bookedRoom.getBookingCount() - 1);
-        roomRepository.save(bookedRoom);
+        if (booking.getStatus().equals(Booking.Status.CHECKED_IN)) {
+            throw new IllegalStateException("Cannot cancel a booking that has already been checked in");
+        }
 
-        bookingRepository.delete(booking);
+        if (booking.getStatus().equals(Booking.Status.CHECKED_OUT)) {
+            throw new IllegalStateException("Cannot cancel a booking that has already been checked out");
+        }
+
+        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
+        }
+
+        booking.setStatus(Booking.Status.CANCELLED);
+        bookingRepository.save(booking);
     }
 
     public Page<BookingResponse> getAll(Pageable pageable) {
         return bookingRepository.findAll(pageable).map(bookingMapper::toBookingResponse);
     }
 
+    @Transactional
     public BookingResponse cancel(Integer id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking with id " + id + " not found"));
-
-        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
-        }
+                .orElseThrow(() -> new ResourceNotFoundException("Booking is not found"));
 
         if (booking.getStatus().equals(Booking.Status.CANCELLED)) {
             throw new IllegalStateException("Booking is already cancelled");
         }
 
-        Room bookedRoom = booking.getRoom();
-        bookedRoom.setBookingCount(bookedRoom.getBookingCount() - 1);
-        roomRepository.save(bookedRoom);
+        if (booking.getStatus().equals(Booking.Status.CHECKED_IN)) {
+            throw new IllegalStateException("Cannot cancel a booking that has already been checked in");
+        }
+
+        if (booking.getStatus().equals(Booking.Status.CHECKED_OUT)) {
+            throw new IllegalStateException("Cannot cancel a booking that has already been checked out");
+        }
+
+        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
+        }
 
         booking.setStatus(Booking.Status.CANCELLED);
         bookingRepository.save(booking);

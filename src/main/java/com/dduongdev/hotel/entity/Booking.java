@@ -1,6 +1,5 @@
 package com.dduongdev.hotel.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,10 +36,10 @@ public class Booking {
     private Status status = Status.CONFIRMED;
 
     @Column(name = "check_in", nullable = false)
-    private LocalDate checkIn;
+    private LocalDateTime checkIn;
 
     @Column(name = "check_out", nullable = false)
-    private LocalDate checkOut;
+    private LocalDateTime checkOut;
 
     @ManyToOne
     @JoinColumn(name = "room_id")

@@ -1,6 +1,7 @@
 package com.dduongdev.hotel.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,7 @@ import com.dduongdev.hotel.payload.response.CreateRoomResponse;
 import com.dduongdev.hotel.payload.response.RoomResponse;
 import com.dduongdev.hotel.repository.RoomRepository;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
+import com.dduongdev.hotel.util.Constants;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +74,18 @@ public class RoomService {
     }
 
     public Page<RoomResponse> getAvailableRoomsByCheckInAndCheckOut(LocalDate checkIn, LocalDate checkOut, Pageable pageable) {
-        Page<Room> roomsPage = roomRepository.findAvailableRoomsByCheckInAndCheckOut(checkIn, checkOut, pageable);
+        if (checkIn.isAfter(checkOut)) {
+            throw new IllegalArgumentException("Check-in date must be before check-out date");
+        }
+
+        if (checkIn.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Check-in date cannot be in the past");
+        }
+
+        LocalDateTime checkInTime = LocalDateTime.of(checkIn, Constants.CHECK_IN_TIME);
+        LocalDateTime checkOutTime = LocalDateTime.of(checkOut, Constants.CHECK_OUT_TIME);
+
+        Page<Room> roomsPage = roomRepository.findAvailableRoomsByCheckInAndCheckOut(checkInTime, checkOutTime, pageable);
         return roomsPage.map(roomMapper::toRoomResponse);
     }
 }

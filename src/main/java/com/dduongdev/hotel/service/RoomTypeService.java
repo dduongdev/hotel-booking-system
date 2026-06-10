@@ -1,6 +1,7 @@
 package com.dduongdev.hotel.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeResponse;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
+import com.dduongdev.hotel.util.Constants;
 
 import lombok.RequiredArgsConstructor;
 
@@ -80,7 +82,10 @@ public class RoomTypeService {
             throw new IllegalArgumentException("Check-in date cannot be in the past");
         }
 
-        List<RoomTypeAvailabilityResponse> roomTypes = roomTypeRepository.findRoomTypeAvailabilityByCheckInAndCheckOut(checkIn, checkOut);
+        LocalDateTime checkInTime = LocalDateTime.of(checkIn, Constants.CHECK_IN_TIME);
+        LocalDateTime checkOutTime = LocalDateTime.of(checkOut, Constants.CHECK_OUT_TIME);
+
+        List<RoomTypeAvailabilityResponse> roomTypes = roomTypeRepository.findRoomTypeAvailabilityByCheckInAndCheckOut(checkInTime, checkOutTime);
         roomTypes.sort((a, b) -> Double.compare(a.getPricePerNight(), b.getPricePerNight()));
         return roomTypes;
     }

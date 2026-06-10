@@ -15,8 +15,8 @@ import lombok.Setter;
 public class BookingResponse {
     private int id;
     private Booking.Status status;
-    private LocalDate checkIn;
-    private LocalDate checkOut;
+    private LocalDateTime checkIn;
+    private LocalDateTime checkOut;
     private RoomResponse room;
     private Integer userId;
     private String username;

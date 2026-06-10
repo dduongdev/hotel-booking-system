@@ -47,8 +47,8 @@
                             <td><strong>#${booking.id}</strong></td>
                             <td>${escapeHtml(booking.room?.name || 'N/A')}</td>
                             <td>${escapeHtml(booking.room?.roomType?.name || 'N/A')}</td>
-                            <td>${formatDate(booking.checkIn)}</td>
-                            <td>${formatDate(booking.checkOut)}</td>
+                            <td>${formatDateTime(booking.checkIn)}</td>
+                            <td>${formatDateTime(booking.checkOut)}</td>
                             <td><span class="${statusClass}">${statusText}</span></td>
                             <td>${formatDateTime(booking.createdAt)}</td>
                             <td>

@@ -1,6 +1,6 @@
 package com.dduongdev.hotel.repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -27,7 +27,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
                   AND b.checkIn < :checkOut
             )
             """)
-    Page<Room> findAvailableRoomsByCheckInAndCheckOut(LocalDate checkIn, LocalDate checkOut, Pageable pageable);
+    Page<Room> findAvailableRoomsByCheckInAndCheckOut(LocalDateTime checkIn, LocalDateTime checkOut, Pageable pageable);
 
     @Query("""
         SELECT r
@@ -50,5 +50,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
         ORDER BY r.bookingCount ASC
         LIMIT 1
         """)
-    Optional<Room> findTopAvailableByRoomTypeIdAndDateRange(int roomTypeId, LocalDate checkIn, LocalDate checkOut);
+    Optional<Room> findTopAvailableByRoomTypeIdAndDateRange(int roomTypeId, LocalDateTime checkIn, LocalDateTime checkOut);
 }

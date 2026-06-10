@@ -1,6 +1,6 @@
 package com.dduongdev.hotel.repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -36,6 +36,6 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
               )
             GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight
             """)
-    List<RoomTypeAvailabilityResponse> findRoomTypeAvailabilityByCheckInAndCheckOut(LocalDate checkIn,
-            LocalDate checkOut);
+    List<RoomTypeAvailabilityResponse> findRoomTypeAvailabilityByCheckInAndCheckOut(LocalDateTime checkIn,
+            LocalDateTime checkOut);
 }

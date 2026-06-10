@@ -1,6 +1,7 @@
 package com.dduongdev.hotel.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import com.dduongdev.hotel.payload.response.MakeBookingResponse;
 import com.dduongdev.hotel.repository.BookingRepository;
 import com.dduongdev.hotel.repository.RoomRepository;
 import com.dduongdev.hotel.repository.UserRepository;
+import com.dduongdev.hotel.util.Constants;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,11 +43,14 @@ public class BookingService {
             throw new IllegalArgumentException("Check-in date cannot be after check-out date");
         }
 
+        LocalDateTime requestCheckInTime = LocalDateTime.of(request.getCheckIn(), Constants.CHECK_IN_TIME);
+        LocalDateTime requestCheckOutTime = LocalDateTime.of(request.getCheckOut(), Constants.CHECK_OUT_TIME);
+
         Room availableRoom = roomRepository
                 .findTopAvailableByRoomTypeIdAndDateRange(
                         request.getRoomTypeId(),
-                        request.getCheckIn(),
-                        request.getCheckOut()
+                        requestCheckInTime,
+                        requestCheckOutTime
                 )
                 .orElseThrow(() -> new IllegalArgumentException("Room type " + request.getRoomTypeId()
                         + " not found or has no available rooms for the selected dates"));
@@ -57,8 +62,8 @@ public class BookingService {
         User userProxy = userRepository.getReferenceById(userId);
 
         Booking booking = new Booking();
-        booking.setCheckIn(request.getCheckIn());
-        booking.setCheckOut(request.getCheckOut());
+        booking.setCheckIn(LocalDateTime.of(request.getCheckIn(), Constants.CHECK_IN_TIME));
+        booking.setCheckOut(LocalDateTime.of(request.getCheckOut(), Constants.CHECK_OUT_TIME));
         booking.setStatus(Booking.Status.CONFIRMED);
         booking.setRoom(availableRoom);
         booking.setUser(userProxy);
@@ -77,7 +82,7 @@ public class BookingService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Booking with id " + request.getBookingId() + " not found for user with id " + userId));
 
-        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDate.now())) {
+        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
         }
 
@@ -100,7 +105,7 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking with id " + id + " not found"));
 
-        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDate.now())) {
+        if (booking.getStatus().equals(Booking.Status.CONFIRMED) && booking.getCheckIn().isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("Cannot cancel a confirmed booking that has already started");
         }
 

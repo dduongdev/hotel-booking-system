@@ -32,7 +32,7 @@
                         window.location.href = '/';
                     }
                 } catch (error) {
-                    const msg = error.data?.error || error.message || 'Invalid username or password';
+                    const msg = error.data?.message || error.message || 'Invalid username or password';
                     errorDiv.textContent = msg;
                     errorDiv.style.display = 'block';
                 }

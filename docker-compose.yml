@@ -11,7 +11,10 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - DEFAULT_MANAGER_USERNAME={DEFAULT_MANAGER_USERNAME}
+      - DEFAULT_MANAGER_USERNAME={DEFAULT_MANAGER_PASSWORD}
+      - JWT_SECRET={JWT_SECRET}
     depends_on:
       db:
         condition: service_healthy
@@ -28,7 +31,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD:-root}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=hotel_db
     volumes:
       - mysql_data:/var/lib/mysql

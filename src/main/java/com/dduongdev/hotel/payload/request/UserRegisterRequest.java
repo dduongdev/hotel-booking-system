@@ -13,7 +13,7 @@ public class UserRegisterRequest {
     @NotNull(message = "Username is required")
     @NotBlank(message = "Username cannot be blank")
     @NotEmpty(message = "Username cannot be empty")
-    @Length(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+    @Length(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
 
     @NotNull(message = "Password is required")

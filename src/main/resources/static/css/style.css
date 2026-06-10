@@ -92,6 +92,7 @@ a:hover {
     align-items: center;
     gap: 8px;
     list-style: none;
+    margin-bottom: 0;
 }
 
 .navbar-menu li a {
@@ -623,6 +624,9 @@ table tr:last-child td {
 }
 
 .modal {
+    display: block;
+    position: relative;
+    height: auto;
     background: var(--white);
     border-radius: var(--radius-lg);
     width: 90%;

@@ -29,8 +29,12 @@ public class JwtService {
 
     @PostConstruct
     private void init() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        key = Keys.hmacShaKeyFor(keyBytes);
+        if (secretKey.equals("GENERATE")) {
+            key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        } else {
+            byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+            key = Keys.hmacShaKeyFor(keyBytes);
+        }
     }
 
     private Key getSigningKey() {
@@ -39,8 +43,8 @@ public class JwtService {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("authorities", userDetails.getAuthorities()); 
-        
+        claims.put("authorities", userDetails.getAuthorities());
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())

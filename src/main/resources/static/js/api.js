@@ -108,13 +108,17 @@ async function handleResponse(response) {
     }
     
     if (!response.ok) {
-        const errorMessage = data?.error || data?.message || `Request failed with status ${response.status}`;
+        const errorMessage = data?.message || `Request failed with status ${response.status}`;
         const error = new Error(errorMessage);
         error.status = response.status;
         error.data = data;
         throw error;
     }
     
+    // Auto-unwrap ApiResponse wrapper if present
+    if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+        return data.data;
+    }
     return data;
 }
 
@@ -127,7 +131,9 @@ async function tryRefreshToken() {
         });
         
         if (response.ok) {
-            const data = await response.json();
+            const raw = await response.json();
+            // Unwrap ApiResponse if present
+            const data = (raw && raw.data) ? raw.data : raw;
             TokenManager.setTokens(data.accessToken, data.refreshToken);
             return true;
         }

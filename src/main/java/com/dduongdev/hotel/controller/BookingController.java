@@ -1,5 +1,7 @@
 package com.dduongdev.hotel.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dduongdev.hotel.payload.request.CancelOwnBookingRequest;
+import com.dduongdev.hotel.payload.request.CheckInRequest;
 import com.dduongdev.hotel.payload.request.MakeBookingRequest;
 import com.dduongdev.hotel.payload.response.ApiResponse;
 import com.dduongdev.hotel.payload.response.BookingResponse;
 import com.dduongdev.hotel.payload.response.MakeBookingResponse;
+import com.dduongdev.hotel.payload.response.RoomResponse;
 import com.dduongdev.hotel.security.entity.HotelUserDetails;
 import com.dduongdev.hotel.service.BookingService;
 
@@ -81,5 +85,28 @@ public class BookingController {
     public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(@PathVariable Integer id) {
         BookingResponse response = bookingService.cancel(id);
         return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", response));
+    }
+
+    @GetMapping("/{id}/best-fit-rooms")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<ApiResponse<List<RoomResponse>>> getBestFitRooms(@PathVariable Integer id) {
+        List<RoomResponse> rooms = bookingService.getBestFitRooms(id);
+        return ResponseEntity.ok(ApiResponse.success(rooms));
+    }
+
+    @PatchMapping("/{id}/check-in")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<ApiResponse<BookingResponse>> checkIn(
+            @PathVariable Integer id,
+            @Valid @RequestBody CheckInRequest request) {
+        BookingResponse response = bookingService.checkIn(id, request.getRoomId());
+        return ResponseEntity.ok(ApiResponse.success("Check-in completed successfully", response));
+    }
+
+    @PatchMapping("/{id}/check-out")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<ApiResponse<BookingResponse>> checkOut(@PathVariable Integer id) {
+        BookingResponse response = bookingService.checkOut(id);
+        return ResponseEntity.ok(ApiResponse.success("Check-out completed successfully", response));
     }
 }

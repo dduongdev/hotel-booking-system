@@ -16,6 +16,10 @@ public class BookingResponse {
     private Booking.Status status;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
+    private Integer roomTypeId;
+    private String roomTypeName;
+    private Integer roomId;
+    private String roomName;
     private Integer userId;
     private String username;
     private LocalDateTime createdAt;

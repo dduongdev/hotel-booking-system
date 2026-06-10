@@ -67,7 +67,7 @@ public class RoomTypeController {
         return ResponseEntity.ok(ApiResponse.success("Room type hidden state changed successfully", response));
     }
 
-    @GetMapping("/all/availability")
+    @GetMapping("/availability")
     public ResponseEntity<ApiResponse<List<RoomTypeAvailabilityResponse>>> getAllRoomTypeAvailability(
         @RequestParam String checkIn, 
         @RequestParam String checkOut) {

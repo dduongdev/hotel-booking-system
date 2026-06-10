@@ -272,6 +272,23 @@ const BookingAPI = {
         return apiRequest(`/bookings/${id}/cancel`, {
             method: 'PATCH'
         });
+    },
+
+    async getBestFitRooms(bookingId) {
+        return apiRequest(`/bookings/${bookingId}/best-fit-rooms`);
+    },
+
+    async checkIn(bookingId, roomId) {
+        return apiRequest(`/bookings/${bookingId}/check-in`, {
+            method: 'PATCH',
+            body: { roomId }
+        });
+    },
+
+    async checkOut(bookingId) {
+        return apiRequest(`/bookings/${bookingId}/check-out`, {
+            method: 'PATCH'
+        });
     }
 };
 
@@ -331,6 +348,8 @@ function showToast(message, type = 'info') {
 function getStatusBadgeClass(status) {
     switch (status) {
         case 'CONFIRMED': return 'badge badge-success';
+        case 'CHECKED_IN': return 'badge badge-info';
+        case 'CHECKED_OUT': return 'badge badge-secondary';
         case 'CANCELLED': return 'badge badge-danger';
         default: return 'badge badge-info';
     }
@@ -339,6 +358,8 @@ function getStatusBadgeClass(status) {
 function getStatusText(status) {
     switch (status) {
         case 'CONFIRMED': return 'Confirmed';
+        case 'CHECKED_IN': return 'Checked In';
+        case 'CHECKED_OUT': return 'Checked Out';
         case 'CANCELLED': return 'Cancelled';
         default: return status;
     }

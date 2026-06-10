@@ -35,26 +35,38 @@
                         return;
                     }
                     
-                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Customer</th><th>Room</th><th>Room Type</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
+                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Customer</th><th>Room Type</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
                     
                     bookings.forEach(booking => {
                         const statusClass = getStatusBadgeClass(booking.status);
                         const statusText = getStatusText(booking.status);
-                        const canCancel = booking.status === 'CONFIRMED';
                         const customerName = booking.username ? escapeHtml(booking.username) : '#' + (booking.userId || '?');
+                        const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color: var(--gray-500)">Not assigned</em>';
+                        const roomTypeDisplay = booking.roomTypeName ? escapeHtml(booking.roomTypeName) : 'N/A';
+                        
+                        let actionsHtml = '<span class="badge badge-secondary">-</span>';
+                        
+                        if (booking.status === 'CONFIRMED') {
+                            actionsHtml = `
+                                <button onclick="openCheckInModal(${booking.id})" class="btn btn-sm btn-success">Check-in</button>
+                                <button onclick="adminCancelBooking(${booking.id})" class="btn btn-sm btn-danger" style="margin-left:4px">Cancel</button>
+                            `;
+                        } else if (booking.status === 'CHECKED_IN') {
+                            actionsHtml = `
+                                <button onclick="adminCheckOut(${booking.id})" class="btn btn-sm btn-info">Check-out</button>
+                            `;
+                        }
                         
                         html += `<tr>
                             <td><strong>#${booking.id}</strong></td>
                             <td><span class="badge badge-info">${customerName}</span></td>
-                            <td>${escapeHtml(booking.room?.name || 'N/A')}</td>
-                            <td>${escapeHtml(booking.room?.roomType?.name || 'N/A')}</td>
+                            <td>${roomTypeDisplay}</td>
+                            <td>${roomDisplay}</td>
                             <td>${formatDateTime(booking.checkIn)}</td>
                             <td>${formatDateTime(booking.checkOut)}</td>
                             <td><span class="${statusClass}">${statusText}</span></td>
                             <td>${formatDateTime(booking.createdAt)}</td>
-                            <td>
-                                ${canCancel ? `<button onclick="adminCancelBooking(${booking.id})" class="btn btn-danger btn-sm">Cancel</button>` : '<span class="badge badge-secondary">-</span>'}
-                            </td>
+                            <td>${actionsHtml}</td>
                         </tr>`;
                     });
                     
@@ -87,7 +99,111 @@
                     showToast(error.message || 'Failed to cancel booking.', 'error');
                 }
             }
+
+            // ===== Check-in Modal =====
+            let currentCheckInBookingId = null;
+
+            function openCheckInModal(bookingId) {
+                currentCheckInBookingId = bookingId;
+                const modal = document.getElementById('checkin-modal');
+                const roomList = document.getElementById('checkin-room-list');
+                const modalTitle = document.getElementById('checkin-modal-title');
+                
+                modalTitle.textContent = 'Check-in & Assign Room - Booking #' + bookingId;
+                roomList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading available rooms...</p></div>';
+                modal.classList.add('active');
+                
+                loadBestFitRooms(bookingId);
+            }
+
+            function closeCheckInModal() {
+                document.getElementById('checkin-modal').classList.remove('active');
+                currentCheckInBookingId = null;
+            }
+
+            async function loadBestFitRooms(bookingId) {
+                const roomList = document.getElementById('checkin-room-list');
+                
+                try {
+                    const rooms = await BookingAPI.getBestFitRooms(bookingId);
+                    
+                    if (!rooms || rooms.length === 0) {
+                        roomList.innerHTML = '<div class="empty-state" style="padding: 24px;"><div class="icon">&#128716;</div><h3>No Rooms Available</h3><p>There are no available rooms matching this booking\'s room type for the selected dates.</p></div>';
+                        return;
+                    }
+                    
+                    let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+                    rooms.forEach(room => {
+                        html += `
+                            <div class="card room-option" style="cursor: pointer; border: 2px solid transparent;" 
+                                 onmouseover="this.style.borderColor='var(--primary)'" 
+                                 onmouseout="this.style.borderColor='transparent'"
+                                 onclick="selectRoomForCheckIn(${room.id})">
+                                <div class="card-body" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${escapeHtml(room.name)}</strong>
+                                        <span style="color: var(--gray-500); margin-left: 12px;">${escapeHtml(room.roomType?.name || '')}</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm">Assign & Check-in</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    roomList.innerHTML = html;
+                } catch (error) {
+                    roomList.innerHTML = '<div class="alert alert-danger">Failed to load available rooms: ' + escapeHtml(error.message) + '</div>';
+                }
+            }
+
+            async function selectRoomForCheckIn(roomId) {
+                if (!currentCheckInBookingId) return;
+                
+                if (!confirm('Assign this room and check in the guest?')) return;
+                
+                try {
+                    await BookingAPI.checkIn(currentCheckInBookingId, roomId);
+                    showToast('Check-in completed successfully. Room assigned.', 'success');
+                    closeCheckInModal();
+                    loadAdminBookings(adminBookingsPage);
+                } catch (error) {
+                    showToast(error.message || 'Check-in failed.', 'error');
+                }
+            }
+
+            async function adminCheckOut(bookingId) {
+                if (!confirm('Confirm check-out for booking #' + bookingId + '?')) return;
+                
+                try {
+                    await BookingAPI.checkOut(bookingId);
+                    showToast('Check-out completed successfully.', 'success');
+                    loadAdminBookings(adminBookingsPage);
+                } catch (error) {
+                    showToast(error.message || 'Check-out failed.', 'error');
+                }
+            }
         </script>
+
+        <!-- Check-in Modal -->
+        <div id="checkin-modal" class="modal-overlay">
+            <div class="modal" style="max-width: 640px;">
+                <div class="modal-header">
+                    <h3 id="checkin-modal-title">Check-in & Assign Room</h3>
+                    <button class="close-btn" onclick="closeCheckInModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="checkin-room-list">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading available rooms...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeCheckInModal()" class="btn btn-outline">Cancel</button>
+                </div>
+            </div>
+        </div>
     </th:block>
 </body>
 </html>

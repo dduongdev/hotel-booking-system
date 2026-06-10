@@ -397,6 +397,11 @@ table tr:last-child td {
     color: var(--primary);
 }
 
+.badge-secondary {
+    background: var(--gray-200);
+    color: var(--gray-600);
+}
+
 /* ===== Hero Section ===== */
 .hero {
     background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);

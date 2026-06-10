@@ -36,17 +36,19 @@
                         return;
                     }
                     
-                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Room</th><th>Room Type</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
+                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Room Type</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
                     
                     bookings.forEach(booking => {
                         const statusClass = getStatusBadgeClass(booking.status);
                         const statusText = getStatusText(booking.status);
                         const canCancel = booking.status === 'CONFIRMED';
+                        const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color: var(--gray-500)">Not assigned</em>';
+                        const roomTypeDisplay = booking.roomTypeName ? escapeHtml(booking.roomTypeName) : 'N/A';
                         
                         html += `<tr>
                             <td><strong>#${booking.id}</strong></td>
-                            <td>${escapeHtml(booking.room?.name || 'N/A')}</td>
-                            <td>${escapeHtml(booking.room?.roomType?.name || 'N/A')}</td>
+                            <td>${roomTypeDisplay}</td>
+                            <td>${roomDisplay}</td>
                             <td>${formatDateTime(booking.checkIn)}</td>
                             <td>${formatDateTime(booking.checkOut)}</td>
                             <td><span class="${statusClass}">${statusText}</span></td>

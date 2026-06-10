@@ -1,6 +1,5 @@
 package com.dduongdev.hotel.payload.response;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.dduongdev.hotel.entity.Booking;

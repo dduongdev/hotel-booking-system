@@ -12,8 +12,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - DEFAULT_MANAGER_USERNAME={DEFAULT_MANAGER_USERNAME}
-      - DEFAULT_MANAGER_USERNAME={DEFAULT_MANAGER_PASSWORD}
+      - DEFAULT_MANAGER_USERNAME=${DEFAULT_MANAGER_USERNAME}
+      - DEFAULT_MANAGER_PASSWORD=${DEFAULT_MANAGER_PASSWORD}
       - JWT_SECRET={JWT_SECRET}
     depends_on:
       db:
@@ -26,7 +26,7 @@ services:
   # MYSQL DATABASE
   # ==========================
   db:
-    image: mysql:8.0
+    image: mysql:latest
     container_name: hotel_mysql
     ports:
       - "3306:3306"

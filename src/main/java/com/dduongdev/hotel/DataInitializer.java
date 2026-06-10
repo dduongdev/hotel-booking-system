@@ -1,5 +1,6 @@
 package com.dduongdev.hotel;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,11 +26,14 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        User manager = new User();
-        manager.setUsername(defaultManagerUsername);
-        manager.setPassword(passwordEncoder.encode(defaultManagerPassword));
-        manager.setRole(User.Role.MANAGER);
-        userRepository.save(manager); 
+        try {
+            User manager = new User();
+            manager.setUsername(defaultManagerUsername);
+            manager.setPassword(passwordEncoder.encode(defaultManagerPassword));
+            manager.setRole(User.Role.MANAGER);
+            userRepository.save(manager);
+        } catch (Exception ex) {
+        }
     }
-    
+
 }

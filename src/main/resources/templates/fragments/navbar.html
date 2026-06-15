@@ -21,6 +21,9 @@
             </div>
             <a id="btn-login" href="/login" class="btn btn-primary btn-sm">Đăng nhập</a>
             <a id="btn-register" href="/register" class="btn btn-outline btn-sm">Đăng ký</a>
+            <a id="btn-change-password" href="/auth/change-password" class="btn btn-outline btn-sm" style="display: none;">
+                <i class="bi bi-key"></i> Đổi mật khẩu
+            </a>
             <a id="btn-logout" href="#" onclick="event.preventDefault(); AuthAPI.logout();" class="btn btn-outline btn-sm" style="display: none;">Đăng xuất</a>
         </div>
         <script>
@@ -45,6 +48,7 @@
                     document.getElementById('user-role-display').textContent = user.role;
                     document.getElementById('btn-login').style.display = 'none';
                     document.getElementById('btn-register').style.display = 'none';
+                    document.getElementById('btn-change-password').style.display = 'inline-flex';
                     document.getElementById('btn-logout').style.display = 'inline-flex';
                     
                     if (user.role === 'CUSTOMER') {

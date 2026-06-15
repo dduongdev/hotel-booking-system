@@ -21,4 +21,12 @@ public class AuthWebController {
         model.addAttribute("view", "auth/register :: content");
         return "fragments/layout";
     }
+
+    @GetMapping("/auth/change-password")
+    public String changePasswordPage(Model model) {
+        model.addAttribute("title", "Change Password - Hotel Booking");
+        model.addAttribute("view", "auth/change-password :: content");
+        model.addAttribute("extraScript", "auth/change-password-script :: content");
+        return "fragments/layout";
+    }
 }

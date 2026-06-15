@@ -1,12 +1,15 @@
 package com.dduongdev.hotel.security.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dduongdev.hotel.payload.request.ChangePasswordRequest;
 import com.dduongdev.hotel.payload.response.ApiResponse;
+import com.dduongdev.hotel.security.entity.HotelUserDetails;
 import com.dduongdev.hotel.security.payload.request.LoginRequest;
 import com.dduongdev.hotel.security.payload.request.RefreshTokenRequest;
 import com.dduongdev.hotel.security.payload.response.LoginResponse;
@@ -32,5 +35,13 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         LoginResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<LoginResponse>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal HotelUserDetails userDetails) {
+        LoginResponse response = authService.changePassword(userDetails.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Password changed successfully", response));
     }
 }

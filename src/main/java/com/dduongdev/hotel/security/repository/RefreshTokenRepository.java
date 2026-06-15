@@ -8,4 +8,5 @@ import com.dduongdev.hotel.security.entity.RefreshToken;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Integer> {
     Optional<RefreshToken> findByToken(String token);
+    void deleteByUserId(Integer userId);
 }

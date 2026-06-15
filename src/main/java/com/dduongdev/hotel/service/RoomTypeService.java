@@ -45,7 +45,7 @@ public class RoomTypeService {
     }
 
     public Page<RoomTypeResponse> getAll(Pageable pageable) {
-        Page<RoomType> roomTypes = roomTypeRepository.findAllByOrderByPricePerNightAsc(pageable);
+        Page<RoomType> roomTypes = roomTypeRepository.findAllByOrderByPricePerNightDesc(pageable);
         return roomTypes.map(roomTypeMapper::toRoomTypeResponse);
     }
 
@@ -86,8 +86,7 @@ public class RoomTypeService {
         LocalDateTime checkInTime = LocalDateTime.of(checkIn, Constants.CHECK_IN_TIME);
         LocalDateTime checkOutTime = LocalDateTime.of(checkOut, Constants.CHECK_OUT_TIME);
 
-        List<RoomTypeAvailability> roomTypes = roomTypeRepository.findAllRoomTypeAvailabilityByCheckInAndCheckOut(checkInTime, checkOutTime);
-        roomTypes.sort((a, b) -> Double.compare(a.getPricePerNight(), b.getPricePerNight()));
+        List<RoomTypeAvailability> roomTypes = roomTypeRepository.findAllRoomTypeAvailabilityByCheckInAndCheckOutOrderByPricePerNightDesc(checkInTime, checkOutTime);
         return roomTypes.stream().map(roomType -> roomTypeMapper.toRoomTypeAvailabilityResponse(roomType)).toList();
     }
 }

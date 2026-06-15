@@ -12,7 +12,7 @@ import com.dduongdev.hotel.dto.RoomTypeAvailability;
 import com.dduongdev.hotel.entity.RoomType;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
-    Page<RoomType> findAllByOrderByPricePerNightAsc(Pageable pageable);
+    Page<RoomType> findAllByOrderByPricePerNightDesc(Pageable pageable);
 
     @Query("""
             SELECT new com.dduongdev.hotel.dto.RoomTypeAvailability(
@@ -34,8 +34,9 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
             LEFT JOIN Room r ON r.roomType.id = rt.id AND r.hidden = false
             WHERE rt.hidden = false
             GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight
+            ORDER BY rt.pricePerNight DESC
             """)
-    List<RoomTypeAvailability> findAllRoomTypeAvailabilityByCheckInAndCheckOut(LocalDateTime checkIn,
+    List<RoomTypeAvailability> findAllRoomTypeAvailabilityByCheckInAndCheckOutOrderByPricePerNightDesc(LocalDateTime checkIn,
             LocalDateTime checkOut);
 
     @Query("""

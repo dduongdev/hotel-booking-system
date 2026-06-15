@@ -168,6 +168,13 @@ const AuthAPI = {
     logout() {
         TokenManager.clearTokens();
         window.location.href = '/login';
+    },
+
+    async changePassword(currentPassword, newPassword, confirmNewPassword) {
+        return apiRequest('/auth/change-password', {
+            method: 'POST',
+            body: { currentPassword, newPassword, confirmNewPassword }
+        });
     }
 };
 

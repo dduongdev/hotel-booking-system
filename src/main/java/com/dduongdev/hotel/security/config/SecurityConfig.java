@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/", "/index.html").permitAll()
                 .requestMatchers("/css/**", "/js/**").permitAll()
-                .requestMatchers("/login", "/register").permitAll()
+                .requestMatchers("/login", "/register", "/auth/change-password").permitAll()
                 .requestMatchers("/room-types/**").permitAll()
                 .requestMatchers("/rooms/**").permitAll()
                 .requestMatchers("/admin/**").permitAll()

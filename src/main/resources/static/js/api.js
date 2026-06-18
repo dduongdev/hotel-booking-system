@@ -157,12 +157,33 @@ const AuthAPI = {
         return data;
     },
     
-    async register(username, password) {
-        return apiRequest('/users/register', {
+    async register(username, password, phoneNumber) {
+        const data = await apiRequest('/users/register', {
             method: 'POST',
-            body: { username, password },
+            body: { username, password, phoneNumber },
             useAuth: false
         });
+        if (data && data.accessToken && data.refreshToken) {
+            TokenManager.setTokens(data.accessToken, data.refreshToken);
+        }
+        return data;
+    },
+    
+    async sendOtpForActivation() {
+        return apiRequest('/otp/send-for-activation', {
+            method: 'POST'
+        });
+    },
+    
+    async activateByOtp(otpCode) {
+        const data = await apiRequest('/users/verify-phone', {
+            method: 'POST',
+            body: { otpCode }
+        });
+        if (data && data.accessToken && data.refreshToken) {
+            TokenManager.setTokens(data.accessToken, data.refreshToken);
+        }
+        return data;
     },
     
     logout() {

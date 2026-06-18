@@ -29,4 +29,11 @@ public class AuthWebController {
         model.addAttribute("extraScript", "auth/change-password-script :: content");
         return "fragments/layout";
     }
+
+    @GetMapping("/verify-phone")
+    public String verifyPhonePage(Model model) {
+        model.addAttribute("title", "Verify Phone - Hotel Booking");
+        model.addAttribute("view", "auth/verify-phone :: content");
+        return "fragments/layout";
+    }
 }

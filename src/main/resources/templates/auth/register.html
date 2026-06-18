@@ -7,27 +7,77 @@
             <div class="auth-card">
                 <div class="auth-header">
                     <h1>Hotel Booking</h1>
-                    <p>Create a new account</p>
+                    <p id="auth-subtitle">Create a new account</p>
                 </div>
+
+                <!-- Error / Success messages -->
                 <div id="register-error" class="alert alert-danger" style="display: none;"></div>
                 <div id="register-success" class="alert alert-success" style="display: none;"></div>
-                <form id="register-form" onsubmit="return handleRegister(event)">
-                    <div class="form-group">
-                        <label class="form-label" for="reg-username">Username</label>
-                        <input type="text" id="reg-username" class="form-control" placeholder="Choose a username (3-20 characters)" required minlength="3" maxlength="20">
+
+                <!-- ===== Step 1: Registration Form ===== -->
+                <div id="register-step">
+                    <form id="register-form" onsubmit="return handleRegister(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-username">Username</label>
+                            <input type="text" id="reg-username" class="form-control" placeholder="Choose a username (3-20 characters)" required minlength="3" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-password">Password</label>
+                            <input type="password" id="reg-password" class="form-control" placeholder="Choose a password (8+ characters)" required minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-confirm">Confirm Password</label>
+                            <input type="password" id="reg-confirm" class="form-control" placeholder="Confirm your password" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-phone">Phone Number</label>
+                            <input type="tel" id="reg-phone" class="form-control" placeholder="e.g. 0912345678" required pattern="0[0-9]{9}">
+                            <div class="form-error" id="phone-error" style="display: none;">Please enter a valid phone number (10 digits starting with 0)</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+                    </form>
+                    <div class="auth-footer">
+                        Already have an account? <a href="/login">Sign in</a>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="reg-password">Password</label>
-                        <input type="password" id="reg-password" class="form-control" placeholder="Choose a password (8+ characters)" required minlength="8">
+                </div>
+
+                <!-- ===== Step 2: OTP Verification ===== -->
+                <div id="otp-step" style="display: none;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">&#128222;</div>
+                        <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--dark);">Verify Your Phone</h3>
+                        <p style="color: var(--gray-500); font-size: 0.9rem; margin-top: 8px;">
+                            We've sent a 6-digit OTP to your registered phone number.
+                        </p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="reg-confirm">Confirm Password</label>
-                        <input type="password" id="reg-confirm" class="form-control" placeholder="Confirm your password" required>
+
+                    <div id="otp-error" class="alert alert-danger" style="display: none;"></div>
+
+                    <form id="otp-form" onsubmit="return handleVerifyOtp(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="otp-code">Enter OTP Code</label>
+                            <input type="text" id="otp-code" class="form-control" placeholder="000000" 
+                                   required maxlength="6" minlength="6" 
+                                   pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code"
+                                   style="text-align: center; font-size: 1.5rem; letter-spacing: 8px; font-weight: 700;">
+                        </div>
+                        <button type="submit" class="btn btn-success" style="width: 100%;" id="btn-verify-otp">
+                            Verify & Activate
+                        </button>
+                    </form>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="button" class="btn btn-outline btn-sm" id="btn-resend-otp" onclick="handleResendOtp()" style="width: 100%;">
+                            Resend OTP
+                        </button>
+                        <div id="resend-countdown" style="display: none; font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
+                            Resend available in <span id="countdown-seconds">60</span>s
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
-                </form>
-                <div class="auth-footer">
-                    Already have an account? <a href="/login">Sign in</a>
+
+                    <div class="auth-footer">
+                        <a href="/register" style="color: var(--gray-600);">Use a different account</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -40,26 +90,131 @@
                 errorDiv.style.display = 'none';
                 successDiv.style.display = 'none';
                 
-                const username = document.getElementById('reg-username').value;
+                const username = document.getElementById('reg-username').value.trim();
                 const password = document.getElementById('reg-password').value;
                 const confirm = document.getElementById('reg-confirm').value;
-                
+                const phone = document.getElementById('reg-phone').value.trim();
+                const phoneError = document.getElementById('phone-error');
+
+                // Validate passwords match
                 if (password !== confirm) {
                     errorDiv.textContent = 'Passwords do not match!';
                     errorDiv.style.display = 'block';
                     return false;
                 }
+
+                // Validate phone number
+                if (!/^0[0-9]{9}$/.test(phone)) {
+                    phoneError.style.display = 'block';
+                    return false;
+                }
+                phoneError.style.display = 'none';
                 
                 try {
-                    const result = await AuthAPI.register(username, password);
-                    successDiv.textContent = 'Account created successfully! Redirecting to login...';
+                    const data = await AuthAPI.register(username, password, phone);
+
+                    // Show success message briefly
+                    successDiv.textContent = 'Account created! Check your phone for OTP.';
                     successDiv.style.display = 'block';
-                    setTimeout(() => window.location.href = '/login', 1500);
+
+                    // Switch to OTP step
+                    document.getElementById('register-step').style.display = 'none';
+                    document.getElementById('otp-step').style.display = 'block';
+                    document.getElementById('auth-subtitle').textContent = 'Phone verification required';
+
+                    // Focus on OTP input
+                    document.getElementById('otp-code').focus();
                 } catch (error) {
                     errorDiv.textContent = error.message || 'Registration failed. Please try again.';
                     errorDiv.style.display = 'block';
                 }
                 return false;
+            }
+
+            async function handleVerifyOtp(event) {
+                event.preventDefault();
+                const errorDiv = document.getElementById('otp-error');
+                const btn = document.getElementById('btn-verify-otp');
+                errorDiv.style.display = 'none';
+
+                const otpCode = document.getElementById('otp-code').value.trim();
+
+                if (otpCode.length !== 6 || !/^[0-9]{6}$/.test(otpCode)) {
+                    errorDiv.textContent = 'Please enter a valid 6-digit OTP code.';
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
+
+                try {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="loading-spinner-small"></span> Verifying...';
+
+                    const data = await AuthAPI.activateByOtp(otpCode);
+
+                    // Decode JWT to get user info
+                    const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
+                    const auth = payload.authorities && payload.authorities[0];
+                    const role = payload.role || (typeof auth === 'string' ? auth.replace('ROLE_', '') : 'CUSTOMER');
+
+                    TokenManager.saveUser({
+                        username: payload.sub,
+                        role: role
+                    });
+
+                    showToast('Phone verified successfully!', 'success');
+
+                    // Redirect based on role
+                    if (role === 'MANAGER') {
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        window.location.href = '/';
+                    }
+                } catch (error) {
+                    errorDiv.textContent = error.data?.message || error.message || 'Invalid OTP code. Please try again.';
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Verify & Activate';
+                }
+                return false;
+            }
+
+            async function handleResendOtp() {
+                const btn = document.getElementById('btn-resend-otp');
+                const countdown = document.getElementById('resend-countdown');
+
+                try {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="loading-spinner-small"></span> Sending...';
+
+                    await AuthAPI.sendOtpForActivation();
+
+                    showToast('OTP resent successfully!', 'success');
+
+                    // Start countdown
+                    startResendCountdown(btn, countdown);
+                } catch (error) {
+                    const msg = error.data?.message || error.message || 'Failed to resend OTP.';
+                    showToast(msg, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Resend OTP';
+                }
+            }
+
+            function startResendCountdown(btn, countdownEl) {
+                let seconds = 60;
+                countdownEl.style.display = 'block';
+                document.getElementById('countdown-seconds').textContent = seconds;
+                btn.innerHTML = 'Resend OTP';
+
+                const interval = setInterval(() => {
+                    seconds--;
+                    document.getElementById('countdown-seconds').textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(interval);
+                        countdownEl.style.display = 'none';
+                        btn.disabled = false;
+                    }
+                }, 1000);
             }
         </script>
     </th:block>

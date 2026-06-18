@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <div class="auth-page">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>Hotel Booking</h1>
+                    <p>Phone verification required</p>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">&#128274;</div>
+                    <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--dark);">Verify Your Phone Number</h3>
+                    <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 8px;">
+                        We've sent a verification code to your registered phone number.
+                    </p>
+                </div>
+
+                <div id="verify-loading" class="alert alert-info" style="display: none;">
+                    <span class="loading-spinner-small"></span> Sending OTP...
+                </div>
+                <div id="verify-error" class="alert alert-danger" style="display: none;"></div>
+                <div id="verify-success" class="alert alert-success" style="display: none;"></div>
+
+                <!-- OTP input -->
+                <div id="verify-otp-step">
+                    <form id="verify-otp-form" onsubmit="return handleVerifyPhoneOtp(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="verify-otp-code">Enter OTP Code</label>
+                            <input type="text" id="verify-otp-code" class="form-control" placeholder="000000" 
+                                   required maxlength="6" minlength="6" 
+                                   pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code"
+                                   style="text-align: center; font-size: 1.5rem; letter-spacing: 8px; font-weight: 700;">
+                        </div>
+                        <button type="submit" class="btn btn-success" style="width: 100%;" id="btn-verify-phone-otp">
+                            Verify & Continue
+                        </button>
+                    </form>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="button" class="btn btn-outline btn-sm" id="btn-resend-phone-otp" onclick="handleResendPhoneOtp()" style="width: 100%;">
+                            Resend OTP
+                        </button>
+                        <div id="resend-phone-countdown" style="display: none; font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
+                            Resend available in <span id="countdown-phone-seconds">60</span>s
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auth-footer">
+                    <a href="/" style="color: var(--gray-600);">Back to Home</a>
+                    &middot;
+                    <a href="/login" style="color: var(--gray-600);">Sign in with a different account</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Send OTP automatically on page load
+            (async function sendOtpOnLoad() {
+                const loadingDiv = document.getElementById('verify-loading');
+                const errorDiv = document.getElementById('verify-error');
+                loadingDiv.style.display = 'block';
+
+                try {
+                    await AuthAPI.sendOtpForActivation();
+                    showToast('OTP sent to your phone!', 'success');
+                } catch (error) {
+                    errorDiv.textContent = error.data?.message || error.message || 'Failed to send OTP. Please try again.';
+                    errorDiv.style.display = 'block';
+                } finally {
+                    loadingDiv.style.display = 'none';
+                }
+            })();
+
+            async function handleVerifyPhoneOtp(event) {
+                event.preventDefault();
+                const errorDiv = document.getElementById('verify-error');
+                const btn = document.getElementById('btn-verify-phone-otp');
+                errorDiv.style.display = 'none';
+
+                const otpCode = document.getElementById('verify-otp-code').value.trim();
+
+                if (otpCode.length !== 6 || !/^[0-9]{6}$/.test(otpCode)) {
+                    errorDiv.textContent = 'Please enter a valid 6-digit OTP code.';
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
+
+                try {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="loading-spinner-small"></span> Verifying...';
+
+                    const data = await AuthAPI.activateByOtp(otpCode);
+
+                    // Decode JWT to get user info
+                    const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
+                    const auth = payload.authorities && payload.authorities[0];
+                    const role = payload.role || (typeof auth === 'string' ? auth.replace('ROLE_', '') : 'CUSTOMER');
+
+                    TokenManager.saveUser({
+                        username: payload.sub,
+                        role: role
+                    });
+
+                    showToast('Phone verified successfully!', 'success');
+
+                    // Redirect based on role
+                    setTimeout(() => {
+                        if (role === 'MANAGER') {
+                            window.location.href = '/admin/dashboard';
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 1000);
+                } catch (error) {
+                    errorDiv.textContent = error.data?.message || error.message || 'Invalid OTP code.';
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Verify & Continue';
+                }
+                return false;
+            }
+
+            async function handleResendPhoneOtp() {
+                const btn = document.getElementById('btn-resend-phone-otp');
+                const countdown = document.getElementById('resend-phone-countdown');
+                const errorDiv = document.getElementById('verify-error');
+                errorDiv.style.display = 'none';
+
+                try {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="loading-spinner-small"></span> Sending...';
+
+                    await AuthAPI.sendOtpForActivation();
+
+                    showToast('OTP resent!', 'success');
+
+                    let seconds = 60;
+                    countdown.style.display = 'block';
+                    document.getElementById('countdown-phone-seconds').textContent = seconds;
+                    btn.innerHTML = 'Resend OTP';
+
+                    const interval = setInterval(() => {
+                        seconds--;
+                        document.getElementById('countdown-phone-seconds').textContent = seconds;
+                        if (seconds <= 0) {
+                            clearInterval(interval);
+                            countdown.style.display = 'none';
+                            btn.disabled = false;
+                        }
+                    }, 1000);
+                } catch (error) {
+                    const msg = error.data?.message || error.message || 'Failed to resend OTP.';
+                    errorDiv.textContent = msg;
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Resend OTP';
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

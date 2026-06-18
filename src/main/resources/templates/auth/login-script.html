@@ -19,11 +19,18 @@
                     const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
                     const auth = payload.authorities && payload.authorities[0];
                     const role = payload.role || (typeof auth === 'string' ? auth.replace('ROLE_', '') : auth?.authority?.replace('ROLE_', ''));
+                    const phoneVerified = payload.phoneVerified;
                     
                     TokenManager.saveUser({
                         username: payload.sub,
                         role: role || 'CUSTOMER'
                     });
+                    
+                    // If phone not verified, redirect to verification page
+                    if (!phoneVerified) {
+                        window.location.href = '/verify-phone';
+                        return false;
+                    }
                     
                     // Redirect based on role
                     if (role === 'MANAGER') {
@@ -40,14 +47,40 @@
             }
 
             // Auto-redirect if already logged in
-            if (TokenManager.isAuthenticated()) {
-                const user = TokenManager.getUser();
-                if (user && user.role === 'MANAGER') {
-                    window.location.href = '/admin/dashboard';
-                } else {
-                    window.location.href = '/';
+            (function() {
+                if (!TokenManager.isAuthenticated()) return;
+                
+                const token = TokenManager.getAccessToken();
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    
+                    // Check token expiry
+                    if (payload.exp && payload.exp * 1000 < Date.now()) {
+                        TokenManager.clearTokens();
+                        return;
+                    }
+                    
+                    const auth = payload.authorities && payload.authorities[0];
+                    const role = payload.role || (typeof auth === 'string' ? auth.replace('ROLE_', '') : auth?.authority?.replace('ROLE_', ''));
+                    const phoneVerified = payload.phoneVerified;
+                    
+                    TokenManager.saveUser({
+                        username: payload.sub,
+                        role: role || 'CUSTOMER'
+                    });
+                    
+                    if (!phoneVerified) {
+                        window.location.href = '/verify-phone';
+                    } else if (role === 'MANAGER') {
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        window.location.href = '/';
+                    }
+                } catch {
+                    // Invalid token, clear and show login page
+                    TokenManager.clearTokens();
                 }
-            }
+            })();
         </script>
     </th:block>
 </body>

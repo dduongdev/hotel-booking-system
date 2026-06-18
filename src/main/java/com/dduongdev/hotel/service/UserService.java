@@ -10,8 +10,6 @@ import com.dduongdev.hotel.exception.PhoneNumberAlreadyExistsException;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
 import com.dduongdev.hotel.exception.UsernameAlreadyExistsException;
 import com.dduongdev.hotel.payload.request.UserRegisterRequest;
-import com.dduongdev.hotel.payload.request.VerifyOtpRequest;
-import com.dduongdev.hotel.payload.response.UserRegisterResponse;
 import com.dduongdev.hotel.repository.UserRepository;
 import com.dduongdev.hotel.security.entity.HotelUserDetails;
 import com.dduongdev.hotel.security.payload.response.LoginResponse;
@@ -22,14 +20,14 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final OtpService otpService;
     private final AuthService authService;
 
     @Transactional
-    public UserRegisterResponse register(UserRegisterRequest request) {
+    public LoginResponse register(UserRegisterRequest request) {
         String username = request.getUsername();
         String password = request.getPassword();
         String phoneNumber = request.getPhoneNumber();
@@ -49,20 +47,23 @@ public class UserService {
         newUser.setPhoneNumber(phoneNumber);
 
         userRepository.save(newUser);
-        
+
         otpService.sendOtp(phoneNumber);
 
-        return new UserRegisterResponse(username, phoneNumber);
+        HotelUserDetails userDetails = new HotelUserDetails(newUser.getId(), newUser.getUsername(), null,
+                newUser.getRole(), newUser.isPhoneVerified());
+        return authService.generateTokenPair(userDetails);
     }
 
-    public LoginResponse activateUserByOtp(VerifyOtpRequest request) {
-        boolean verified = otpService.verifyOtp(request.getPhoneNumber(), request.getOtpCode());
+    public LoginResponse activateUserByOtp(int userId, String otpCode) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        boolean verified = otpService.verifyOtp(user.getPhoneNumber(), otpCode);
 
         if (!verified) {
             throw new InvalidOtpException();
         }
-
-        User user = userRepository.findByPhoneNumber(request.getPhoneNumber()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setPhoneVerified(true);
         userRepository.save(user);
@@ -70,5 +71,11 @@ public class UserService {
         HotelUserDetails userDetails = new HotelUserDetails(user.getId(), user.getUsername(), null,
                 user.getRole(), user.isPhoneVerified());
         return authService.generateTokenPair(userDetails);
+    }
+
+    public void sendOtpForActivation(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        otpService.sendOtp(user.getPhoneNumber());
     }
 }

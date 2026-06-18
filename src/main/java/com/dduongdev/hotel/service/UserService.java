@@ -19,6 +19,7 @@ public class UserService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OtpService otpService;
 
     @Transactional
     public UserRegisterResponse register(UserRegisterRequest request) {
@@ -41,6 +42,8 @@ public class UserService {
         newUser.setPhoneNumber(phoneNumber);
 
         userRepository.save(newUser);
+        
+        otpService.sendOtp(phoneNumber);
 
         return new UserRegisterResponse(username);
     }

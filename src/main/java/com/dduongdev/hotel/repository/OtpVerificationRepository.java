@@ -8,4 +8,6 @@ import com.dduongdev.hotel.entity.OtpVerification;
 
 public interface OtpVerificationRepository extends JpaRepository<OtpVerification, Long>  {
     Optional<OtpVerification> findFirstByPhoneNumberOrderByCreatedAtDesc(String phoneNumber);
+
+    Optional<OtpVerification> findFirstByPhoneNumberAndVerifiedFalseOrderByCreatedAtDesc(String phoneNumber);
 }

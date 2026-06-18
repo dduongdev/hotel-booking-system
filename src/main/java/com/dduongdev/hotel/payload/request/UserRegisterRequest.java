@@ -2,6 +2,8 @@ package com.dduongdev.hotel.payload.request;
 
 import org.hibernate.validator.constraints.Length;
 
+import com.dduongdev.hotel.util.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +27,7 @@ public class UserRegisterRequest {
 
     @NotNull(message = "Phone number is required")
     @NotBlank(message = "Phone number cannot be blank")
-    @Pattern(regexp = "^(\\+84|0)[3|5|7|8|9][0-9]{8}$", message = "Invalid Vietnamese phone number format")
+    @Pattern(regexp = Constants.PHONE_NUMBER_PATTERN, message = "Invalid Vietnamese phone number format")
     private String phoneNumber;
 
 }

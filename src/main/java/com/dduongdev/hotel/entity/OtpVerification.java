@@ -16,37 +16,33 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "`user`")
+@Table(name = "otp_verification")
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-
+public class OtpVerification {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(name = "phone_number", nullable = false, unique = true)
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "phone_verified", nullable = false)
-    private boolean phoneVerified = false;
+    @Column(name = "otp_hash", nullable = false)
+    private String otpHash;
 
-    private Role role = Role.CUSTOMER;
+    @Column(name = "expires_at", nullable = false)
+    private LocalDateTime expiresAt;
+
+    @Column(nullable = false)
+    private boolean verified = false;
+
+    @Column(name = "attempt_count", nullable = false)
+    private int attemptCount = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    public static enum Role {
-        MANAGER,
-        CUSTOMER
-    }
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dduongdev.hotel.entity.User;
+import com.dduongdev.hotel.exception.PhoneNumberAlreadyExistsException;
 import com.dduongdev.hotel.exception.UsernameAlreadyExistsException;
 import com.dduongdev.hotel.payload.request.UserRegisterRequest;
 import com.dduongdev.hotel.payload.response.UserRegisterResponse;
@@ -23,15 +24,21 @@ public class UserService {
     public UserRegisterResponse register(UserRegisterRequest request) {
         String username = request.getUsername();
         String password = request.getPassword();
+        String phoneNumber = request.getPhoneNumber();
 
         if (userRepository.existsByUsername(username)) {
-            throw new UsernameAlreadyExistsException("Username already exists: " + username);
+            throw new UsernameAlreadyExistsException();
+        }
+
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new PhoneNumberAlreadyExistsException();
         }
 
         String encodedPassword = passwordEncoder.encode(password);
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(encodedPassword);
+        newUser.setPhoneNumber(phoneNumber);
 
         userRepository.save(newUser);
 

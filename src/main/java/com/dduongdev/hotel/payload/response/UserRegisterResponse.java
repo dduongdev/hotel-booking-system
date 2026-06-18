@@ -9,4 +9,5 @@ import lombok.Setter;
 @Getter
 public class UserRegisterResponse {
     private String username;
+    private String phoneNumber;
 }

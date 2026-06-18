@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.dduongdev.hotel.security.entity.HotelUserDetails;
+
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -44,6 +47,10 @@ public class JwtService {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("authorities", userDetails.getAuthorities());
+        
+        if (userDetails instanceof HotelUserDetails) {
+            claims.put("phoneVerified", ((HotelUserDetails) userDetails).isPhoneVerified());
+        }
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -52,19 +59,6 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
     }
 
     public String extractUsername(String token) {
@@ -76,11 +70,29 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+    public boolean extractPhoneVerified(String token) {
+        final Claims claims = extractAllClaims(token);
+
+        Boolean phoneVerified = claims.get("phoneVerified", Boolean.class);
+
+        return phoneVerified != null && phoneVerified;
+    }
+
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public boolean validate(String jwt) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt);
+
+            return true;
+        } catch (JwtException e) {}
+
+        return false;
     }
 }

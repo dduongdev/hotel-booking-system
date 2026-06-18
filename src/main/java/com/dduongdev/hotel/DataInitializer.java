@@ -30,6 +30,7 @@ public class DataInitializer implements CommandLineRunner {
             manager.setUsername(defaultManagerUsername);
             manager.setPassword(passwordEncoder.encode(defaultManagerPassword));
             manager.setRole(User.Role.MANAGER);
+            manager.setPhoneVerified(true);
             userRepository.save(manager);
         } catch (Exception ex) {
         }

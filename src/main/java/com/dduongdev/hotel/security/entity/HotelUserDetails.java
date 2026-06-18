@@ -17,11 +17,13 @@ public class HotelUserDetails extends org.springframework.security.core.userdeta
     
     private int id;
     private User.Role role;
+    private boolean phoneVerified;
 
-    public HotelUserDetails(int id, String username, String password, User.Role role) {
+    public HotelUserDetails(int id, String username, String password, User.Role role, boolean phoneVerified) {
         super(username, password, List.of());
         this.id = id;
         this.role = role;
+        this.phoneVerified = phoneVerified;
     }
 
     @Override

@@ -27,7 +27,7 @@ public class UserRegisterRequest {
 
     @NotNull(message = "Phone number is required")
     @NotBlank(message = "Phone number cannot be blank")
-    @Pattern(regexp = Constants.PHONE_NUMBER_PATTERN, message = "Invalid Vietnamese phone number format")
+    @Pattern(regexp = Constants.PHONE_NUMBER_PATTERN, message = "Invalid phone number format")
     private String phoneNumber;
 
 }

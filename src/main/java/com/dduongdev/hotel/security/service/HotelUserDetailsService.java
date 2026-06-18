@@ -22,7 +22,8 @@ public class HotelUserDetailsService implements org.springframework.security.cor
                         user.getId(),
                         user.getUsername(),
                         user.getPassword(),
-                        user.getRole()
+                        user.getRole(),
+                        user.isPhoneVerified()
                 ))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }

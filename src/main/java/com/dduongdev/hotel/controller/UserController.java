@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dduongdev.hotel.payload.request.UserRegisterRequest;
+import com.dduongdev.hotel.payload.request.VerifyOtpRequest;
 import com.dduongdev.hotel.payload.response.ApiResponse;
 import com.dduongdev.hotel.payload.response.UserRegisterResponse;
+import com.dduongdev.hotel.security.payload.response.LoginResponse;
 import com.dduongdev.hotel.service.UserService;
 
 import jakarta.validation.Valid;
@@ -26,5 +28,11 @@ public class UserController {
         UserRegisterResponse response = userService.register(request);
         ApiResponse<UserRegisterResponse> wrappedResponse = ApiResponse.success("User register successfully", response); 
         return ResponseEntity.ok(wrappedResponse);
+    }
+
+    @PostMapping("/activate-by-otp")
+    public ResponseEntity<ApiResponse<LoginResponse>> activate(@Valid @RequestBody VerifyOtpRequest request) {
+        LoginResponse response = userService.activateUserByOtp(request);
+        return ResponseEntity.ok().body(ApiResponse.success("User activation successfully", response));
     }
 }

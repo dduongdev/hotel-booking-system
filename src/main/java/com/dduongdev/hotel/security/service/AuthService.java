@@ -42,6 +42,11 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(unauthenticatedToken);
 
         HotelUserDetails userDetails = (HotelUserDetails) authentication.getPrincipal();
+        
+        return generateTokenPair(userDetails);
+    }
+
+    public LoginResponse generateTokenPair(HotelUserDetails userDetails) {
         String jwtToken = jwtService.generateToken(userDetails);
 
         RefreshToken refreshToken = refreshTokenService.create(userDetails.getId());
@@ -59,7 +64,8 @@ public class AuthService {
         }
 
         User user = storedRefreshToken.getUser();
-        HotelUserDetails userDetails = new HotelUserDetails(user.getId(), user.getUsername(), null, user.getRole());
+        HotelUserDetails userDetails = new HotelUserDetails(user.getId(), user.getUsername(), null, user.getRole(),
+                user.isPhoneVerified());
         String jwtToken = jwtService.generateToken(userDetails);
 
         RefreshToken newRefreshToken = refreshTokenService.create(user.getId());
@@ -72,7 +78,8 @@ public class AuthService {
 
     @Transactional
     public LoginResponse changePassword(int userId, ChangePasswordRequest request) {
-        User storedUser = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User storedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), storedUser.getPassword())) {
             throw new InvalidCurrentPasswordException();
@@ -88,11 +95,9 @@ public class AuthService {
 
         refreshTokenRepository.deleteByUserId(storedUser.getId());
 
-        HotelUserDetails userDetails = new HotelUserDetails(storedUser.getId(), storedUser.getUsername(), null, storedUser.getRole());
-        String jwtToken = jwtService.generateToken(userDetails);
-
-        RefreshToken newRefreshToken = refreshTokenService.create(storedUser.getId());
-
-        return new LoginResponse(jwtToken, newRefreshToken.getToken());
+        HotelUserDetails userDetails = new HotelUserDetails(storedUser.getId(), storedUser.getUsername(), null,
+                storedUser.getRole(), storedUser.isPhoneVerified());
+        
+        return generateTokenPair(userDetails);
     }
 }

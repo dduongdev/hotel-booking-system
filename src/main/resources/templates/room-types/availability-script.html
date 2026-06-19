@@ -44,7 +44,7 @@
                     const results = await RoomTypeAPI.getAvailability(checkIn, checkOut);
                     
                     if (!results || results.length === 0) {
-                        resultsDiv.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">🛏️</div><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng trống cho ngày đã chọn. Vui lòng thử ngày khác.</p></div>';
+                        resultsDiv.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng trống cho ngày đã chọn. Vui lòng thử ngày khác.</p></div>';
                         return;
                     }
                     

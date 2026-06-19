@@ -36,17 +36,17 @@
                     const results = await RoomTypeAPI.getAvailability(checkIn, checkOut);
 
                     if (!results || results.length === 0) {
-                        grid.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">🛏️</div><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng trống cho ngày đã chọn. Vui lòng chọn ngày khác.</p></div>';
+                        grid.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng trống cho ngày đã chọn. Vui lòng chọn ngày khác.</p></div>';
                         return;
                     }
 
                     const isAuth = TokenManager.isAuthenticated();
 
-                    grid.innerHTML = results.map(rt => `
+                    grid.innerHTML = results.map(rt => {
+                        const roomImg = rt.imageUrl || `https://images.unsplash.com/photo-${Math.random() > 0.5 ? '1590490360182-c33d57733427' : '1611892472016-f2e38b7de8e9'}?w=800&q=80`;
+                        return `
                         <div class="ls-card" style="display:flex;flex-direction:column;">
-                            <div style="height:200px;background:linear-gradient(135deg, var(--color-secondary-container), var(--color-secondary));display:flex;align-items:center;justify-content:center;font-size:3rem;">
-                                🏨
-                            </div>
+                            <div style="height:200px;background-image:url('${roomImg}');background-size:cover;background-position:center;border-radius:var(--radius-lg) var(--radius-lg) 0 0;"></div>
                             <div class="ls-card__body" style="flex:1;display:flex;flex-direction:column;">
                                 <h3 style="font-family:var(--font-display);font-weight:700;font-size:1.125rem;color:var(--slate-900);margin-bottom:8px;">${escapeHtml(rt.name)}</h3>
                                 <p style="color:var(--slate-500);font-size:0.875rem;margin-bottom:16px;flex:1;">${escapeHtml(rt.description || 'Không có mô tả.')}</p>
@@ -70,7 +70,8 @@
                                 </div>
                             </div>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 } catch (error) {
                     grid.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }

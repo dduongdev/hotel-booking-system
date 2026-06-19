@@ -28,12 +28,13 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
                         AND (b.status = 'CONFIRMED' OR b.status = 'CHECKED_IN')
                         AND b.checkIn < :checkOut
                         AND b.checkOut > :checkIn
-                )
+                ),
+                rt.imageUrl
             )
             FROM RoomType rt
             LEFT JOIN Room r ON r.roomType.id = rt.id AND r.hidden = false
             WHERE rt.hidden = false
-            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight
+            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight, rt.imageUrl
             ORDER BY rt.pricePerNight DESC
             """)
     List<RoomTypeAvailability> findAllRoomTypeAvailabilityByCheckInAndCheckOutOrderByPricePerNightDesc(LocalDateTime checkIn,
@@ -53,13 +54,14 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
                         AND (b.status = 'CONFIRMED' OR b.status = 'CHECKED_IN')
                         AND b.checkIn < :checkOut
                         AND b.checkOut > :checkIn
-                )
+                ),
+                rt.imageUrl
             )
             FROM RoomType rt
             LEFT JOIN Room r ON r.roomType.id = rt.id AND r.hidden = false
             WHERE rt.id = :id
               AND rt.hidden = false
-            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight
+            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight, rt.imageUrl
             """)
     RoomTypeAvailability findRoomTypeAvailabilityByIdAndCheckInAndCheckOut(int id, LocalDateTime checkIn, LocalDateTime checkOut);
 }

@@ -12,13 +12,15 @@ public class RoomTypeAvailabilityResponse {
     private int capacity;
     private double pricePerNight;
     private int availableRoomCount;
+    private String imageUrl;
 
-    public RoomTypeAvailabilityResponse(int id, String name, String description, int capacity, double pricePerNight, long availableRoomCount) {
+    public RoomTypeAvailabilityResponse(int id, String name, String description, int capacity, double pricePerNight, long availableRoomCount, String imageUrl) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.capacity = capacity;
         this.pricePerNight = pricePerNight;
-        this.availableRoomCount = (int) availableRoomCount; 
+        this.availableRoomCount = (int) availableRoomCount;
+        this.imageUrl = imageUrl;
     }
 }

@@ -43,11 +43,6 @@
                     allMyBookings = bookings;
                     filteredMyBookings = bookings;
                     
-                    // Update stats
-                    document.getElementById('total-bookings').textContent = result.totalElements || bookings.length;
-                    const upcomingCount = bookings.filter(b => b.status === 'CONFIRMED').length;
-                    document.getElementById('upcoming-count').textContent = upcomingCount;
-                    
                     renderMyBookingsList();
                     
                     // Pagination
@@ -74,7 +69,6 @@
                 if (filteredMyBookings.length === 0) {
                     container.innerHTML = `
                         <div class="ls-empty">
-                            <div class="ls-empty__icon">📋</div>
                             <div class="ls-empty__title">Chưa có đặt phòng</div>
                             <p class="ls-empty__text">Bạn chưa có đặt phòng nào. Hãy đặt ngay tại trang chủ!</p>
                         </div>

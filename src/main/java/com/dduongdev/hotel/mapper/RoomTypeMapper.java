@@ -31,7 +31,8 @@ public class RoomTypeMapper {
                 availability.getDescription(),
                 availability.getCapacity(),
                 availability.getPricePerNight(),
-                availability.getAvailableRoomCount()
+                availability.getAvailableRoomCount(),
+                availability.getImageUrl()
         );
     }
 

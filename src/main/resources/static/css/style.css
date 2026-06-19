@@ -2115,46 +2115,6 @@ a:hover {
   }
 }
 
-/* ===== BOOKING STATS ===== */
-.ls-booking-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.ls-booking-stat {
-  background: white;
-  padding: 24px;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--slate-100);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.ls-booking-stat__label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--slate-400);
-  font-weight: 800;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.ls-booking-stat__value {
-  font-family: var(--font-display);
-  font-size: 1.875rem;
-  font-weight: 800;
-  color: var(--slate-800);
-}
-
-.ls-booking-stat__value--green {
-  color: var(--success);
-}
-
 /* ===== CHAT FAB ===== */
 .ls-fab {
   position: fixed;
@@ -2398,9 +2358,6 @@ a:hover {
     grid-template-columns: 1fr;
   }
   .ls-services__list {
-    grid-template-columns: 1fr;
-  }
-  .ls-booking-stats {
     grid-template-columns: 1fr;
   }
   .ls-stats-grid-4 {

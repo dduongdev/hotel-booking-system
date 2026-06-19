@@ -9,7 +9,7 @@ public class AuthWebController {
 
     @GetMapping("/login")
     public String loginPage(Model model) {
-        model.addAttribute("title", "Login - Hotel Booking");
+        model.addAttribute("title", "Đăng nhập - LuxeStay");
         model.addAttribute("view", "auth/login :: content");
         model.addAttribute("extraScript", "auth/login-script :: content");
         return "fragments/layout";
@@ -24,9 +24,8 @@ public class AuthWebController {
 
     @GetMapping("/auth/change-password")
     public String changePasswordPage(Model model) {
-        model.addAttribute("title", "Change Password - Hotel Booking");
+        model.addAttribute("title", "Đổi mật khẩu - LuxeStay");
         model.addAttribute("view", "auth/change-password :: content");
-        model.addAttribute("extraScript", "auth/change-password-script :: content");
         return "fragments/layout";
     }
 

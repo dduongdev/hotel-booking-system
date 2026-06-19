@@ -1,51 +1,355 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      lang="en">
+      lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <section class="hero">
-            <h1>Hotel Booking System</h1>
-            <p>Discover the perfect room for your stay. Browse our room types, check availability, and book with ease.</p>
-            <div style="display: flex; gap: 16px; justify-content: center;">
-                <a href="/room-types" class="btn btn-lg">Explore Rooms</a>
-                <a href="/room-types/availability" class="btn btn-lg" style="background: rgba(255,255,255,0.2);">Check Availability</a>
+        <!-- Hero Section -->
+        <section class="ls-hero">
+            <div class="ls-hero__bg">
+                <div class="ls-hero__overlay"></div>
+                <div class="ls-hero__image" style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600&q=80');"></div>
+            </div>
+            
+            <div class="ls-hero__content">
+                <h1 class="ls-hero__title">Nâng Tầm Trải Nghiệm Nghỉ Dưỡng</h1>
+                <p class="ls-hero__subtitle">Khám phá không gian sang trọng với dịch vụ chuẩn 5 sao cá nhân hóa tại LuxeStay.</p>
+                
+                <div class="ls-hero__search">
+                    <div class="ls-hero__search-fields">
+                        <div class="ls-hero__search-field">
+                            <label class="ls-hero__search-label">
+                                <span class="ls-icon ls-icon--sm" style="font-size:12px;color:var(--color-secondary);">calendar_today</span>
+                                Ngày đến
+                            </label>
+                            <input type="date" id="hero-check-in" class="ls-hero__search-input">
+                        </div>
+                        <div class="ls-hero__search-field">
+                            <label class="ls-hero__search-label">
+                                <span class="ls-icon ls-icon--sm" style="font-size:12px;color:var(--color-secondary);">calendar_today</span>
+                                Ngày đi
+                            </label>
+                            <input type="date" id="hero-check-out" class="ls-hero__search-input">
+                        </div>
+                        <div class="ls-hero__search-field">
+                            <label class="ls-hero__search-label">
+                                <span class="ls-icon ls-icon--sm" style="font-size:12px;color:var(--color-secondary);">group</span>
+                                Số khách
+                            </label>
+                            <select id="hero-guests" class="ls-hero__search-input">
+                                <option value="1 Người lớn">1 Người lớn</option>
+                                <option value="2 Người lớn" selected>2 Người lớn</option>
+                                <option value="2 Người lớn, 1 Trẻ em">2 Người lớn, 1 Trẻ em</option>
+                                <option value="4 Người lớn, 2 Trẻ em">4 Người lớn, 2 Trẻ em</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <a href="/room-types" class="ls-btn ls-btn--secondary ls-btn--rounded-full" style="white-space:nowrap;">
+                        Đặt ngay
+                    </a>
+                </div>
             </div>
         </section>
 
-        <div class="grid-3" style="margin-bottom: 40px;">
-            <div class="feature-card">
-                <div class="icon">&#128719;</div>
-                <h3>Wide Selection</h3>
-                <p>Choose from various room types to suit your needs and budget.</p>
+        <!-- Why Choose Us -->
+        <section class="ls-features">
+            <div class="ls-container">
+                <div class="ls-features__grid">
+                    <div class="ls-feature-card">
+                        <div class="ls-feature-card__icon">
+                            <span class="ls-icon">verified</span>
+                        </div>
+                        <div>
+                            <h3 class="ls-feature-card__title">Chất lượng 5 sao</h3>
+                            <p class="ls-feature-card__text">Dịch vụ tận tâm, không gian đẳng cấp được thiết kế bởi những kiến trúc sư hàng đầu.</p>
+                        </div>
+                    </div>
+                    <div class="ls-feature-card">
+                        <div class="ls-feature-card__icon">
+                            <span class="ls-icon">payments</span>
+                        </div>
+                        <div>
+                            <h3 class="ls-feature-card__title">Giá tốt nhất</h3>
+                            <p class="ls-feature-card__text">Cam kết mức giá cạnh tranh nhất khi đặt phòng trực tiếp qua hệ thống LuxeStay.</p>
+                        </div>
+                    </div>
+                    <div class="ls-feature-card">
+                        <div class="ls-feature-card__icon">
+                            <span class="ls-icon">support_agent</span>
+                        </div>
+                        <div>
+                            <h3 class="ls-feature-card__title">Hỗ trợ 24/7</h3>
+                            <p class="ls-feature-card__text">Đội ngũ lễ tân chuyên nghiệp luôn sẵn sàng phục vụ bất cứ thời điểm nào.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="feature-card">
-                <div class="icon">&#128197;</div>
-                <h3>Easy Booking</h3>
-                <p>Simple and fast booking process with instant confirmation.</p>
+        </section>
+
+        <!-- Rooms Section -->
+        <section class="ls-room-section" id="phong-nghi">
+            <div class="ls-container">
+                <div class="ls-room-section__header">
+                    <div>
+                        <span class="ls-room-section__label">Danh mục phòng nghỉ</span>
+                        <h2 class="ls-room-section__title">Chọn Không Gian Của Bạn</h2>
+                    </div>
+                    <a href="/room-types" class="flex items-center gap-2 text-secondary font-bold text-sm">
+                        Xem tất cả <span class="ls-icon ls-icon--sm">arrow_forward</span>
+                    </a>
+                </div>
+
+                <div id="home-room-types" class="grid grid-cols-12 gap-6">
+                    <div class="ls-loading" style="grid-column: 1/-1;">
+                        <div class="ls-spinner"></div>
+                        <p>Đang tải phòng...</p>
+                    </div>
+                </div>
             </div>
-            <div class="feature-card">
-                <div class="icon">&#128179;</div>
-                <h3>Best Prices</h3>
-                <p>Competitive prices with transparent pricing and no hidden fees.</p>
+        </section>
+
+        <!-- Services Section -->
+        <section class="ls-services" id="dich-vu">
+            <div class="ls-container">
+                <div class="ls-services__grid">
+                    <div class="relative">
+                        <div class="ls-services__image" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80');"></div>
+                    </div>
+                    
+                    <div>
+                        <span class="ls-services__label">Tiện ích đẳng cấp</span>
+                        <h2 class="ls-services__title">Nhiều Hơn Cả Một Chỗ Nghỉ</h2>
+                        <p class="ls-services__text">LuxeStay cung cấp chuỗi tiện ích bổ sung đa dạng đạt chuẩn quốc tế, giúp kỳ nghỉ dưỡng của quý vị thật trọn vẹn và thư thái.</p>
+                        
+                        <div class="ls-services__list">
+                            <div class="ls-service-item">
+                                <span class="ls-icon text-secondary">pool</span>
+                                <span class="ls-service-item__label">Hồ bơi vô cực</span>
+                            </div>
+                            <div class="ls-service-item">
+                                <span class="ls-icon text-secondary">spa</span>
+                                <span class="ls-service-item__label">Spa & Trị liệu</span>
+                            </div>
+                            <div class="ls-service-item">
+                                <span class="ls-icon text-secondary">restaurant</span>
+                                <span class="ls-service-item__label">Ẩm thực Á-Âu</span>
+                            </div>
+                            <div class="ls-service-item">
+                                <span class="ls-icon text-secondary">fitness_center</span>
+                                <span class="ls-service-item__label">Phòng Gym 24/7</span>
+                            </div>
+                        </div>
+                        
+                        <a href="/room-types/availability" class="ls-btn ls-btn--outline">Khám phá dịch vụ</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guest CTA -->
+        <div id="guest-cta" style="text-align:center;padding:60px 24px;background:white;">
+            <div class="ls-container">
+                <h2 style="font-family:var(--font-display);font-size:1.75rem;font-weight:800;color:var(--slate-900);margin-bottom:16px;">
+                    Sẵn sàng đặt phòng?
+                </h2>
+                <p style="color:var(--slate-500);margin-bottom:24px;font-size:1rem;">
+                    Đăng nhập hoặc tạo tài khoản để bắt đầu đặt phòng ngay hôm nay.
+                </p>
+                <div class="flex items-center justify-center gap-4">
+                    <a href="/login" class="ls-btn ls-btn--primary">Đăng nhập</a>
+                    <a href="/register" class="ls-btn ls-btn--outline">Tạo tài khoản</a>
+                </div>
             </div>
         </div>
 
-        <div id="guest-cta" style="text-align: center; margin: 40px 0;">
-            <h2 style="margin-bottom: 16px;">Ready to Book?</h2>
-            <p style="color: var(--gray-600); margin-bottom: 24px;">Sign in to your account or create a new one to start booking.</p>
-            <div style="display: flex; gap: 16px; justify-content: center;">
-                <a href="/login" class="btn btn-primary">Sign In</a>
-                <a href="/register" class="btn btn-outline">Create Account</a>
+        <!-- Footer -->
+        <footer class="ls-footer">
+            <div class="ls-footer__main">
+                <div>
+                    <span class="ls-footer__brand">LuxeStay</span>
+                    <p class="ls-footer__text">Điểm đến lý tưởng cho những chuyến công tác và nghỉ dưỡng sang trọng. Trải nghiệm dịch vụ concierge cá nhân hóa chu đáo phục vụ 24/7.</p>
+                    <div class="ls-footer__social">
+                        <button class="ls-footer__social-btn"><span class="ls-icon ls-icon--sm">public</span></button>
+                        <button class="ls-footer__social-btn"><span class="ls-icon ls-icon--sm">play_circle</span></button>
+                        <button class="ls-footer__social-btn"><span class="ls-icon ls-icon--sm">share</span></button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="ls-footer__heading">Liên kết nhanh</h4>
+                    <ul class="ls-footer__links">
+                        <li><a href="/" class="ls-footer__link">Về chúng tôi</a></li>
+                        <li><a href="/" class="ls-footer__link">Chính sách bảo mật</a></li>
+                        <li><a href="/" class="ls-footer__link">Điều khoản sử dụng</a></li>
+                        <li><a href="/" class="ls-footer__link">Liên hệ</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="ls-footer__heading">Liên hệ</h4>
+                    <ul class="ls-footer__links">
+                        <li>
+                            <div class="ls-footer__contact-item">
+                                <span class="ls-icon ls-icon--sm text-secondary">location_on</span>
+                                <span>123 Đường Luxury, Quận 1, TP.HCM</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="ls-footer__contact-item">
+                                <span class="ls-icon ls-icon--sm text-secondary">call</span>
+                                <span>+84 123 456 789</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="ls-footer__contact-item">
+                                <span class="ls-icon ls-icon--sm text-secondary">mail</span>
+                                <span>contact@luxestay.vn</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
+            
+            <div class="ls-footer__bottom">
+                <div class="ls-footer__bottom-inner">
+                    <p>© 2026 LuxeStay Hospitality Group. Bảo lưu mọi quyền.</p>
+                    <div class="ls-footer__lang">
+                        <button class="ls-footer__lang-btn">VN</button>
+                        <button class="ls-footer__lang-btn">EN</button>
+                        <button class="ls-footer__lang-btn">JP</button>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
         <script>
             document.addEventListener('DOMContentLoaded', () => {
+                // Hide CTA if logged in
                 if (TokenManager.isAuthenticated()) {
                     document.getElementById('guest-cta').style.display = 'none';
                 }
+                
+                // Set default dates
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                const checkIn = document.getElementById('hero-check-in');
+                const checkOut = document.getElementById('hero-check-out');
+                if (checkIn) checkIn.value = today.toISOString().split('T')[0];
+                if (checkOut) checkOut.value = tomorrow.toISOString().split('T')[0];
+                
+                // Load room types for home page
+                loadHomeRoomTypes();
             });
+            
+            async function loadHomeRoomTypes() {
+                const container = document.getElementById('home-room-types');
+                
+                try {
+                    const result = await RoomTypeAPI.getAll(0, 10);
+                    const roomTypes = result.content || [];
+                    
+                    if (roomTypes.length === 0) {
+                        container.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chưa có phòng</div><p class="ls-empty__text">Hiện chưa có loại phòng nào. Vui lòng quay lại sau.</p></div>';
+                        return;
+                    }
+                    
+                    const isAuth = TokenManager.isAuthenticated();
+                    
+                    let html = '';
+                    roomTypes.forEach((rt, index) => {
+                        const isFirst = index === 0;
+                        const roomImg = `https://images.unsplash.com/photo-${index % 2 === 0 ? '1590490360182-c33d57733427' : '1611892472016-f2e38b7de8e9'}?w=800&q=80`;
+                        
+                        if (isFirst) {
+                            html += `                            <div class="ls-col-span-8 ls-room-card">
+                                <div class="ls-room-card__image" style="background-image: url('${roomImg}');"></div>
+                                <div class="ls-room-card__gradient"></div>
+                                <div class="ls-room-card__content">
+                                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                                        <div class="text-left">
+                                            <h3 class="ls-room-card__name">${escapeHtml(rt.name)}</h3>
+                                            <div class="ls-room-card__meta">
+                                                <span class="flex items-center gap-1">
+                                                    <span class="ls-icon ls-icon--sm" style="color:var(--color-secondary-container);font-size:16px;">people</span>
+                                                    ${rt.capacity} khách
+                                                </span>
+                                            </div>
+                                            ${rt.description ? '<span class="ls-room-card__amenity-tag">' + escapeHtml(rt.description.substring(0, 60)) + '...</span>' : ''}
+                                        </div>
+                                        <div class="text-left sm:text-right w-full sm:w-auto">
+                                            <span class="ls-room-card__price-label">Bắt đầu từ</span>
+                                            <p class="ls-room-card__price">${formatCurrency(rt.pricePerNight)}</p>
+                                            ${isAuth 
+                                                ? `<button onclick="bookNow(${rt.id})" class="ls-btn ls-btn--secondary ls-btn--sm">Đặt ngay</button>`
+                                                : `<a href="/login" class="ls-btn ls-btn--secondary ls-btn--sm">Đặt ngay</a>`
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                        } else {
+                            html += `<div class="ls-col-span-4 ls-room-card">
+                                <div class="ls-room-card__image" style="background-image: url('${roomImg}');"></div>
+                                <div class="ls-room-card__gradient"></div>
+                                <div class="ls-room-card__content">
+                                    <h3 class="ls-room-card__name" style="font-size:1.25rem;">${escapeHtml(rt.name)}</h3>
+                                    <p class="ls-room-card__price">${formatCurrency(rt.pricePerNight)} <span style="font-size:0.75rem;opacity:0.6;font-family:var(--font-sans);font-weight:400;">/ đêm</span></p>
+                                    ${isAuth 
+                                        ? `<button onclick="bookNow(${rt.id})" class="ls-btn ls-btn--secondary ls-btn--sm w-full text-center">Chi tiết & Đặt</button>`
+                                        : `<a href="/login" class="ls-btn ls-btn--secondary ls-btn--sm w-full text-center">Đặt ngay</a>`
+                                    }
+                                </div>
+                            </div>`;
+                        }
+                    });
+                    
+                    // Stats card at the end - use real counts
+                    const totalRoomTypesCount = result.totalElements || roomTypes.length;
+                    html += `<div class="ls-col-span-8 ls-stats-card">
+                        <div class="ls-stats-grid">
+                            <div>
+                                <p class="ls-stat-item__value">${totalRoomTypesCount}</p>
+                                <p class="ls-stat-item__label">Loại phòng</p>
+                            </div>
+                            <div class="ls-stat-divider"></div>
+                            <div>
+                                <p class="ls-stat-item__value">${roomTypes.reduce((sum, rt) => sum + (rt.capacity || 0), 0)}</p>
+                                <p class="ls-stat-item__label">Tổng sức chứa</p>
+                            </div>
+                            <div class="ls-stat-divider"></div>
+                            <div>
+                                <p class="ls-stat-item__value">${formatCurrency(Math.min(...roomTypes.map(rt => rt.pricePerNight)))}</p>
+                                <p class="ls-stat-item__label">Giá thấp nhất / đêm</p>
+                            </div>
+                        </div>
+                    </div>`;
+                    
+                    container.innerHTML = html;
+                } catch (error) {
+                    container.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải phòng</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                }
+            }
+            
+            async function bookNow(roomTypeId) {
+                const checkIn = document.getElementById('hero-check-in')?.value || new Date().toISOString().split('T')[0];
+                const checkOut = document.getElementById('hero-check-out')?.value || new Date(Date.now() + 86400000).toISOString().split('T')[0];
+                
+                try {
+                    const result = await BookingAPI.make({
+                        roomTypeId: roomTypeId,
+                        checkIn: checkIn,
+                        checkOut: checkOut
+                    });
+                    ToastManager.show('Đặt phòng thành công! Mã đơn: #' + result.id, 'success');
+                    setTimeout(() => { window.location.href = '/bookings/my'; }, 1500);
+                } catch (error) {
+                    ToastManager.show(error.message || 'Đặt phòng thất bại.', 'error');
+                }
+            }
         </script>
     </th:block>
 </body>

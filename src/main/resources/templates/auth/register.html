@@ -1,88 +1,170 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <div class="auth-page">
-            <div class="auth-card">
-                <div class="auth-header">
-                    <h1>Hotel Booking</h1>
-                    <p id="auth-subtitle">Create a new account</p>
+        <div class="ls-auth-page">
+            <div class="ls-auth-bg-blob">
+                <div class="ls-auth-bg-blob-1"></div>
+                <div class="ls-auth-bg-blob-2"></div>
+            </div>
+            
+            <button onclick="window.location.href='/'" class="absolute" style="top:24px;left:24px;color:var(--slate-500);background:none;border:none;display:flex;align-items:center;gap:8px;font-size:0.75rem;font-weight:700;cursor:pointer;z-index:10;">
+                <span class="ls-icon ls-icon--sm">arrow_back</span> Quay lại Trang chủ
+            </button>
+            
+            <div class="ls-auth-card">
+                <div class="ls-auth-card__brand">
+                    <div class="ls-auth-card__brand-name">LuxeStay</div>
+                    <p class="ls-auth-card__brand-sub" id="auth-subtitle">Tạo tài khoản mới</p>
                 </div>
-
-                <!-- Error / Success messages -->
-                <div id="register-error" class="alert alert-danger" style="display: none;"></div>
-                <div id="register-success" class="alert alert-success" style="display: none;"></div>
-
-                <!-- ===== Step 1: Registration Form ===== -->
+                
+                <!-- Progress Steps -->
+                <div class="ls-auth-card__progress" id="progress-steps">
+                    <div class="ls-auth-card__progress-step ls-auth-card__progress-step--active" id="step1-bar"></div>
+                    <div class="ls-auth-card__progress-step ls-auth-card__progress-step--inactive" id="step2-bar"></div>
+                </div>
+                
+                <div id="register-error" class="ls-alert ls-alert--danger" style="display:none;"></div>
+                <div id="register-success" class="ls-alert ls-alert--success" style="display:none;"></div>
+                
+                <!-- Step 1: Registration -->
                 <div id="register-step">
                     <form id="register-form" onsubmit="return handleRegister(event)">
-                        <div class="form-group">
-                            <label class="form-label" for="reg-username">Username</label>
-                            <input type="text" id="reg-username" class="form-control" placeholder="Choose a username (3-20 characters)" required minlength="3" maxlength="20">
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="reg-username">Tên đăng ký</label>
+                            <input type="text" id="reg-username" class="ls-form-input" placeholder="Chọn tên đăng nhập (3-20 ký tự)" required minlength="3" maxlength="20">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="reg-password">Password</label>
-                            <input type="password" id="reg-password" class="form-control" placeholder="Choose a password (8+ characters)" required minlength="8">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="reg-password">Mật khẩu</label>
+                                <input type="password" id="reg-password" class="ls-form-input" placeholder="••••••••" required minlength="8">
+                            </div>
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="reg-confirm">Xác nhận</label>
+                                <input type="password" id="reg-confirm" class="ls-form-input" placeholder="••••••••" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="reg-confirm">Confirm Password</label>
-                            <input type="password" id="reg-confirm" class="form-control" placeholder="Confirm your password" required>
+                        
+                        <!-- Password Strength -->
+                        <div class="ls-password-strength" id="pw-strength">
+                            <div class="ls-password-strength__bar" id="pw-bar-1" style="background:var(--slate-100);"></div>
+                            <div class="ls-password-strength__bar" id="pw-bar-2" style="background:var(--slate-100);"></div>
+                            <div class="ls-password-strength__bar" id="pw-bar-3" style="background:var(--slate-100);"></div>
+                            <div class="ls-password-strength__bar" id="pw-bar-4" style="background:var(--slate-100);"></div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="reg-phone">Phone Number</label>
-                            <input type="tel" id="reg-phone" class="form-control" placeholder="e.g. 0912345678" required pattern="0[0-9]{9}">
-                            <div class="form-error" id="phone-error" style="display: none;">Please enter a valid phone number (10 digits starting with 0)</div>
+                        
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="reg-phone">Số điện thoại</label>
+                            <div class="ls-form-phone-wrapper">
+                                <span class="ls-form-phone-prefix">+84</span>
+                                <input type="tel" id="reg-phone" class="ls-form-input ls-form-input--phone" placeholder="9xx xxx xxx" required pattern="[0-9]{9,10}">
+                            </div>
+                            <div class="form-error" id="phone-error" style="display:none;font-size:0.75rem;color:var(--danger);margin-top:4px;">Vui lòng nhập số điện thoại hợp lệ</div>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+                        
+                        <button type="submit" class="ls-btn" style="width:100%;background:var(--color-primary-container);color:white;padding:12px;border-radius:var(--radius-lg);font-weight:700;margin-top:8px;border:none;cursor:pointer;">
+                            Đăng ký
+                        </button>
                     </form>
-                    <div class="auth-footer">
-                        Already have an account? <a href="/login">Sign in</a>
+                    
+                    <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--slate-100);font-size:0.875rem;color:var(--slate-500);">
+                        Đã có tài khoản? <a href="/login" style="font-weight:700;">Đăng nhập</a>
                     </div>
                 </div>
-
-                <!-- ===== Step 2: OTP Verification ===== -->
-                <div id="otp-step" style="display: none;">
-                    <div style="text-align: center; margin-bottom: 24px;">
-                        <div style="font-size: 3rem; margin-bottom: 12px;">&#128222;</div>
-                        <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--dark);">Verify Your Phone</h3>
-                        <p style="color: var(--gray-500); font-size: 0.9rem; margin-top: 8px;">
-                            We've sent a 6-digit OTP to your registered phone number.
-                        </p>
+                
+                <!-- Step 2: OTP -->
+                <div id="otp-step" style="display:none;">
+                    <div style="text-align:center;margin-bottom:24px;">
+                        <h3 style="font-family:var(--font-display);font-weight:600;font-size:1.125rem;color:var(--slate-800);margin-bottom:8px;">Xác thực OTP</h3>
+                        <p style="font-size:0.8125rem;color:var(--slate-400);">Chúng tôi đã gửi mã 6 số đến điện thoại của bạn.</p>
                     </div>
-
-                    <div id="otp-error" class="alert alert-danger" style="display: none;"></div>
-
+                    
+                    <div id="otp-error" class="ls-alert ls-alert--danger" style="display:none;"></div>
+                    
                     <form id="otp-form" onsubmit="return handleVerifyOtp(event)">
-                        <div class="form-group">
-                            <label class="form-label" for="otp-code">Enter OTP Code</label>
-                            <input type="text" id="otp-code" class="form-control" placeholder="000000" 
-                                   required maxlength="6" minlength="6" 
-                                   pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code"
-                                   style="text-align: center; font-size: 1.5rem; letter-spacing: 8px; font-weight: 700;">
+                        <div class="ls-otp-grid" id="otp-inputs">
+                            <input type="text" class="ls-otp-input" id="otp-0" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                            <input type="text" class="ls-otp-input" id="otp-1" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                            <input type="text" class="ls-otp-input" id="otp-2" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                            <input type="text" class="ls-otp-input" id="otp-3" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                            <input type="text" class="ls-otp-input" id="otp-4" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                            <input type="text" class="ls-otp-input" id="otp-5" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
                         </div>
-                        <button type="submit" class="btn btn-success" style="width: 100%;" id="btn-verify-otp">
-                            Verify & Activate
+                        
+                        <button type="submit" class="ls-btn ls-btn--secondary" style="width:100%;margin-top:16px;" id="btn-verify-otp">
+                            Xác nhận đăng ký
                         </button>
                     </form>
-
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button type="button" class="btn btn-outline btn-sm" id="btn-resend-otp" onclick="handleResendOtp()" style="width: 100%;">
-                            Resend OTP
+                    
+                    <div style="text-align:center;margin-top:16px;">
+                        <button type="button" class="ls-btn ls-btn--outline ls-btn--sm" id="btn-resend-otp" onclick="handleResendOtp()" style="width:100%;">
+                            Gửi lại mã OTP
                         </button>
-                        <div id="resend-countdown" style="display: none; font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
-                            Resend available in <span id="countdown-seconds">60</span>s
+                        <div id="resend-countdown" style="display:none;font-size:0.75rem;color:var(--slate-400);margin-top:8px;">
+                            Gửi lại mã sau <span id="countdown-seconds" style="font-weight:700;color:var(--slate-700);">60</span> giây
                         </div>
                     </div>
-
-                    <div class="auth-footer">
-                        <a href="/register" style="color: var(--gray-600);">Use a different account</a>
+                    
+                    <div style="text-align:center;margin-top:16px;">
+                        <button onclick="goToStep1()" style="background:none;border:none;color:var(--slate-400);cursor:pointer;display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.75rem;width:100%;">
+                            <span class="ls-icon ls-icon--sm">arrow_back</span> Quay lại bước 1
+                        </button>
                     </div>
                 </div>
+            </div>
+            
+            <div class="ls-auth-card__decorative">
+                <div style="width:100%;height:100%;background-size:cover;background-position:center;background-image:url('https://images.unsplash.com/photo-1611892472016-f2e38b7de8e9?w=400&q=80');"></div>
             </div>
         </div>
 
         <script>
+            // OTP auto-focus
+            document.addEventListener('DOMContentLoaded', () => {
+                const otpInputs = document.querySelectorAll('.ls-otp-input');
+                otpInputs.forEach((input, index) => {
+                    input.addEventListener('input', (e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        e.target.value = val;
+                        if (val && index < 5) {
+                            otpInputs[index + 1].focus();
+                        }
+                    });
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                            otpInputs[index - 1].focus();
+                        }
+                    });
+                });
+                
+                // Password strength
+                const pwInput = document.getElementById('reg-password');
+                if (pwInput) {
+                    pwInput.addEventListener('input', () => {
+                        const pw = pwInput.value;
+                        const bars = ['pw-bar-1', 'pw-bar-2', 'pw-bar-3', 'pw-bar-4'];
+                        let score = 0;
+                        if (pw.length > 0) score = 1;
+                        if (pw.length > 4) score = 2;
+                        if (pw.length > 7) score = 3;
+                        if (pw.length > 10 && /[A-Z]/.test(pw) && /[0-9]/.test(pw)) score = 4;
+                        
+                        const colors = ['', 'var(--danger)', '#f59e0b', '#facc15', 'var(--success)'];
+                        bars.forEach((bar, i) => {
+                            const el = document.getElementById(bar);
+                            if (i < score) {
+                                el.style.background = colors[score];
+                            } else {
+                                el.style.background = 'var(--slate-100)';
+                            }
+                        });
+                    });
+                }
+            });
+            
+            let countdownTimer = null;
+            
             async function handleRegister(event) {
                 event.preventDefault();
                 const errorDiv = document.getElementById('register-error');
@@ -93,18 +175,16 @@
                 const username = document.getElementById('reg-username').value.trim();
                 const password = document.getElementById('reg-password').value;
                 const confirm = document.getElementById('reg-confirm').value;
-                const phone = document.getElementById('reg-phone').value.trim();
+                const phone = '0' + document.getElementById('reg-phone').value.trim();
                 const phoneError = document.getElementById('phone-error');
-
-                // Validate passwords match
+                
                 if (password !== confirm) {
-                    errorDiv.textContent = 'Passwords do not match!';
+                    errorDiv.textContent = 'Mật khẩu không khớp!';
                     errorDiv.style.display = 'block';
                     return false;
                 }
-
-                // Validate phone number
-                if (!/^0[0-9]{9}$/.test(phone)) {
+                
+                if (!/^0[0-9]{9}$/.test('0' + document.getElementById('reg-phone').value.trim())) {
                     phoneError.style.display = 'block';
                     return false;
                 }
@@ -112,109 +192,131 @@
                 
                 try {
                     const data = await AuthAPI.register(username, password, phone);
-
-                    // Show success message briefly
-                    successDiv.textContent = 'Account created! Check your phone for OTP.';
+                    
+                    successDiv.textContent = 'Tài khoản đã được tạo! Kiểm tra điện thoại để nhận mã OTP.';
                     successDiv.style.display = 'block';
-
+                    
                     // Switch to OTP step
                     document.getElementById('register-step').style.display = 'none';
                     document.getElementById('otp-step').style.display = 'block';
-                    document.getElementById('auth-subtitle').textContent = 'Phone verification required';
-
-                    // Focus on OTP input
-                    document.getElementById('otp-code').focus();
+                    document.getElementById('auth-subtitle').textContent = 'Xác thực số điện thoại';
+                    
+                    // Update progress
+                    document.getElementById('step1-bar').className = 'ls-auth-card__progress-step ls-auth-card__progress-step--active';
+                    document.getElementById('step2-bar').className = 'ls-auth-card__progress-step ls-auth-card__progress-step--active';
+                    
+                    // Start countdown
+                    startCountdown();
+                    
+                    // Focus first OTP
+                    document.getElementById('otp-0').focus();
                 } catch (error) {
-                    errorDiv.textContent = error.message || 'Registration failed. Please try again.';
+                    errorDiv.textContent = error.message || 'Đăng ký thất bại. Vui lòng thử lại.';
                     errorDiv.style.display = 'block';
                 }
                 return false;
             }
-
+            
+            function goToStep1() {
+                document.getElementById('register-step').style.display = 'block';
+                document.getElementById('otp-step').style.display = 'none';
+                document.getElementById('auth-subtitle').textContent = 'Tạo tài khoản mới';
+                document.getElementById('step2-bar').className = 'ls-auth-card__progress-step ls-auth-card__progress-step--inactive';
+                if (countdownTimer) clearInterval(countdownTimer);
+            }
+            
+            function startCountdown() {
+                const btn = document.getElementById('btn-resend-otp');
+                const countdown = document.getElementById('resend-countdown');
+                let seconds = 60;
+                
+                countdown.style.display = 'block';
+                document.getElementById('countdown-seconds').textContent = seconds;
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                
+                if (countdownTimer) clearInterval(countdownTimer);
+                countdownTimer = setInterval(() => {
+                    seconds--;
+                    document.getElementById('countdown-seconds').textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(countdownTimer);
+                        countdown.style.display = 'none';
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }
+                }, 1000);
+            }
+            
             async function handleVerifyOtp(event) {
                 event.preventDefault();
                 const errorDiv = document.getElementById('otp-error');
                 const btn = document.getElementById('btn-verify-otp');
                 errorDiv.style.display = 'none';
-
-                const otpCode = document.getElementById('otp-code').value.trim();
-
-                if (otpCode.length !== 6 || !/^[0-9]{6}$/.test(otpCode)) {
-                    errorDiv.textContent = 'Please enter a valid 6-digit OTP code.';
+                
+                let otpCode = '';
+                for (let i = 0; i < 6; i++) {
+                    otpCode += document.getElementById('otp-' + i).value || '';
+                }
+                
+                if (otpCode.length !== 6) {
+                    errorDiv.textContent = 'Vui lòng nhập đầy đủ mã xác thực OTP!';
                     errorDiv.style.display = 'block';
                     return false;
                 }
-
+                
                 try {
                     btn.disabled = true;
-                    btn.innerHTML = '<span class="loading-spinner-small"></span> Verifying...';
-
+                    btn.innerHTML = '<span class="ls-spinner ls-spinner--sm" style="display:inline-block;margin:0 auto;"></span> Đang xác thực...';
+                    
                     const data = await AuthAPI.activateByOtp(otpCode);
-
-                    // Decode JWT to get user info
-                    const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
-                    const auth = payload.authorities && payload.authorities[0];
-                    const role = payload.role || (typeof auth === 'string' ? auth.replace('ROLE_', '') : 'CUSTOMER');
-
+                    
+                    // Decode JWT
+                    const payload = decodeJwt(data.accessToken);
+                    const role = extractRoleFromPayload(payload);
+                    
                     TokenManager.saveUser({
-                        username: payload.sub,
+                        username: payload?.sub || 'User',
                         role: role
                     });
-
-                    showToast('Phone verified successfully!', 'success');
-
-                    // Redirect based on role
+                    
+                    if (typeof ToastManager !== 'undefined') {
+                        ToastManager.show('Xác thực số điện thoại thành công!', 'success');
+                    } else {
+                        showToast('Xác thực số điện thoại thành công!', 'success');
+                    }
+                    
                     if (role === 'MANAGER') {
                         window.location.href = '/admin/dashboard';
                     } else {
                         window.location.href = '/';
                     }
                 } catch (error) {
-                    errorDiv.textContent = error.data?.message || error.message || 'Invalid OTP code. Please try again.';
+                    errorDiv.textContent = error.data?.message || error.message || 'Mã OTP không hợp lệ.';
                     errorDiv.style.display = 'block';
                     btn.disabled = false;
-                    btn.innerHTML = 'Verify & Activate';
+                    btn.innerHTML = 'Xác nhận đăng ký';
                 }
                 return false;
             }
-
+            
             async function handleResendOtp() {
-                const btn = document.getElementById('btn-resend-otp');
-                const countdown = document.getElementById('resend-countdown');
-
                 try {
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="loading-spinner-small"></span> Sending...';
-
                     await AuthAPI.sendOtpForActivation();
-
-                    showToast('OTP resent successfully!', 'success');
-
-                    // Start countdown
-                    startResendCountdown(btn, countdown);
-                } catch (error) {
-                    const msg = error.data?.message || error.message || 'Failed to resend OTP.';
-                    showToast(msg, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Resend OTP';
-                }
-            }
-
-            function startResendCountdown(btn, countdownEl) {
-                let seconds = 60;
-                countdownEl.style.display = 'block';
-                document.getElementById('countdown-seconds').textContent = seconds;
-                btn.innerHTML = 'Resend OTP';
-
-                const interval = setInterval(() => {
-                    seconds--;
-                    document.getElementById('countdown-seconds').textContent = seconds;
-                    if (seconds <= 0) {
-                        clearInterval(interval);
-                        countdownEl.style.display = 'none';
-                        btn.disabled = false;
+                    if (typeof ToastManager !== 'undefined') {
+                        ToastManager.show('Mã OTP đã được gửi lại!', 'success');
+                    } else {
+                        showToast('Mã OTP đã được gửi lại!', 'success');
                     }
-                }, 1000);
+                    startCountdown();
+                } catch (error) {
+                    const msg = error.data?.message || error.message || 'Gửi lại OTP thất bại.';
+                    if (typeof ToastManager !== 'undefined') {
+                        ToastManager.show(msg, 'error');
+                    } else {
+                        showToast(msg, 'error');
+                    }
+                }
             }
         </script>
     </th:block>

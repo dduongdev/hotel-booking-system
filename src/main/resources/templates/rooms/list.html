@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <div class="page-header">
-            <h1>All Rooms</h1>
-            <p>Browse all available rooms in our hotel.</p>
-        </div>
-        
-        <div id="rooms-container">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Loading rooms...</p>
+        <div class="ls-container">
+            <div class="ls-page-header">
+                <h1>Tất cả Phòng</h1>
+                <p>Danh sách tất cả phòng trong khách sạn của chúng tôi.</p>
+            </div>
+            
+            <div class="ls-card">
+                <div class="ls-card__body">
+                    <div id="rooms-container">
+                        <div class="ls-loading">
+                            <div class="ls-spinner"></div>
+                            <p>Đang tải danh sách phòng...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </th:block>

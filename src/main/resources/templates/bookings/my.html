@@ -1,17 +1,55 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <div class="page-header">
-            <h1>My Bookings</h1>
-            <p>View and manage your hotel bookings.</p>
-        </div>
-        
-        <div id="my-bookings-container">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Loading your bookings...</p>
+        <div class="ls-container">
+            <div class="ls-page-header" style="margin-bottom:32px;">
+                <h1>Đặt chỗ của tôi</h1>
+                <p>Xem và quản lý các lượt đặt phòng của bạn tại LuxeStay.</p>
+            </div>
+            
+            <!-- Stats -->
+            <div class="ls-booking-stats" id="booking-stats">
+                <div class="ls-booking-stat">
+                    <div>
+                        <span class="ls-booking-stat__label">Tổng đặt chỗ</span>
+                        <div class="ls-booking-stat__value" id="total-bookings">0</div>
+                    </div>
+                    <span class="ls-icon" style="color:var(--color-secondary);font-size:32px;">book_online</span>
+                </div>
+                <div class="ls-booking-stat">
+                    <div>
+                        <span class="ls-booking-stat__label">Sắp tới</span>
+                        <div class="ls-booking-stat__value ls-booking-stat__value--green" id="upcoming-count">0</div>
+                    </div>
+                    <span class="ls-icon" style="color:var(--success);font-size:32px;">event_available</span>
+                </div>
+                <div class="ls-booking-stat">
+                    <div>
+                        <span class="ls-booking-stat__label">Hạng thành viên</span>
+                        <div class="ls-booking-stat__value" id="member-tier">Gold</div>
+                    </div>
+                    <span class="ls-icon" style="color:var(--color-secondary);font-size:32px;">workspace_premium</span>
+                </div>
+            </div>
+            
+            <!-- Bookings Table -->
+            <div class="ls-card">
+                <div class="ls-card__header">
+                    <h3>Danh sách đặt phòng</h3>
+                    <div style="position:relative;">
+                        <span class="ls-icon ls-icon--sm" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--slate-400);">search</span>
+                        <input type="text" id="search-bookings" class="ls-form-input" placeholder="Tìm kiếm mã đặt chỗ..." style="padding-left:36px;padding-top:8px;padding-bottom:8px;min-width:200px;" oninput="filterMyBookings(this.value)">
+                    </div>
+                </div>
+                
+                <div id="my-bookings-container">
+                    <div class="ls-loading">
+                        <div class="ls-spinner"></div>
+                        <p>Đang tải dữ liệu đặt phòng...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </th:block>

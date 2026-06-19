@@ -1,62 +1,108 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1>Manage Room Types</h1>
-                <p>Configure room types, pricing, and availability.</p>
-            </div>
-            <button onclick="showAddRoomTypeModal()" class="btn btn-primary">+ Add Room Type</button>
+        <div class="ls-admin-layout ls-admin-wrapper">
+            <!-- Sidebar -->
+            <aside class="ls-sidebar">
+                <div class="ls-sidebar__header">
+                    <div class="ls-sidebar__logo">
+                        <span class="ls-icon" style="font-variation-settings:'FILL' 1;">hotel_class</span>
+                    </div>
+                    <div>
+                        <div class="ls-sidebar__title">LuxeStay Admin</div>
+                        <div class="ls-sidebar__subtitle">Hệ thống quản lý chuỗi</div>
+                    </div>
+                </div>
+                
+                <nav class="ls-sidebar__nav">
+                    <a href="/admin/dashboard" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">dashboard</span> Bảng điều khiển
+                    </a>
+                    <a href="/admin/bookings" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">calendar_today</span> Lịch đặt phòng
+                    </a>
+                    <a href="/admin/rooms" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">bed</span> Quản lý phòng
+                    </a>
+                    <a href="/admin/room-types" class="ls-sidebar__nav-item ls-sidebar__nav-item--active">
+                        <span class="ls-icon ls-icon--sm">category</span> Loại phòng
+                    </a>
+                </nav>
+                
+                <div class="ls-sidebar__footer">
+                    <button onclick="showAddRoomTypeModal()" class="ls-sidebar__add-btn">
+                        <span class="ls-icon ls-icon--sm">add_circle</span>
+                        Thêm loại phòng mới
+                    </button>
+                    <div style="margin-top:12px;">
+                        <a href="#" onclick="event.preventDefault(); logoutUser();" style="width:100%;padding:12px;display:flex;align-items:center;gap:12px;border-radius:var(--radius-lg);font-size:0.75rem;font-weight:700;color:var(--danger);text-decoration:none;transition:var(--transition);" onmouseover="this.style.background='var(--danger-bg)'" onmouseout="this.style.background='transparent'">
+                            <span class="ls-icon ls-icon--sm">logout</span> Đăng xuất Admin
+                        </a>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <main class="ls-main-content">
+                <div class="ls-page-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h1>Quản lý Loại Phòng</h1>
+                        <p>Cấu hình loại phòng, giá cả và sức chứa.</p>
+                    </div>
+                    <button onclick="showAddRoomTypeModal()" class="ls-btn ls-btn--primary ls-btn--sm">+ Thêm loại phòng</button>
+                </div>
+                
+                <div id="admin-room-types-container">
+                    <div class="ls-loading">
+                        <div class="ls-spinner"></div>
+                        <p>Đang tải danh sách loại phòng...</p>
+                    </div>
+                </div>
+            </main>
         </div>
-
-        <div id="admin-room-types-container">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Loading room types...</p>
-            </div>
-        </div>
-
+        
         <!-- Add/Edit Room Type Modal -->
-        <div id="room-type-modal" class="modal-overlay">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3 id="room-type-modal-title">Add Room Type</h3>
-                    <button class="close-btn" onclick="closeRoomTypeModal()">&times;</button>
+        <div id="room-type-modal" class="ls-modal-overlay">
+            <div class="ls-modal-backdrop" onclick="closeRoomTypeModal()"></div>
+            <div class="ls-modal">
+                <div class="ls-modal__header">
+                    <h3 id="room-type-modal-title">Thêm loại phòng</h3>
+                    <button class="ls-modal__close" onclick="closeRoomTypeModal()">&times;</button>
                 </div>
                 <form id="room-type-form" onsubmit="return saveRoomType(event)">
-                    <div class="modal-body">
-                        <div id="room-type-form-error" class="alert alert-danger" style="display: none;"></div>
+                    <div class="ls-modal__body">
+                        <div id="room-type-form-error" class="ls-alert ls-alert--danger" style="display:none;"></div>
                         <input type="hidden" id="room-type-id">
-                        <div class="form-group">
-                            <label class="form-label" for="rt-name">Name</label>
-                            <input type="text" id="rt-name" class="form-control" placeholder="e.g. Deluxe Suite" required>
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="rt-name">Tên loại phòng</label>
+                            <input type="text" id="rt-name" class="ls-form-input" placeholder="VD: Deluxe Suite" required>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="rt-description">Description</label>
-                            <textarea id="rt-description" class="form-control" rows="3" placeholder="Describe this room type..."></textarea>
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="rt-description">Mô tả</label>
+                            <textarea id="rt-description" class="ls-form-input" rows="3" placeholder="Mô tả loại phòng này..." style="resize:vertical;"></textarea>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="rt-capacity">Capacity (guests)</label>
-                                <input type="number" id="rt-capacity" class="form-control" min="1" placeholder="e.g. 2" required>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="rt-capacity">Sức chứa (khách)</label>
+                                <input type="number" id="rt-capacity" class="ls-form-input" min="1" placeholder="VD: 2" required>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label" for="rt-price">Price per Night (VND)</label>
-                                <input type="number" id="rt-price" class="form-control" min="0" step="10000" placeholder="e.g. 500000" required>
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="rt-price">Giá mỗi đêm (VNĐ)</label>
+                                <input type="number" id="rt-price" class="ls-form-input" min="0" step="10000" placeholder="VD: 500000" required>
                             </div>
                         </div>
-                        <div class="form-group" id="rt-hidden-group" style="display: none;">
-                            <label class="form-label">
-                                <input type="checkbox" id="rt-hidden"> Hidden
+                        <div class="ls-form-group" id="rt-hidden-group" style="display:none;">
+                            <label class="ls-form-label" style="display:flex;align-items:center;gap:8px;">
+                                <input type="checkbox" id="rt-hidden" style="width:16px;height:16px;cursor:pointer;"> Ẩn loại phòng
                             </label>
-                            <small style="color: var(--gray-500); display: block; margin-top: 4px;">Hidden room types won't be shown to customers searching for availability.</small>
+                            <small style="color:var(--slate-500);display:block;margin-top:4px;font-size:0.75rem;">Loại phòng ẩn sẽ không hiển thị khi khách hàng tìm kiếm.</small>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" onclick="closeRoomTypeModal()" class="btn btn-outline">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                    <div class="ls-modal__footer">
+                        <button type="button" onclick="closeRoomTypeModal()" class="ls-btn ls-btn--outline ls-btn--sm">Hủy</button>
+                        <button type="submit" class="ls-btn ls-btn--primary ls-btn--sm">Lưu</button>
                     </div>
                 </form>
             </div>

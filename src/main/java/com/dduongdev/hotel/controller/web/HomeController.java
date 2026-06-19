@@ -9,7 +9,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("title", "Hotel Booking System");
+        model.addAttribute("title", "LuxeStay - Hệ thống đặt phòng khách sạn");
         model.addAttribute("view", "index :: content");
         return "fragments/layout";
     }

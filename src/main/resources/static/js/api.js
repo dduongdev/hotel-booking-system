@@ -1,5 +1,5 @@
 /**
- * Hotel Booking System - API Client
+ * LuxeStay - API Client
  * Handles JWT authentication and API communication
  */
 
@@ -34,6 +34,42 @@ const TokenManager = {
     },
     isAuthenticated() {
         return !!this.getAccessToken();
+    }
+};
+
+// ===== Toast Manager (LuxeStay Style) =====
+const ToastManager = {
+    show(message, type = 'info') {
+        const container = document.getElementById('ls-toast-container');
+        if (!container) {
+            const div = document.createElement('div');
+            div.id = 'ls-toast-container';
+            div.className = 'ls-toast-container';
+            document.body.appendChild(div);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = 'ls-toast';
+        
+        const iconMap = {
+            success: 'check_circle',
+            error: 'error',
+            warning: 'warning',
+            info: 'info_outline'
+        };
+        
+        toast.innerHTML = `
+            <span class="ls-icon ls-toast__icon">${iconMap[type] || iconMap.info}</span>
+            <p class="ls-toast__text">${message}</p>
+        `;
+        
+        document.getElementById('ls-toast-container').appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 };
 
@@ -132,7 +168,6 @@ async function tryRefreshToken() {
         
         if (response.ok) {
             const raw = await response.json();
-            // Unwrap ApiResponse if present
             const data = (raw && raw.data) ? raw.data : raw;
             TokenManager.setTokens(data.accessToken, data.refreshToken);
             return true;
@@ -320,6 +355,45 @@ const BookingAPI = {
     }
 };
 
+// ===== JWT Decoder (Base64URL-safe) =====
+function decodeJwt(token) {
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            console.error('Invalid JWT: expected 3 parts, got', parts.length);
+            return null;
+        }
+        // Base64URL -> Base64: replace - with +, _ with /, add padding
+        let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4 !== 0) {
+            base64 += '=';
+        }
+        const decoded = atob(base64);
+        return JSON.parse(decoded);
+    } catch (e) {
+        console.error('Failed to decode JWT:', e);
+        return null;
+    }
+}
+
+function extractRoleFromPayload(payload) {
+    if (!payload) return 'CUSTOMER';
+    // Try direct role field first
+    if (payload.role) {
+        return typeof payload.role === 'string' ? payload.role.replace('ROLE_', '') : 'CUSTOMER';
+    }
+    // Extract from authorities array
+    const auth = payload.authorities && payload.authorities[0];
+    if (!auth) return 'CUSTOMER';
+    if (typeof auth === 'string') {
+        return auth.replace('ROLE_', '');
+    }
+    if (auth.authority) {
+        return auth.authority.replace('ROLE_', '');
+    }
+    return 'CUSTOMER';
+}
+
 // ===== Utility Functions =====
 
 function formatCurrency(amount) {
@@ -351,50 +425,33 @@ function formatDateTime(dateStr) {
     });
 }
 
+// Legacy showToast - routes to ToastManager
 function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) {
-        const div = document.createElement('div');
-        div.id = 'toast-container';
-        div.className = 'toast-container';
-        document.body.appendChild(div);
-    }
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    
-    document.getElementById('toast-container').appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    ToastManager.show(message, type);
 }
 
 function getStatusBadgeClass(status) {
     switch (status) {
-        case 'CONFIRMED': return 'badge badge-success';
-        case 'CHECKED_IN': return 'badge badge-info';
-        case 'CHECKED_OUT': return 'badge badge-secondary';
-        case 'CANCELLED': return 'badge badge-danger';
-        default: return 'badge badge-info';
+        case 'CONFIRMED': return 'ls-badge ls-badge--confirmed';
+        case 'CHECKED_IN': return 'ls-badge ls-badge--checked-in';
+        case 'CHECKED_OUT': return 'ls-badge ls-badge--secondary';
+        case 'CANCELLED': return 'ls-badge ls-badge--cancelled';
+        default: return 'ls-badge ls-badge--info';
     }
 }
 
 function getStatusText(status) {
     switch (status) {
-        case 'CONFIRMED': return 'Confirmed';
-        case 'CHECKED_IN': return 'Checked In';
-        case 'CHECKED_OUT': return 'Checked Out';
-        case 'CANCELLED': return 'Cancelled';
-        default: return status;
+        case 'CONFIRMED': return 'Đã xác nhận';
+        case 'CHECKED_IN': return 'Đã nhận phòng';
+        case 'CHECKED_OUT': return 'Đã trả phòng';
+        case 'CANCELLED': return 'Đã hủy';
+        default: return status || 'Không xác định';
     }
 }
 
 function getRoleBadgeClass(role) {
-    return role === 'MANAGER' ? 'badge badge-warning' : 'badge badge-info';
+    return role === 'MANAGER' ? 'ls-badge ls-badge--warning' : 'ls-badge ls-badge--info';
 }
 
 function isManager() {
@@ -408,6 +465,7 @@ function isCustomer() {
 }
 
 function escapeHtml(str) {
+    if (typeof str !== 'string') return String(str || '');
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;

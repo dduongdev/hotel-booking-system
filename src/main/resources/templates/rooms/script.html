@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="script">
@@ -14,7 +14,7 @@
             async function loadRooms(page = 0) {
                 currentPage = page;
                 const container = document.getElementById('rooms-container');
-                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading rooms...</p></div>';
+                container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải danh sách phòng...</p></div>';
                 
                 try {
                     const result = await RoomAPI.getAll(page, pageSize);
@@ -22,40 +22,39 @@
                     const totalPages = result.totalPages || 0;
                     
                     if (rooms.length === 0) {
-                        container.innerHTML = '<div class="empty-state"><div class="icon">&#128716;</div><h3>No Rooms Found</h3><p>There are no rooms available at the moment.</p></div>';
+                        container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">🛏️</div><div class="ls-empty__title">Không có phòng</div><p class="ls-empty__text">Hiện không có phòng nào.</p></div>';
                         return;
                     }
                     
-                    let html = '<div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Room Type</th><th>Price/Night</th><th>Capacity</th><th>Status</th></tr></thead><tbody>';
+                    let html = '<div class="ls-table-container"><table class="ls-table"><thead><tr><th>ID</th><th>Tên phòng</th><th>Loại phòng</th><th>Giá/Đêm</th><th>Sức chứa</th><th>Trạng thái</th></tr></thead><tbody>';
                     
                     rooms.forEach(room => {
-                        const statusBadge = room.hidden ? '<span class="badge badge-danger">Hidden</span>' : '<span class="badge badge-success">Active</span>';
+                        const statusBadge = room.hidden ? '<span class="ls-badge ls-badge--hidden">Ẩn</span>' : '<span class="ls-badge ls-badge--visible">Hoạt động</span>';
                         html += `<tr>
                             <td>${room.id}</td>
                             <td><strong>${escapeHtml(room.name)}</strong></td>
                             <td>${escapeHtml(room.roomType?.name || 'N/A')}</td>
                             <td>${formatCurrency(room.roomType?.pricePerNight || 0)}</td>
-                            <td>${room.roomType?.capacity || 0} guests</td>
+                            <td>${room.roomType?.capacity || 0} khách</td>
                             <td>${statusBadge}</td>
                         </tr>`;
                     });
                     
                     html += '</tbody></table></div>';
                     
-                    // Pagination
                     if (totalPages > 1) {
-                        html += '<div class="pagination">';
-                        html += `<button onclick="loadRooms(0)" ${page === 0 ? 'disabled' : ''}>&#171; First</button>`;
-                        html += `<button onclick="loadRooms(${page - 1})" ${page === 0 ? 'disabled' : ''}>&#8249; Prev</button>`;
-                        html += `<span class="page-info">Page ${page + 1} of ${totalPages}</span>`;
-                        html += `<button onclick="loadRooms(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Next &#8250;</button>`;
-                        html += `<button onclick="loadRooms(${totalPages - 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Last &#187;</button>`;
+                        html += '<div class="ls-pagination">';
+                        html += `<button onclick="loadRooms(0)" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#171;</button>`;
+                        html += `<button onclick="loadRooms(${page - 1})" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#8249;</button>`;
+                        html += `<span class="ls-pagination__info">Trang ${page + 1} / ${totalPages}</span>`;
+                        html += `<button onclick="loadRooms(${page + 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#8250;</button>`;
+                        html += `<button onclick="loadRooms(${totalPages - 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#187;</button>`;
                         html += '</div>';
                     }
                     
                     container.innerHTML = html;
                 } catch (error) {
-                    container.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Rooms</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
         </script>

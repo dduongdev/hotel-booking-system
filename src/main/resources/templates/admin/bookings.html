@@ -1,20 +1,61 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1>Manage Bookings</h1>
-                <p>View and manage all hotel bookings.</p>
-            </div>
-        </div>
-
-        <div id="admin-bookings-container">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Loading bookings...</p>
-            </div>
+        <div class="ls-admin-layout ls-admin-wrapper">
+            <!-- Sidebar -->
+            <aside class="ls-sidebar">
+                <div class="ls-sidebar__header">
+                    <div class="ls-sidebar__logo">
+                        <span class="ls-icon" style="font-variation-settings:'FILL' 1;">hotel_class</span>
+                    </div>
+                    <div>
+                        <div class="ls-sidebar__title">LuxeStay Admin</div>
+                        <div class="ls-sidebar__subtitle">Hệ thống quản lý chuỗi</div>
+                    </div>
+                </div>
+                
+                <nav class="ls-sidebar__nav">
+                    <a href="/admin/dashboard" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">dashboard</span> Bảng điều khiển
+                    </a>
+                    <a href="/admin/bookings" class="ls-sidebar__nav-item ls-sidebar__nav-item--active">
+                        <span class="ls-icon ls-icon--sm">calendar_today</span> Lịch đặt phòng
+                    </a>
+                    <a href="/admin/rooms" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">bed</span> Quản lý phòng
+                    </a>
+                    <a href="/admin/room-types" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">category</span> Loại phòng
+                    </a>
+                </nav>
+                
+                <div class="ls-sidebar__footer">
+                    <div style="margin-top:12px;">
+                        <a href="#" onclick="event.preventDefault(); logoutUser();" style="width:100%;padding:12px;display:flex;align-items:center;gap:12px;border-radius:var(--radius-lg);font-size:0.75rem;font-weight:700;color:var(--danger);text-decoration:none;transition:var(--transition);" onmouseover="this.style.background='var(--danger-bg)'" onmouseout="this.style.background='transparent'">
+                            <span class="ls-icon ls-icon--sm">logout</span> Đăng xuất Admin
+                        </a>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <main class="ls-main-content">
+                <div class="ls-page-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h1>Quản lý Đặt phòng</h1>
+                        <p>Xem và quản lý tất cả đặt phòng khách sạn.</p>
+                    </div>
+                </div>
+                
+                <div id="admin-bookings-container">
+                    <div class="ls-loading">
+                        <div class="ls-spinner"></div>
+                        <p>Đang tải dữ liệu đặt phòng...</p>
+                    </div>
+                </div>
+            </main>
         </div>
     </th:block>
 </body>

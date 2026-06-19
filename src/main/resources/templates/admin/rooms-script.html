@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="script">
@@ -23,7 +23,7 @@
             async function loadAdminRooms(page = 0) {
                 adminRoomsPage = page;
                 const container = document.getElementById('admin-rooms-container');
-                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading rooms...</p></div>';
+                container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải danh sách phòng...</p></div>';
                 
                 try {
                     const result = await RoomAPI.getAll(page, adminRoomsPageSize);
@@ -32,27 +32,27 @@
                     const roomTypes = (await RoomTypeAPI.getAll()).content;
                     
                     if (rooms.length === 0) {
-                        container.innerHTML = '<div class="empty-state"><div class="icon">&#128716;</div><h3>No Rooms Found</h3><p>No rooms have been created yet.</p></div>';
+                        container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Không có phòng</div><p class="ls-empty__text">Chưa có phòng nào được tạo.</p></div>';
                         return;
                     }
                     
-                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Room Type</th><th>Price/Night</th><th>Capacity</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                    let html = '<div class="ls-card"><div class="ls-table-container"><table class="ls-table"><thead><tr><th>ID</th><th>Tên phòng</th><th>Loại phòng</th><th>Giá/Đêm</th><th>Sức chứa</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>';
                     
                     rooms.forEach(room => {
-                        const statusBadge = room.hidden ? '<span class="badge badge-danger">Hidden</span>' : '<span class="badge badge-success">Active</span>';
+                        const statusBadge = room.hidden ? '<span class="ls-badge ls-badge--hidden">Ẩn</span>' : '<span class="ls-badge ls-badge--visible">Hoạt động</span>';
                         html += `<tr>
                             <td><strong>${room.id}</strong></td>
                             <td>${escapeHtml(room.name)}</td>
                             <td>${escapeHtml(room.roomType?.name || 'N/A')}</td>
                             <td>${formatCurrency(room.roomType?.pricePerNight || 0)}</td>
-                            <td>${room.roomType?.capacity || 0} guests</td>
+                            <td>${room.roomType?.capacity || 0} khách</td>
                             <td>${statusBadge}</td>
                             <td>
-                                <button class="btn btn-outline btn-sm edit-room-btn" 
+                                <button class="ls-btn ls-btn--outline ls-btn--sm edit-room-btn" 
                                     data-id="${room.id}" 
                                     data-name="${room.name.replace(/'/g, '&#39;')}" 
                                     data-type="${room.roomType?.id || 0}" 
-                                    data-hidden="${room.hidden}">Edit</button>
+                                    data-hidden="${room.hidden}">Sửa</button>
                             </td>
                         </tr>`;
                     });
@@ -60,18 +60,18 @@
                     html += '</tbody></table></div></div>';
                     
                     if (totalPages > 1) {
-                        html += '<div class="pagination">';
-                        html += `<button onclick="loadAdminRooms(0)" ${page === 0 ? 'disabled' : ''}>&#171; First</button>`;
-                        html += `<button onclick="loadAdminRooms(${page - 1})" ${page === 0 ? 'disabled' : ''}>&#8249; Prev</button>`;
-                        html += `<span class="page-info">Page ${page + 1} of ${totalPages}</span>`;
-                        html += `<button onclick="loadAdminRooms(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Next &#8250;</button>`;
-                        html += `<button onclick="loadAdminRooms(${totalPages - 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Last &#187;</button>`;
+                        html += '<div class="ls-pagination">';
+                        html += `<button onclick="loadAdminRooms(0)" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#171;</button>`;
+                        html += `<button onclick="loadAdminRooms(${page - 1})" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#8249;</button>`;
+                        html += `<span class="ls-pagination__info">Trang ${page + 1} / ${totalPages}</span>`;
+                        html += `<button onclick="loadAdminRooms(${page + 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#8250;</button>`;
+                        html += `<button onclick="loadAdminRooms(${totalPages - 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#187;</button>`;
                         html += '</div>';
                     }
                     
                     container.innerHTML = html;
                     
-                    // Attach click handlers for edit buttons
+                    // Attach click handlers
                     container.querySelectorAll('.edit-room-btn').forEach(btn => {
                         btn.addEventListener('click', () => {
                             const id = parseInt(btn.dataset.id);
@@ -82,7 +82,7 @@
                         });
                     });
                 } catch (error) {
-                    container.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Rooms</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 
@@ -90,43 +90,43 @@
                 try {
                     const roomTypes = (await RoomTypeAPI.getAll()).content;
                     const select = document.getElementById('room-type-select');
-                    select.innerHTML = '<option value="">-- Select Room Type --</option>';
+                    select.innerHTML = '<option value="">-- Chọn loại phòng --</option>';
                     roomTypes.forEach(rt => {
                         const option = document.createElement('option');
                         option.value = rt.id;
-                        option.textContent = `${rt.name} - ${formatCurrency(rt.pricePerNight)}/night`;
+                        option.textContent = `${rt.name} - ${formatCurrency(rt.pricePerNight)}/đêm`;
                         if (rt.id === selectedId) option.selected = true;
                         select.appendChild(option);
                     });
                 } catch (error) {
-                    showToast('Failed to load room types.', 'error');
+                    ToastManager.show('Lỗi tải loại phòng.', 'error');
                 }
             }
 
-            async function showAddRoomModal() {
-                document.getElementById('room-modal-title').textContent = 'Add Room';
+            function showAddRoomModal() {
+                document.getElementById('room-modal-title').textContent = 'Thêm phòng';
                 document.getElementById('room-id').value = '';
                 document.getElementById('room-name').value = '';
                 document.getElementById('room-hidden').checked = false;
                 document.getElementById('room-hidden-group').style.display = 'none';
                 document.getElementById('room-form-error').style.display = 'none';
-                await populateRoomTypeSelect(null);
-                document.getElementById('room-modal').classList.add('active');
+                populateRoomTypeSelect(null);
+                document.getElementById('room-modal').classList.add('ls-modal-overlay--active');
             }
 
             async function editRoom(id, name, roomTypeId, hidden) {
-                document.getElementById('room-modal-title').textContent = 'Edit Room';
+                document.getElementById('room-modal-title').textContent = 'Sửa phòng';
                 document.getElementById('room-id').value = id;
                 document.getElementById('room-name').value = name;
                 document.getElementById('room-hidden').checked = hidden;
                 document.getElementById('room-hidden-group').style.display = 'block';
                 document.getElementById('room-form-error').style.display = 'none';
                 await populateRoomTypeSelect(roomTypeId);
-                document.getElementById('room-modal').classList.add('active');
+                document.getElementById('room-modal').classList.add('ls-modal-overlay--active');
             }
 
             function closeRoomModal() {
-                document.getElementById('room-modal').classList.remove('active');
+                document.getElementById('room-modal').classList.remove('ls-modal-overlay--active');
             }
 
             async function saveRoom(event) {
@@ -140,7 +140,7 @@
                 const hidden = document.getElementById('room-hidden').checked;
                 
                 if (!name || !roomTypeId) {
-                    errorDiv.textContent = 'Please fill in all required fields.';
+                    errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin.';
                     errorDiv.style.display = 'block';
                     return false;
                 }
@@ -148,15 +148,15 @@
                 try {
                     if (id) {
                         await RoomAPI.update(parseInt(id), { name, roomTypeId, hidden });
-                        showToast('Room updated successfully.', 'success');
+                        ToastManager.show('Cập nhật phòng thành công.', 'success');
                     } else {
                         await RoomAPI.create({ name, roomTypeId });
-                        showToast('Room created successfully.', 'success');
+                        ToastManager.show('Thêm phòng thành công.', 'success');
                     }
                     closeRoomModal();
                     loadAdminRooms(adminRoomsPage);
                 } catch (error) {
-                    errorDiv.textContent = error.message || 'Operation failed.';
+                    errorDiv.textContent = error.message || 'Thao tác thất bại.';
                     errorDiv.style.display = 'block';
                 }
                 return false;

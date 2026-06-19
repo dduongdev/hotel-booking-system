@@ -1,36 +1,57 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <div class="page-header">
-            <h1>Manager Dashboard</h1>
-            <p>Overview and management tools for the hotel system.</p>
-        </div>
+        <div class="ls-admin-layout ls-admin-wrapper">
+            <!-- Sidebar -->
+            <aside class="ls-sidebar">
+                <div class="ls-sidebar__header">
+                    <div class="ls-sidebar__logo">
+                        <span class="ls-icon" style="font-variation-settings:'FILL' 1;">hotel_class</span>
+                    </div>
+                    <div>
+                        <div class="ls-sidebar__title">LuxeStay Admin</div>
+                        <div class="ls-sidebar__subtitle">Hệ thống quản lý chuỗi</div>
+                    </div>
+                </div>
+                
+                <nav class="ls-sidebar__nav" id="admin-sidebar-nav">
+                    <a href="/admin/dashboard" class="ls-sidebar__nav-item ls-sidebar__nav-item--active" data-section="dashboard">
+                        <span class="ls-icon ls-icon--sm">dashboard</span> Bảng điều khiển
+                    </a>
+                    <a href="/admin/bookings" class="ls-sidebar__nav-item" data-section="bookings">
+                        <span class="ls-icon ls-icon--sm">calendar_today</span> Lịch đặt phòng
+                    </a>
+                    <a href="/admin/rooms" class="ls-sidebar__nav-item" data-section="rooms">
+                        <span class="ls-icon ls-icon--sm">bed</span> Quản lý phòng
+                    </a>
+                    <a href="/admin/room-types" class="ls-sidebar__nav-item" data-section="room-types">
+                        <span class="ls-icon ls-icon--sm">category</span> Loại phòng
+                    </a>
 
-        <div id="dashboard-stats" class="stats-grid">
-            <div class="loading" style="grid-column: 1/-1;">
-                <div class="loading-spinner"></div>
-                <p>Loading dashboard data...</p>
-            </div>
-        </div>
-
-        <div class="grid-3" style="margin-top: 32px;">
-            <div class="feature-card" onclick="window.location.href='/admin/bookings'" style="cursor: pointer;">
-                <div class="icon">&#128203;</div>
-                <h3>Manage Bookings</h3>
-                <p>View and manage all hotel bookings.</p>
-            </div>
-            <div class="feature-card" onclick="window.location.href='/admin/rooms'" style="cursor: pointer;">
-                <div class="icon">&#128719;</div>
-                <h3>Manage Rooms</h3>
-                <p>Add, edit, and manage hotel rooms.</p>
-            </div>
-            <div class="feature-card" onclick="window.location.href='/admin/room-types'" style="cursor: pointer;">
-                <div class="icon">&#127968;</div>
-                <h3>Manage Room Types</h3>
-                <p>Configure room types, prices, and capacity.</p>
-            </div>
+                </nav>
+                
+                <div class="ls-sidebar__footer">
+                    <a href="/admin/rooms" class="ls-sidebar__add-btn">
+                        <span class="ls-icon ls-icon--sm">add_circle</span>
+                        Thêm phòng mới
+                    </a>
+                    <div style="margin-top:12px;">
+                        <a href="#" onclick="event.preventDefault(); logoutUser();" style="width:100%;padding:12px;display:flex;align-items:center;gap:12px;border-radius:var(--radius-lg);font-size:0.75rem;font-weight:700;color:var(--danger);text-decoration:none;transition:var(--transition);" onmouseover="this.style.background='var(--danger-bg)'" onmouseout="this.style.background='transparent'">
+                            <span class="ls-icon ls-icon--sm">logout</span> Đăng xuất Admin
+                        </a>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <main class="ls-main-content" id="admin-main-content">
+                <div class="ls-loading">
+                    <div class="ls-spinner"></div>
+                    <p>Đang tải dữ liệu...</p>
+                </div>
+            </main>
         </div>
     </th:block>
 </body>

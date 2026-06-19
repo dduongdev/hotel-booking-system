@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="script">
@@ -14,11 +14,11 @@
                     window.location.href = '/';
                     return;
                 }
-                loadDashboard();
+                loadDashboardContent();
             });
 
-            async function loadDashboard() {
-                const statsDiv = document.getElementById('dashboard-stats');
+            async function loadDashboardContent() {
+                const mainContent = document.getElementById('admin-main-content');
                 
                 try {
                     const [roomTypeResult, roomsResult, bookingsResult] = await Promise.all([
@@ -31,32 +31,89 @@
                     const totalRoomTypes = roomTypes.length;
                     const totalRooms = roomsResult?.totalElements || 0;
                     const totalBookings = bookingsResult?.totalElements || 0;
-                    const maxPrice = totalRoomTypes > 0 ? Math.max(...roomTypes.map(rt => rt.pricePerNight)) : 0;
                     
-                    statsDiv.innerHTML = `
-                        <div class="stat-card">
-                            <div class="stat-icon">&#127968;</div>
-                            <div class="stat-value">${totalRoomTypes}</div>
-                            <div class="stat-label">Room Types</div>
+                    const user = TokenManager.getUser();
+                    const displayName = user?.username || 'Admin';
+                    
+                    mainContent.innerHTML = `
+                        <div class="ls-admin-topbar">
+                            <div>
+                                <div class="ls-admin-topbar__title">Bảng điều khiển</div>
+                                <div class="ls-admin-topbar__subtitle">Xin chào, ${escapeHtml(displayName)}! Quản lý hệ thống LuxeStay.</div>
+                            </div>
+                            <div class="ls-admin-topbar__right">
+                                <div class="flex items-center gap-3">
+                                    <div style="width:40px;height:40px;border-radius:50%;background:var(--color-secondary-container);border:2px solid var(--color-secondary-container);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                                        <span class="ls-icon" style="color:var(--color-on-secondary-container);font-size:20px;">person</span>
+                                    </div>
+                                    <div class="hidden sm:block text-left">
+                                        <p class="text-xs font-bold text-slate-800">${escapeHtml(displayName)}</p>
+                                        <p class="text-[10px] text-slate-400 font-medium">Quản trị viên</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">&#128719;</div>
-                            <div class="stat-value">${totalRooms}</div>
-                            <div class="stat-label">Total Rooms</div>
+                        
+                        <!-- Stats Grid -->
+                        <div class="ls-stats-grid-4">
+                            <div class="ls-stat-box">
+                                <div class="ls-stat-box__icon ls-stat-box__icon--dark">
+                                    <span class="ls-icon">book_online</span>
+                                </div>
+                                <div>
+                                    <p class="ls-stat-box__label">Tổng lượt đặt</p>
+                                    <h3 class="ls-stat-box__value">${totalBookings}</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="ls-stat-box">
+                                <div class="ls-stat-box__icon ls-stat-box__icon--dark">
+                                    <span class="ls-icon">bed</span>
+                                </div>
+                                <div>
+                                    <p class="ls-stat-box__label">Tổng phòng</p>
+                                    <h3 class="ls-stat-box__value">${totalRooms}</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="ls-stat-box">
+                                <div class="ls-stat-box__icon ls-stat-box__icon--light">
+                                    <span class="ls-icon">category</span>
+                                </div>
+                                <div>
+                                    <p class="ls-stat-box__label">Danh mục phòng</p>
+                                    <h3 class="ls-stat-box__value">${totalRoomTypes} loại</h3>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">&#128203;</div>
-                            <div class="stat-value">${totalBookings}</div>
-                            <div class="stat-label">Total Bookings</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">&#128176;</div>
-                            <div class="stat-value">${formatCurrency(maxPrice)}</div>
-                            <div class="stat-label">Max Price/Night</div>
+                        
+                        <!-- Action Cards -->
+                        <div class="grid grid-cols-3" style="gap:24px;margin-top:24px;">
+                            <div class="ls-feature-card" onclick="window.location.href='/admin/bookings'" style="cursor:pointer;padding:32px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+                                <div class="ls-feature-card__icon" style="width:56px;height:56px;border-radius:var(--radius-xl);margin:0 auto 16px;">
+                                    <span class="ls-icon">calendar_today</span>
+                                </div>
+                                <h3 class="ls-feature-card__title" style="font-size:1rem;">Quản lý Đặt phòng</h3>
+                                <p class="ls-feature-card__text" style="font-size:0.8125rem;">Xem và quản lý tất cả đặt phòng.</p>
+                            </div>
+                            <div class="ls-feature-card" onclick="window.location.href='/admin/rooms'" style="cursor:pointer;padding:32px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+                                <div class="ls-feature-card__icon" style="width:56px;height:56px;border-radius:var(--radius-xl);margin:0 auto 16px;">
+                                    <span class="ls-icon">bed</span>
+                                </div>
+                                <h3 class="ls-feature-card__title" style="font-size:1rem;">Quản lý Phòng</h3>
+                                <p class="ls-feature-card__text" style="font-size:0.8125rem;">Thêm, sửa, quản lý phòng.</p>
+                            </div>
+                            <div class="ls-feature-card" onclick="window.location.href='/admin/room-types'" style="cursor:pointer;padding:32px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+                                <div class="ls-feature-card__icon" style="width:56px;height:56px;border-radius:var(--radius-xl);margin:0 auto 16px;">
+                                    <span class="ls-icon">category</span>
+                                </div>
+                                <h3 class="ls-feature-card__title" style="font-size:1rem;">Quản lý Loại Phòng</h3>
+                                <p class="ls-feature-card__text" style="font-size:0.8125rem;">Cấu hình giá, sức chứa.</p>
+                            </div>
                         </div>
                     `;
                 } catch (error) {
-                    statsDiv.innerHTML = '<div style="grid-column: 1/-1;" class="alert alert-danger">Failed to load dashboard data: ' + escapeHtml(error.message) + '</div>';
+                    mainContent.innerHTML = '<div class="ls-alert ls-alert--danger">Lỗi tải dữ liệu: ' + escapeHtml(error.message) + '</div>';
                 }
             }
         </script>

@@ -1,64 +1,122 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
-    <nav class="navbar" th:fragment="navbar" id="main-navbar">
-        <div style="display: flex; align-items: center; gap: 32px;">
-            <a href="/" class="navbar-brand">
-                <span>&#127976;</span>
-                <span>Hotel Booking</span>
-            </a>
-            <ul class="navbar-menu" id="navbar-menu">
-                <li><a href="/" class="nav-link">Phòng</a></li>
-                <li id="nav-my-bookings" style="display: none;"><a href="/bookings/my" class="nav-link">Đặt của tôi</a></li>
-                <li id="nav-admin" style="display: none;"><a href="/admin/dashboard" class="nav-link">Quản lý</a></li>
-            </ul>
-        </div>
-        <div class="navbar-right" id="navbar-right">
-            <div id="user-badge" class="user-badge" style="display: none;">
-                <span id="user-name-display">User</span>
-                <span id="user-role-display" class="role-tag">ROLE</span>
+    <header class="ls-navbar" th:fragment="navbar" id="main-navbar">
+        <nav class="ls-navbar__inner">
+            <div class="flex items-center gap-8">
+                <a href="/" class="ls-navbar__brand">LuxeStay</a>
+                
+                <div class="ls-navbar__links" id="navbar-menu">
+                    <a href="/" class="ls-navbar__link" id="nav-home">Trang chủ</a>
+                    <a href="/room-types" class="ls-navbar__link" id="nav-rooms">Phòng nghỉ</a>
+<a href="/bookings/my" class="ls-navbar__link" id="nav-my-bookings" style="display:none;">Đặt chỗ của tôi</a>
+                    <a href="/admin/dashboard" class="ls-navbar__link" id="nav-admin" style="display:none;">Quản lý</a>
+                </div>
             </div>
-            <a id="btn-login" href="/login" class="btn btn-primary btn-sm">Đăng nhập</a>
-            <a id="btn-register" href="/register" class="btn btn-outline btn-sm">Đăng ký</a>
-            <a id="btn-change-password" href="/auth/change-password" class="btn btn-outline btn-sm" style="display: none;">
-                <i class="bi bi-key"></i> Đổi mật khẩu
-            </a>
-            <a id="btn-logout" href="#" onclick="event.preventDefault(); AuthAPI.logout();" class="btn btn-outline btn-sm" style="display: none;">Đăng xuất</a>
-        </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const user = TokenManager.getUser();
-                const isAuth = TokenManager.isAuthenticated();
-                const path = window.location.pathname;
-                
-                // Highlight active link
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    const href = link.getAttribute('href');
-                    if (path === href || (href !== '/' && path.startsWith(href))) {
-                        link.classList.add('active');
-                    } else if (href === '/' && (path === '/' || path.startsWith('/room-types') || path.startsWith('/rooms'))) {
-                        link.classList.add('active');
-                    }
-                });
-                
-                if (isAuth && user) {
-                    document.getElementById('user-badge').style.display = 'flex';
-                    document.getElementById('user-name-display').textContent = user.username;
-                    document.getElementById('user-role-display').textContent = user.role;
-                    document.getElementById('btn-login').style.display = 'none';
-                    document.getElementById('btn-register').style.display = 'none';
-                    document.getElementById('btn-change-password').style.display = 'inline-flex';
-                    document.getElementById('btn-logout').style.display = 'inline-flex';
+            
+            <div class="ls-navbar__right" id="navbar-right">
+                <!-- User Info (logged in state) -->
+                <div id="user-section" style="display:none;" class="flex items-center gap-3">
+                    <div class="hidden sm:block text-right">
+                        <p id="user-name-display" class="text-xs font-bold text-slate-800 leading-tight"></p>
+                        <p id="user-role-display" class="text-[10px] text-slate-400 font-medium"></p>
+                    </div>
                     
-                    if (user.role === 'CUSTOMER') {
-                        document.getElementById('nav-my-bookings').style.display = 'list-item';
-                    } else if (user.role === 'MANAGER') {
-                        document.getElementById('nav-admin').style.display = 'list-item';
-                    }
+
+                    
+                    <!-- User Avatar -->
+                    <div class="relative" id="user-menu-wrapper">
+                        <div class="ls-navbar__user-avatar" id="btn-user-menu">
+                            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOFWjkf2NmYCBYc20-FwOhoxk0fMHN0lDXZ6zsTi7eRfD7OIFf2pWvfRqnqDN6iEVLeWRL5HCRNPFEbr1MTIEDRUkAdjOc2IMebNaUrzfvhRlKPcJUstXM2mtCsLvQzkjYkroIljfNBgrgOl39tylPXWFgIzrfX3cIH64afhGgO5u7obWBy9JTE3Rqjg9HAO-erx-YOVUvM_yFGIm24f34fmupTqqUjJJSGkTCp8vxduoYRN0ZCH_-ZyApqOazjaAAfn0btXMWTn4" alt="User" referrerPolicy="no-referrer" />
+                        </div>
+                        
+                        <div class="ls-dropdown" id="user-dropdown" style="display:none;">
+                            <div class="ls-dropdown__header">Tài khoản</div>
+                            <a href="/auth/change-password" class="ls-dropdown__item">
+                                <span class="ls-icon ls-icon--sm">lock</span>
+                                Đổi mật khẩu
+                            </a>
+                            <a href="#" onclick="event.preventDefault(); logoutUser();" class="ls-dropdown__item" style="color: var(--danger); cursor: pointer;">
+                                <span class="ls-icon ls-icon--sm">logout</span>
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Guest buttons -->
+                <div id="guest-section">
+                    <a href="/login" class="ls-btn ls-btn--primary ls-btn--sm">Đăng nhập</a>
+                    <a href="/register" class="ls-btn ls-btn--outline ls-btn--sm">Đăng ký</a>
+                </div>
+            </div>
+        </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = TokenManager.getUser();
+            const isAuth = TokenManager.isAuthenticated();
+            const path = window.location.pathname;
+            
+            // Highlight active nav link
+            document.querySelectorAll('.ls-navbar__link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (path === href || (href !== '/' && path.startsWith(href))) {
+                    link.classList.add('ls-navbar__link--active');
+                } else if (href === '/' && (path === '/' || path === '')) {
+                    link.classList.add('ls-navbar__link--active');
                 }
             });
-        </script>
-    </nav>
+            
+            if (isAuth && user) {
+                document.getElementById('guest-section').style.display = 'none';
+                document.getElementById('user-section').style.display = 'flex';
+                document.getElementById('user-name-display').textContent = user.username || 'User';
+                
+                const roleDisplay = document.getElementById('user-role-display');
+                if (user.role === 'MANAGER') {
+                    roleDisplay.textContent = 'Quản lý';
+                    document.getElementById('nav-admin').style.display = 'inline';
+                    document.getElementById('nav-my-bookings').style.display = 'none';
+                } else {
+                    roleDisplay.textContent = 'Khách hàng';
+                    document.getElementById('nav-my-bookings').style.display = 'inline';
+                }
+            }
+            
+            // User menu toggle
+            const userMenuBtn = document.getElementById('btn-user-menu');
+            const userDropdown = document.getElementById('user-dropdown');
+            if (userMenuBtn) {
+                userMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.style.display = userDropdown.style.display === 'none' ? 'block' : 'none';
+                });
+                document.addEventListener('click', () => {
+                    userDropdown.style.display = 'none';
+                });
+            }
+            
+
+        });
+        
+        function logoutUser() {
+            if (typeof AuthAPI !== 'undefined' && AuthAPI.logout) {
+                AuthAPI.logout();
+            } else {
+                // Fallback if AuthAPI is not defined
+                if (typeof TokenManager !== 'undefined') {
+                    TokenManager.clearTokens();
+                } else {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('user');
+                }
+                window.location.href = '/login';
+            }
+        }
+    </script>
+</header>
 </body>
 </html>

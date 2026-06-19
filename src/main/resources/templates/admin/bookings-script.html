@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="script">
@@ -23,7 +23,7 @@
             async function loadAdminBookings(page = 0) {
                 adminBookingsPage = page;
                 const container = document.getElementById('admin-bookings-container');
-                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading bookings...</p></div>';
+                container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải dữ liệu đặt phòng...</p></div>';
                 
                 try {
                     const result = await BookingAPI.getAll(page, adminBookingsPageSize);
@@ -31,41 +31,40 @@
                     const totalPages = result.totalPages || 0;
                     
                     if (bookings.length === 0) {
-                        container.innerHTML = '<div class="empty-state"><div class="icon">&#128230;</div><h3>No Bookings Found</h3><p>There are no bookings in the system yet.</p></div>';
+                        container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Không có đặt phòng</div><p class="ls-empty__text">Chưa có đặt phòng nào trong hệ thống.</p></div>';
                         return;
                     }
                     
-                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Customer</th><th>Room Type</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
+                    let html = '<div class="ls-card"><div class="ls-table-container"><table class="ls-table"><thead><tr><th>ID</th><th>Khách hàng</th><th>Loại phòng</th><th>Phòng</th><th>Check-in</th><th>Check-out</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>';
                     
                     bookings.forEach(booking => {
                         const statusClass = getStatusBadgeClass(booking.status);
                         const statusText = getStatusText(booking.status);
                         const customerName = booking.username ? escapeHtml(booking.username) : '#' + (booking.userId || '?');
-                        const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color: var(--gray-500)">Not assigned</em>';
+                        const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color:var(--slate-400);font-style:italic;">Chưa gán</em>';
                         const roomTypeDisplay = booking.roomTypeName ? escapeHtml(booking.roomTypeName) : 'N/A';
                         
-                        let actionsHtml = '<span class="badge badge-secondary">-</span>';
+                        let actionsHtml = '<span class="ls-badge ls-badge--secondary">-</span>';
                         
                         if (booking.status === 'CONFIRMED') {
                             actionsHtml = `
-                                <button onclick="openCheckInModal(${booking.id})" class="btn btn-sm btn-success">Check-in</button>
-                                <button onclick="adminCancelBooking(${booking.id})" class="btn btn-sm btn-danger" style="margin-left:4px">Cancel</button>
+                                <button onclick="openCheckInModal(${booking.id})" class="ls-btn ls-btn--success ls-btn--sm">Nhận phòng</button>
+                                <button onclick="adminCancelBooking(${booking.id})" class="ls-btn ls-btn--danger ls-btn--sm" style="margin-left:4px;">Hủy</button>
                             `;
                         } else if (booking.status === 'CHECKED_IN') {
                             actionsHtml = `
-                                <button onclick="adminCheckOut(${booking.id})" class="btn btn-sm btn-info">Check-out</button>
+                                <button onclick="adminCheckOut(${booking.id})" class="ls-btn ls-btn--primary ls-btn--sm">Trả phòng</button>
                             `;
                         }
                         
                         html += `<tr>
                             <td><strong>#${booking.id}</strong></td>
-                            <td><span class="badge badge-info">${customerName}</span></td>
+                            <td><span class="ls-badge ls-badge--info">${customerName}</span></td>
                             <td>${roomTypeDisplay}</td>
                             <td>${roomDisplay}</td>
                             <td>${formatDateTime(booking.checkIn)}</td>
                             <td>${formatDateTime(booking.checkOut)}</td>
                             <td><span class="${statusClass}">${statusText}</span></td>
-                            <td>${formatDateTime(booking.createdAt)}</td>
                             <td>${actionsHtml}</td>
                         </tr>`;
                     });
@@ -73,30 +72,30 @@
                     html += '</tbody></table></div></div>';
                     
                     if (totalPages > 1) {
-                        html += '<div class="pagination">';
-                        html += `<button onclick="loadAdminBookings(0)" ${page === 0 ? 'disabled' : ''}>&#171; First</button>`;
-                        html += `<button onclick="loadAdminBookings(${page - 1})" ${page === 0 ? 'disabled' : ''}>&#8249; Prev</button>`;
-                        html += `<span class="page-info">Page ${page + 1} of ${totalPages}</span>`;
-                        html += `<button onclick="loadAdminBookings(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Next &#8250;</button>`;
-                        html += `<button onclick="loadAdminBookings(${totalPages - 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Last &#187;</button>`;
+                        html += '<div class="ls-pagination">';
+                        html += `<button onclick="loadAdminBookings(0)" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#171;</button>`;
+                        html += `<button onclick="loadAdminBookings(${page - 1})" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#8249;</button>`;
+                        html += `<span class="ls-pagination__info">Trang ${page + 1} / ${totalPages}</span>`;
+                        html += `<button onclick="loadAdminBookings(${page + 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#8250;</button>`;
+                        html += `<button onclick="loadAdminBookings(${totalPages - 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#187;</button>`;
                         html += '</div>';
                     }
                     
                     container.innerHTML = html;
                 } catch (error) {
-                    container.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Bookings</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 
             async function adminCancelBooking(bookingId) {
-                if (!confirm('Are you sure you want to cancel booking #' + bookingId + '?')) return;
+                if (!confirm('Xác nhận hủy đặt phòng #' + bookingId + '?')) return;
                 
                 try {
                     await BookingAPI.cancelByManager(bookingId);
-                    showToast('Booking #' + bookingId + ' cancelled successfully.', 'success');
+                    ToastManager.show('Đã hủy đặt phòng #' + bookingId + ' thành công.', 'success');
                     loadAdminBookings(adminBookingsPage);
                 } catch (error) {
-                    showToast(error.message || 'Failed to cancel booking.', 'error');
+                    ToastManager.show(error.message || 'Hủy đặt phòng thất bại.', 'error');
                 }
             }
 
@@ -105,19 +104,38 @@
 
             function openCheckInModal(bookingId) {
                 currentCheckInBookingId = bookingId;
-                const modal = document.getElementById('checkin-modal');
-                const roomList = document.getElementById('checkin-room-list');
-                const modalTitle = document.getElementById('checkin-modal-title');
                 
-                modalTitle.textContent = 'Check-in & Assign Room - Booking #' + bookingId;
-                roomList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading available rooms...</p></div>';
-                modal.classList.add('active');
+                // Create modal dynamically
+                const modalOverlay = document.createElement('div');
+                modalOverlay.className = 'ls-modal-overlay ls-modal-overlay--active';
+                modalOverlay.id = 'checkin-modal';
                 
+                modalOverlay.innerHTML = `
+                    <div class="ls-modal-backdrop" onclick="closeCheckInModal()"></div>
+                    <div class="ls-modal" style="max-width:640px;">
+                        <div class="ls-modal__header">
+                            <h3 id="checkin-modal-title">Nhận phòng & Gán phòng - Booking #${bookingId}</h3>
+                            <button class="ls-modal__close" onclick="closeCheckInModal()">&times;</button>
+                        </div>
+                        <div class="ls-modal__body">
+                            <div id="checkin-room-list" class="ls-loading">
+                                <div class="ls-spinner"></div>
+                                <p>Đang tải danh sách phòng trống...</p>
+                            </div>
+                        </div>
+                        <div class="ls-modal__footer">
+                            <button type="button" onclick="closeCheckInModal()" class="ls-btn ls-btn--outline ls-btn--sm">Đóng</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalOverlay);
                 loadBestFitRooms(bookingId);
             }
 
             function closeCheckInModal() {
-                document.getElementById('checkin-modal').classList.remove('active');
+                const modal = document.getElementById('checkin-modal');
+                if (modal) modal.remove();
                 currentCheckInBookingId = null;
             }
 
@@ -128,23 +146,23 @@
                     const rooms = await BookingAPI.getBestFitRooms(bookingId);
                     
                     if (!rooms || rooms.length === 0) {
-                        roomList.innerHTML = '<div class="empty-state" style="padding: 24px;"><div class="icon">&#128716;</div><h3>No Rooms Available</h3><p>There are no available rooms matching this booking\'s room type for the selected dates.</p></div>';
+                        roomList.innerHTML = '<div class="ls-empty" style="padding:24px;"><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng phù hợp với loại phòng và ngày đã chọn.</p></div>';
                         return;
                     }
                     
-                    let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+                    let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
                     rooms.forEach(room => {
                         html += `
-                            <div class="card room-option" style="cursor: pointer; border: 2px solid transparent;" 
-                                 onmouseover="this.style.borderColor='var(--primary)'" 
+                            <div class="ls-card room-option" style="cursor:pointer;border:2px solid transparent;transition:var(--transition);" 
+                                 onmouseover="this.style.borderColor='var(--color-secondary)'" 
                                  onmouseout="this.style.borderColor='transparent'"
                                  onclick="selectRoomForCheckIn(${room.id})">
-                                <div class="card-body" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+                                <div class="ls-card__body" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
                                     <div>
                                         <strong>${escapeHtml(room.name)}</strong>
-                                        <span style="color: var(--gray-500); margin-left: 12px;">${escapeHtml(room.roomType?.name || '')}</span>
+                                        <span style="color:var(--slate-500);margin-left:12px;font-size:0.875rem;">${escapeHtml(room.roomType?.name || '')}</span>
                                     </div>
-                                    <button class="btn btn-primary btn-sm">Assign & Check-in</button>
+                                    <button class="ls-btn ls-btn--primary ls-btn--sm">Gán & Nhận phòng</button>
                                 </div>
                             </div>
                         `;
@@ -152,58 +170,37 @@
                     html += '</div>';
                     roomList.innerHTML = html;
                 } catch (error) {
-                    roomList.innerHTML = '<div class="alert alert-danger">Failed to load available rooms: ' + escapeHtml(error.message) + '</div>';
+                    roomList.innerHTML = '<div class="ls-alert ls-alert--danger">Lỗi tải phòng: ' + escapeHtml(error.message) + '</div>';
                 }
             }
 
             async function selectRoomForCheckIn(roomId) {
                 if (!currentCheckInBookingId) return;
                 
-                if (!confirm('Assign this room and check in the guest?')) return;
+                if (!confirm('Gán phòng này và nhận phòng cho khách?')) return;
                 
                 try {
                     await BookingAPI.checkIn(currentCheckInBookingId, roomId);
-                    showToast('Check-in completed successfully. Room assigned.', 'success');
+                    ToastManager.show('Nhận phòng thành công. Đã gán phòng.', 'success');
                     closeCheckInModal();
                     loadAdminBookings(adminBookingsPage);
                 } catch (error) {
-                    showToast(error.message || 'Check-in failed.', 'error');
+                    ToastManager.show(error.message || 'Nhận phòng thất bại.', 'error');
                 }
             }
 
             async function adminCheckOut(bookingId) {
-                if (!confirm('Confirm check-out for booking #' + bookingId + '?')) return;
+                if (!confirm('Xác nhận trả phòng cho đặt phòng #' + bookingId + '?')) return;
                 
                 try {
                     await BookingAPI.checkOut(bookingId);
-                    showToast('Check-out completed successfully.', 'success');
+                    ToastManager.show('Trả phòng thành công.', 'success');
                     loadAdminBookings(adminBookingsPage);
                 } catch (error) {
-                    showToast(error.message || 'Check-out failed.', 'error');
+                    ToastManager.show(error.message || 'Trả phòng thất bại.', 'error');
                 }
             }
         </script>
-
-        <!-- Check-in Modal -->
-        <div id="checkin-modal" class="modal-overlay">
-            <div class="modal" style="max-width: 640px;">
-                <div class="modal-header">
-                    <h3 id="checkin-modal-title">Check-in & Assign Room</h3>
-                    <button class="close-btn" onclick="closeCheckInModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div id="checkin-room-list">
-                        <div class="loading">
-                            <div class="loading-spinner"></div>
-                            <p>Loading available rooms...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" onclick="closeCheckInModal()" class="btn btn-outline">Cancel</button>
-                </div>
-            </div>
-        </div>
     </th:block>
 </body>
 </html>

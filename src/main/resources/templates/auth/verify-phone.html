@@ -1,113 +1,156 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="content">
-        <div class="auth-page">
-            <div class="auth-card">
-                <div class="auth-header">
-                    <h1>Hotel Booking</h1>
-                    <p>Phone verification required</p>
+        <div class="ls-auth-page">
+            <div class="ls-auth-bg-blob">
+                <div class="ls-auth-bg-blob-1"></div>
+                <div class="ls-auth-bg-blob-2"></div>
+            </div>
+            
+            <button onclick="window.location.href='/'" class="absolute" style="top:24px;left:24px;color:var(--slate-500);background:none;border:none;display:flex;align-items:center;gap:8px;font-size:0.75rem;font-weight:700;cursor:pointer;z-index:10;">
+                <span class="ls-icon ls-icon--sm">arrow_back</span> Quay lại Trang chủ
+            </button>
+            
+            <div class="ls-auth-card">
+                <div class="ls-auth-card__brand">
+                    <div class="ls-auth-card__brand-name">LuxeStay</div>
+                    <p class="ls-auth-card__brand-sub">Xác thực số điện thoại</p>
                 </div>
-
-                <div style="text-align: center; margin-bottom: 24px;">
-                    <div style="font-size: 3rem; margin-bottom: 12px;">&#128274;</div>
-                    <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--dark);">Verify Your Phone Number</h3>
-                    <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 8px;">
-                        We've sent a verification code to your registered phone number.
-                    </p>
+                
+                <div style="text-align:center;margin-bottom:24px;">
+                    <div style="font-size:3rem;margin-bottom:12px;">📱</div>
+                    <h3 style="font-family:var(--font-display);font-weight:600;font-size:1.125rem;color:var(--slate-800);margin-bottom:8px;">Xác thực số điện thoại</h3>
+                    <p style="font-size:0.8125rem;color:var(--slate-400);">Chúng tôi đã gửi mã xác thực đến số điện thoại của bạn.</p>
                 </div>
-
-                <div id="verify-loading" class="alert alert-info" style="display: none;">
-                    <span class="loading-spinner-small"></span> Sending OTP...
+                
+                <div id="verify-loading" class="ls-alert ls-alert--info" style="display:none;">
+                    <span class="ls-spinner ls-spinner--sm" style="display:inline-block;margin-right:8px;"></span> Đang gửi OTP...
                 </div>
-                <div id="verify-error" class="alert alert-danger" style="display: none;"></div>
-                <div id="verify-success" class="alert alert-success" style="display: none;"></div>
-
-                <!-- OTP input -->
+                <div id="verify-error" class="ls-alert ls-alert--danger" style="display:none;"></div>
+                <div id="verify-success" class="ls-alert ls-alert--success" style="display:none;"></div>
+                
                 <div id="verify-otp-step">
                     <form id="verify-otp-form" onsubmit="return handleVerifyPhoneOtp(event)">
-                        <div class="form-group">
-                            <label class="form-label" for="verify-otp-code">Enter OTP Code</label>
-                            <input type="text" id="verify-otp-code" class="form-control" placeholder="000000" 
-                                   required maxlength="6" minlength="6" 
-                                   pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code"
-                                   style="text-align: center; font-size: 1.5rem; letter-spacing: 8px; font-weight: 700;">
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="verify-otp-code" style="text-align:center;">Nhập mã OTP</label>
+                            <div class="ls-otp-grid">
+                                <input type="text" class="ls-otp-input" id="votp-0" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                                <input type="text" class="ls-otp-input" id="votp-1" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                                <input type="text" class="ls-otp-input" id="votp-2" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                                <input type="text" class="ls-otp-input" id="votp-3" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                                <input type="text" class="ls-otp-input" id="votp-4" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                                <input type="text" class="ls-otp-input" id="votp-5" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-success" style="width: 100%;" id="btn-verify-phone-otp">
-                            Verify & Continue
+                        <button type="submit" class="ls-btn ls-btn--secondary" style="width:100%;" id="btn-verify-phone-otp">
+                            Xác thực & Tiếp tục
                         </button>
                     </form>
-
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button type="button" class="btn btn-outline btn-sm" id="btn-resend-phone-otp" onclick="handleResendPhoneOtp()" style="width: 100%;">
-                            Resend OTP
+                    
+                    <div style="text-align:center;margin-top:16px;">
+                        <button type="button" class="ls-btn ls-btn--outline ls-btn--sm" id="btn-resend-phone-otp" onclick="handleResendPhoneOtp()" style="width:100%;">
+                            Gửi lại mã OTP
                         </button>
-                        <div id="resend-phone-countdown" style="display: none; font-size: 0.8rem; color: var(--gray-500); margin-top: 8px;">
-                            Resend available in <span id="countdown-phone-seconds">60</span>s
+                        <div id="resend-phone-countdown" style="display:none;font-size:0.75rem;color:var(--slate-400);margin-top:8px;">
+                            Gửi lại mã sau <span id="countdown-phone-seconds" style="font-weight:700;color:var(--slate-700);">60</span> giây
                         </div>
                     </div>
                 </div>
-
-                <div class="auth-footer">
-                    <a href="/" style="color: var(--gray-600);">Back to Home</a>
-                    &middot;
-                    <a href="/login" style="color: var(--gray-600);">Sign in with a different account</a>
+                
+                <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid var(--slate-100);">
+                    <div style="display:flex;gap:12px;justify-content:center;font-size:0.8125rem;">
+                        <a href="/" style="color:var(--slate-500);">Về trang chủ</a>
+                        <span style="color:var(--slate-300);">·</span>
+                        <a href="/login" style="color:var(--slate-500);">Đăng nhập</a>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="ls-auth-card__decorative">
+                <div style="width:100%;height:100%;background-size:cover;background-position:center;background-image:url('https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&q=80');"></div>
             </div>
         </div>
 
         <script>
-            // Send OTP automatically on page load
-            (async function sendOtpOnLoad() {
+            // OTP auto-focus
+            document.addEventListener('DOMContentLoaded', () => {
+                const otpInputs = document.querySelectorAll('#verify-otp-step .ls-otp-input');
+                otpInputs.forEach((input, index) => {
+                    input.addEventListener('input', (e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        e.target.value = val;
+                        if (val && index < 5) {
+                            otpInputs[index + 1].focus();
+                        }
+                    });
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                            otpInputs[index - 1].focus();
+                        }
+                    });
+                });
+                
+                // Send OTP on page load
+                sendOtpOnLoad();
+            });
+            
+            async function sendOtpOnLoad() {
                 const loadingDiv = document.getElementById('verify-loading');
                 const errorDiv = document.getElementById('verify-error');
-                loadingDiv.style.display = 'block';
-
+                loadingDiv.style.display = 'flex';
+                
                 try {
                     await AuthAPI.sendOtpForActivation();
-                    showToast('OTP sent to your phone!', 'success');
+                    if (typeof ToastManager !== 'undefined') {
+                        ToastManager.show('Mã OTP đã được gửi đến điện thoại của bạn!', 'success');
+                    } else {
+                        showToast('Mã OTP đã được gửi đến điện thoại của bạn!', 'success');
+                    }
                 } catch (error) {
-                    errorDiv.textContent = error.data?.message || error.message || 'Failed to send OTP. Please try again.';
+                    errorDiv.textContent = error.data?.message || error.message || 'Gửi OTP thất bại.';
                     errorDiv.style.display = 'block';
                 } finally {
                     loadingDiv.style.display = 'none';
                 }
-            })();
-
+            }
+            
             async function handleVerifyPhoneOtp(event) {
                 event.preventDefault();
                 const errorDiv = document.getElementById('verify-error');
                 const btn = document.getElementById('btn-verify-phone-otp');
                 errorDiv.style.display = 'none';
-
-                const otpCode = document.getElementById('verify-otp-code').value.trim();
-
-                if (otpCode.length !== 6 || !/^[0-9]{6}$/.test(otpCode)) {
-                    errorDiv.textContent = 'Please enter a valid 6-digit OTP code.';
+                
+                let otpCode = '';
+                for (let i = 0; i < 6; i++) {
+                    otpCode += document.getElementById('votp-' + i).value || '';
+                }
+                
+                if (otpCode.length !== 6) {
+                    errorDiv.textContent = 'Vui lòng nhập đầy đủ mã xác thực 6 số.';
                     errorDiv.style.display = 'block';
                     return false;
                 }
-
+                
                 try {
                     btn.disabled = true;
-                    btn.innerHTML = '<span class="loading-spinner-small"></span> Verifying...';
-
+                    btn.innerHTML = '<span class="ls-spinner ls-spinner--sm" style="display:inline-block;margin:0 auto;"></span> Đang xác thực...';
+                    
                     const data = await AuthAPI.activateByOtp(otpCode);
-
-                    // Decode JWT to get user info
-                    const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
-                    const auth = payload.authorities && payload.authorities[0];
-                    const role = payload.role || (typeof auth === 'string' ? auth.replace('ROLE_', '') : 'CUSTOMER');
-
+                    
+                    const payload = decodeJwt(data.accessToken);
+                    const role = extractRoleFromPayload(payload);
+                    
                     TokenManager.saveUser({
-                        username: payload.sub,
+                        username: payload?.sub || 'User',
                         role: role
                     });
-
-                    showToast('Phone verified successfully!', 'success');
-
-                    // Redirect based on role
+                    
+                    if (typeof ToastManager !== 'undefined') {
+                        ToastManager.show('Xác thực số điện thoại thành công!', 'success');
+                    }
+                    
                     setTimeout(() => {
                         if (role === 'MANAGER') {
                             window.location.href = '/admin/dashboard';
@@ -116,33 +159,35 @@
                         }
                     }, 1000);
                 } catch (error) {
-                    errorDiv.textContent = error.data?.message || error.message || 'Invalid OTP code.';
+                    errorDiv.textContent = error.data?.message || error.message || 'Mã OTP không hợp lệ.';
                     errorDiv.style.display = 'block';
                     btn.disabled = false;
-                    btn.innerHTML = 'Verify & Continue';
+                    btn.innerHTML = 'Xác thực & Tiếp tục';
                 }
                 return false;
             }
-
+            
             async function handleResendPhoneOtp() {
                 const btn = document.getElementById('btn-resend-phone-otp');
                 const countdown = document.getElementById('resend-phone-countdown');
                 const errorDiv = document.getElementById('verify-error');
                 errorDiv.style.display = 'none';
-
+                
                 try {
                     btn.disabled = true;
-                    btn.innerHTML = '<span class="loading-spinner-small"></span> Sending...';
-
+                    btn.innerHTML = '<span class="ls-spinner ls-spinner--sm" style="display:inline-block;margin-right:4px;"></span> Đang gửi...';
+                    
                     await AuthAPI.sendOtpForActivation();
-
-                    showToast('OTP resent!', 'success');
-
+                    
+                    if (typeof ToastManager !== 'undefined') {
+                        ToastManager.show('Mã OTP đã được gửi lại!', 'success');
+                    }
+                    
                     let seconds = 60;
                     countdown.style.display = 'block';
                     document.getElementById('countdown-phone-seconds').textContent = seconds;
-                    btn.innerHTML = 'Resend OTP';
-
+                    btn.innerHTML = 'Gửi lại mã OTP';
+                    
                     const interval = setInterval(() => {
                         seconds--;
                         document.getElementById('countdown-phone-seconds').textContent = seconds;
@@ -153,11 +198,11 @@
                         }
                     }, 1000);
                 } catch (error) {
-                    const msg = error.data?.message || error.message || 'Failed to resend OTP.';
+                    const msg = error.data?.message || error.message || 'Gửi lại OTP thất bại.';
                     errorDiv.textContent = msg;
                     errorDiv.style.display = 'block';
                     btn.disabled = false;
-                    btn.innerHTML = 'Resend OTP';
+                    btn.innerHTML = 'Gửi lại mã OTP';
                 }
             }
         </script>

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="script">
         <script>
             let myBookingsPage = 0;
             const myBookingsPageSize = 10;
+            let allMyBookings = [];
+            let filteredMyBookings = [];
 
             document.addEventListener('DOMContentLoaded', () => {
                 if (!TokenManager.isAuthenticated()) {
@@ -15,78 +17,107 @@
                 loadMyBookings();
             });
 
+            function filterMyBookings(searchTerm) {
+                if (!searchTerm) {
+                    filteredMyBookings = allMyBookings;
+                } else {
+                    const term = searchTerm.toLowerCase();
+                    filteredMyBookings = allMyBookings.filter(b => 
+                        b.id.toString().includes(term) || 
+                        (b.roomTypeName && b.roomTypeName.toLowerCase().includes(term))
+                    );
+                }
+                renderMyBookingsList();
+            }
+
             async function loadMyBookings(page = 0) {
                 myBookingsPage = page;
                 const container = document.getElementById('my-bookings-container');
-                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading your bookings...</p></div>';
+                container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải dữ liệu đặt phòng...</p></div>';
                 
                 try {
                     const result = await BookingAPI.getMyBookings(page, myBookingsPageSize);
                     const bookings = result.content || [];
                     const totalPages = result.totalPages || 0;
                     
-                    if (bookings.length === 0) {
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <div class="icon">&#128230;</div>
-                                <h3>No Bookings Yet</h3>
-                                <p>You haven't made any bookings yet.</p>
-                            </div>
-                        `;
-                        return;
-                    }
+                    allMyBookings = bookings;
+                    filteredMyBookings = bookings;
                     
-                    let html = '<div class="card"><div class="table-container"><table><thead><tr><th>ID</th><th>Room Type</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
+                    // Update stats
+                    document.getElementById('total-bookings').textContent = result.totalElements || bookings.length;
+                    const upcomingCount = bookings.filter(b => b.status === 'CONFIRMED').length;
+                    document.getElementById('upcoming-count').textContent = upcomingCount;
                     
-                    bookings.forEach(booking => {
-                        const statusClass = getStatusBadgeClass(booking.status);
-                        const statusText = getStatusText(booking.status);
-                        const canCancel = booking.status === 'CONFIRMED';
-                        const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color: var(--gray-500)">Not assigned</em>';
-                        const roomTypeDisplay = booking.roomTypeName ? escapeHtml(booking.roomTypeName) : 'N/A';
-                        
-                        html += `<tr>
-                            <td><strong>#${booking.id}</strong></td>
-                            <td>${roomTypeDisplay}</td>
-                            <td>${roomDisplay}</td>
-                            <td>${formatDateTime(booking.checkIn)}</td>
-                            <td>${formatDateTime(booking.checkOut)}</td>
-                            <td><span class="${statusClass}">${statusText}</span></td>
-                            <td>${formatDateTime(booking.createdAt)}</td>
-                            <td>
-                                ${canCancel ? `<button onclick="cancelMyBooking(${booking.id})" class="btn btn-danger btn-sm">Cancel</button>` : '<span class="badge badge-secondary">-</span>'}
-                            </td>
-                        </tr>`;
-                    });
-                    
-                    html += '</tbody></table></div></div>';
+                    renderMyBookingsList();
                     
                     // Pagination
                     if (totalPages > 1) {
-                        html += '<div class="pagination">';
-                        html += `<button onclick="loadMyBookings(0)" ${page === 0 ? 'disabled' : ''}>&#171; First</button>`;
-                        html += `<button onclick="loadMyBookings(${page - 1})" ${page === 0 ? 'disabled' : ''}>&#8249; Prev</button>`;
-                        html += `<span class="page-info">Page ${page + 1} of ${totalPages}</span>`;
-                        html += `<button onclick="loadMyBookings(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Next &#8250;</button>`;
-                        html += `<button onclick="loadMyBookings(${totalPages - 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>Last &#187;</button>`;
-                        html += '</div>';
+                        const pagination = document.createElement('div');
+                        pagination.className = 'ls-pagination';
+                        pagination.innerHTML = `
+                            <button onclick="loadMyBookings(0)" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#171;</button>
+                            <button onclick="loadMyBookings(${page - 1})" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#8249;</button>
+                            <span class="ls-pagination__info">Trang ${page + 1} / ${totalPages}</span>
+                            <button onclick="loadMyBookings(${page + 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#8250;</button>
+                            <button onclick="loadMyBookings(${totalPages - 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#187;</button>
+                        `;
+                        container.appendChild(pagination);
                     }
-                    
-                    container.innerHTML = html;
                 } catch (error) {
-                    container.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Error Loading Bookings</h3><p>' + escapeHtml(error.message) + '</p></div>';
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 
+            function renderMyBookingsList() {
+                const container = document.getElementById('my-bookings-container');
+                
+                if (filteredMyBookings.length === 0) {
+                    container.innerHTML = `
+                        <div class="ls-empty">
+                            <div class="ls-empty__icon">📋</div>
+                            <div class="ls-empty__title">Chưa có đặt phòng</div>
+                            <p class="ls-empty__text">Bạn chưa có đặt phòng nào. Hãy đặt ngay tại trang chủ!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '<div class="ls-table-container"><table class="ls-table"><thead><tr><th>Mã đặt</th><th>Loại phòng</th><th>Phòng</th><th>Nhận phòng</th><th>Trả phòng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>';
+                
+                filteredMyBookings.forEach(booking => {
+                    const statusClass = getStatusBadgeClass(booking.status);
+                    const statusText = getStatusText(booking.status);
+                    const canCancel = booking.status === 'CONFIRMED';
+                    const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color:var(--slate-400);font-style:italic;">Chưa gán</em>';
+                    const roomTypeDisplay = booking.roomTypeName ? escapeHtml(booking.roomTypeName) : 'N/A';
+                    
+                    html += `<tr>
+                        <td><strong>#${booking.id}</strong></td>
+                        <td>${roomTypeDisplay}</td>
+                        <td>${roomDisplay}</td>
+                        <td>${formatDateTime(booking.checkIn)}</td>
+                        <td>${formatDateTime(booking.checkOut)}</td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            ${canCancel ? `<button onclick="cancelMyBooking(${booking.id})" class="ls-btn ls-btn--danger ls-btn--sm">Hủy</button>` : '<span class="ls-badge ls-badge--secondary">-</span>'}
+                        </td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+                
+                container.innerHTML = html;
+            }
+
             async function cancelMyBooking(bookingId) {
-                if (!confirm('Are you sure you want to cancel this booking?')) return;
+                if (!confirm('Bạn có chắc muốn hủy đặt phòng #' + bookingId + '?')) return;
                 
                 try {
                     await BookingAPI.cancelMyBooking(bookingId);
-                    showToast('Booking cancelled successfully.', 'success');
+                    ToastManager.show('Đã hủy đặt phòng thành công.', 'success');
                     loadMyBookings(myBookingsPage);
                 } catch (error) {
-                    showToast(error.message || 'Failed to cancel booking.', 'error');
+                    ToastManager.show(error.message || 'Hủy đặt phòng thất bại.', 'error');
                 }
             }
         </script>

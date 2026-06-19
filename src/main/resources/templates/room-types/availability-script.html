@@ -1,61 +1,79 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head></head>
 <body>
     <th:block th:fragment="script">
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Set default dates: today and tomorrow
                 const today = new Date();
                 const tomorrow = new Date(today);
                 tomorrow.setDate(tomorrow.getDate() + 1);
                 
-                document.getElementById('check-in').value = today.toISOString().split('T')[0];
-                document.getElementById('check-out').value = tomorrow.toISOString().split('T')[0];
+                const checkIn = document.getElementById('avail-check-in');
+                const checkOut = document.getElementById('avail-check-out');
+                if (checkIn) checkIn.value = today.toISOString().split('T')[0];
+                if (checkOut) checkOut.value = tomorrow.toISOString().split('T')[0];
             });
 
             async function searchAvailability() {
-                const checkIn = document.getElementById('check-in').value;
-                const checkOut = document.getElementById('check-out').value;
+                const checkInInput = document.getElementById('avail-check-in') || document.getElementById('check-in');
+                const checkOutInput = document.getElementById('avail-check-out') || document.getElementById('check-out');
                 const resultsDiv = document.getElementById('availability-results');
                 
+                if (!checkInInput || !checkOutInput) {
+                    ToastManager.show('Không tìm thấy trường ngày.', 'error');
+                    return;
+                }
+                
+                const checkIn = checkInInput.value;
+                const checkOut = checkOutInput.value;
+                
                 if (!checkIn || !checkOut) {
-                    showToast('Please select both check-in and check-out dates.', 'warning');
+                    ToastManager.show('Vui lòng chọn ngày nhận và trả phòng.', 'warning');
                     return;
                 }
                 
                 if (checkIn >= checkOut) {
-                    showToast('Check-out date must be after check-in date.', 'warning');
+                    ToastManager.show('Ngày trả phòng phải sau ngày nhận phòng.', 'warning');
                     return;
                 }
                 
-                resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Searching availability...</p></div>';
+                resultsDiv.innerHTML = '<div class="ls-loading" style="grid-column:1/-1;"><div class="ls-spinner"></div><p>Đang tìm kiếm phòng trống...</p></div>';
                 
                 try {
                     const results = await RoomTypeAPI.getAvailability(checkIn, checkOut);
                     
                     if (!results || results.length === 0) {
-                        resultsDiv.innerHTML = '<div class="empty-state"><div class="icon">&#128716;</div><h3>No Rooms Available</h3><p>No rooms are available for the selected dates. Please try different dates.</p></div>';
+                        resultsDiv.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">🛏️</div><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng trống cho ngày đã chọn. Vui lòng thử ngày khác.</p></div>';
                         return;
                     }
                     
                     resultsDiv.innerHTML = results.map(rt => `
-                        <div class="room-type-card">
-                            <div class="card-image">&#127968;</div>
-                            <div class="card-content">
-                                <h3>${escapeHtml(rt.name)}</h3>
-                                <p>${escapeHtml(rt.description || 'No description available.')}</p>
-                                <div class="card-meta">
-                                    <span class="meta-item">&#128101; ${rt.capacity} guests</span>
-                                    <span class="meta-item">&#128197; ${rt.availableRoomCount} room(s) available</span>
+                        <div class="ls-card" style="display:flex;flex-direction:column;">
+                            <div style="height:200px;background:linear-gradient(135deg, var(--color-secondary-container), var(--color-secondary));display:flex;align-items:center;justify-content:center;font-size:3rem;">
+                                🏨
+                            </div>
+                            <div class="ls-card__body" style="flex:1;display:flex;flex-direction:column;">
+                                <h3 style="font-family:var(--font-display);font-weight:700;font-size:1.125rem;color:var(--slate-900);margin-bottom:8px;">${escapeHtml(rt.name)}</h3>
+                                <p style="color:var(--slate-500);font-size:0.875rem;margin-bottom:16px;flex:1;">${escapeHtml(rt.description || 'Không có mô tả.')}</p>
+                                <div class="flex gap-4 flex-wrap" style="margin-bottom:16px;">
+                                    <span class="flex items-center gap-1.5 text-sm" style="color:var(--slate-700);">
+                                        <span class="ls-icon ls-icon--sm">people</span> ${rt.capacity} khách
+                                    </span>
+                                    <span class="flex items-center gap-1.5 text-sm" style="color:var(--slate-700);">
+                                        <span class="ls-icon ls-icon--sm">bed</span> ${rt.availableRoomCount} phòng trống
+                                    </span>
                                 </div>
-                                <div class="price">${formatCurrency(rt.pricePerNight)} <small>/ night</small></div>
+                                <div>
+                                    <span class="text-xs" style="color:var(--slate-400);">Giá chỉ từ</span>
+                                    <div class="text-xl font-bold font-display" style="color:var(--color-secondary);">${formatCurrency(rt.pricePerNight)} <span style="font-size:0.75rem;font-weight:400;color:var(--slate-400);font-family:var(--font-sans);">/ đêm</span></div>
+                                </div>
                             </div>
                         </div>
                     `).join('');
                 } catch (error) {
-                    resultsDiv.innerHTML = '<div class="empty-state"><div class="icon">&#9888;</div><h3>Search Failed</h3><p>' + escapeHtml(error.message) + '</p></div>';
-                    showToast(error.message, 'error');
+                    resultsDiv.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Tìm kiếm thất bại</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                    ToastManager.show(error.message, 'error');
                 }
             }
         </script>

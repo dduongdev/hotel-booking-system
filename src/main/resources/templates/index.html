@@ -262,7 +262,7 @@
                     let html = '';
                     roomTypes.forEach((rt, index) => {
                         const isFirst = index === 0;
-                        const roomImg = `https://images.unsplash.com/photo-${index % 2 === 0 ? '1590490360182-c33d57733427' : '1611892472016-f2e38b7de8e9'}?w=800&q=80`;
+                        const roomImg = rt.imageUrl || `https://images.unsplash.com/photo-${index % 2 === 0 ? '1590490360182-c33d57733427' : '1611892472016-f2e38b7de8e9'}?w=800&q=80`;
                         
                         if (isFirst) {
                             html += `                            <div class="ls-col-span-8 ls-room-card">

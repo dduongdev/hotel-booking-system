@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
@@ -39,8 +40,18 @@ public class RoomTypeController {
 
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<CreateRoomTypeResponse>> create(@Valid @RequestBody CreateRoomTypeRequest request) {
-        CreateRoomTypeResponse response = roomTypeService.create(request);
+    public ResponseEntity<ApiResponse<CreateRoomTypeResponse>> create(
+            @RequestParam("name") String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam("capacity") int capacity,
+            @RequestParam("pricePerNight") double pricePerNight,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        CreateRoomTypeRequest request = new CreateRoomTypeRequest();
+        request.setName(name);
+        request.setDescription(description);
+        request.setCapacity(capacity);
+        request.setPricePerNight(pricePerNight);
+        CreateRoomTypeResponse response = roomTypeService.create(request, image);
         return ResponseEntity.ok(ApiResponse.success("Room type created successfully", response));
     }
 
@@ -55,8 +66,19 @@ public class RoomTypeController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<RoomTypeResponse>> update(@PathVariable Integer id, @Valid @RequestBody UpdateRoomTypeRequest request) {
-        RoomTypeResponse response = roomTypeService.update(id, request);
+    public ResponseEntity<ApiResponse<RoomTypeResponse>> update(
+            @PathVariable Integer id,
+            @RequestParam("name") String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam("capacity") int capacity,
+            @RequestParam("pricePerNight") double pricePerNight,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        UpdateRoomTypeRequest request = new UpdateRoomTypeRequest();
+        request.setName(name);
+        request.setDescription(description);
+        request.setCapacity(capacity);
+        request.setPricePerNight(pricePerNight);
+        RoomTypeResponse response = roomTypeService.update(id, request, image);
         return ResponseEntity.ok(ApiResponse.success("Room type updated successfully", response));
     }
 

@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/", "/index.html").permitAll()
-                .requestMatchers("/css/**", "/js/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/uploads/**").permitAll()
                 .requestMatchers("/login", "/register", "/auth/change-password", "/verify-phone").permitAll()
                 .requestMatchers("/room-types/**").permitAll()
                 .requestMatchers("/rooms/**").permitAll()
@@ -68,7 +68,7 @@ public class SecurityConfig {
             "http://localhost:8080"
         ));
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         configuration.setAllowedHeaders(List.of("*"));
 

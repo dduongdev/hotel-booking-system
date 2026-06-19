@@ -39,9 +39,12 @@
                     
                     roomTypes.forEach(rt => {
                         const hiddenBadge = rt.hidden ? '<span class="ls-badge ls-badge--hidden" style="margin-top:8px;display:inline-block;">Đã ẩn</span>' : '<span class="ls-badge ls-badge--visible" style="margin-top:8px;display:inline-block;">Hiển thị</span>';
+                        const imageHtml = rt.imageUrl ? `<img src="${escapeHtml(rt.imageUrl)}" alt="${escapeHtml(rt.name)}" style="width:100%;height:180px;object-fit:cover;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">` : `<div style="width:100%;height:180px;background:var(--slate-100);border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;align-items:center;justify-content:center;">
+                            <span class="ls-icon" style="font-size:48px;color:var(--slate-300);">image</span></div>`;
                         
                         html += `
                             <div class="ls-card">
+                                ${imageHtml}
                                 <div class="ls-card__header">
                                     <h3>${escapeHtml(rt.name)}</h3>
                                     <div class="flex gap-2">
@@ -103,6 +106,8 @@
                 document.getElementById('rt-description').value = '';
                 document.getElementById('rt-capacity').value = '2';
                 document.getElementById('rt-price').value = '';
+                document.getElementById('rt-image').value = '';
+                document.getElementById('rt-image-preview').style.display = 'none';
                 document.getElementById('rt-hidden').checked = false;
                 document.getElementById('rt-hidden-group').style.display = 'none';
                 document.getElementById('room-type-form-error').style.display = 'none';
@@ -127,6 +132,13 @@
                     document.getElementById('rt-description').value = rt.description || '';
                     document.getElementById('rt-capacity').value = rt.capacity;
                     document.getElementById('rt-price').value = rt.pricePerNight;
+                    document.getElementById('rt-image').value = '';
+                    if (rt.imageUrl) {
+                        document.getElementById('rt-image-preview').style.display = 'block';
+                        document.getElementById('rt-image-preview-img').src = rt.imageUrl;
+                    } else {
+                        document.getElementById('rt-image-preview').style.display = 'none';
+                    }
                     document.getElementById('rt-hidden').checked = rt.hidden || false;
                     document.getElementById('rt-hidden-group').style.display = 'block';
                     document.getElementById('room-type-modal').classList.add('ls-modal-overlay--active');
@@ -156,12 +168,14 @@
                     return false;
                 }
                 
+                const imageFile = document.getElementById('rt-image').files[0];
+                
                 try {
                     if (id) {
-                        await RoomTypeAPI.update(parseInt(id), { name, description, capacity, pricePerNight });
+                        await RoomTypeAPI.updateWithImage(parseInt(id), { name, description, capacity, pricePerNight }, imageFile);
                         ToastManager.show('Cập nhật loại phòng thành công.', 'success');
                     } else {
-                        await RoomTypeAPI.create({ name, description, capacity, pricePerNight });
+                        await RoomTypeAPI.createWithImage({ name, description, capacity, pricePerNight }, imageFile);
                         ToastManager.show('Thêm loại phòng thành công.', 'success');
                     }
                     closeRoomTypeModal();

@@ -22,6 +22,8 @@ import com.dduongdev.hotel.payload.response.RoomTypeResponse;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
 import com.dduongdev.hotel.util.Constants;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,14 +32,21 @@ public class RoomTypeService {
 
     private final RoomTypeRepository roomTypeRepository;
     private final RoomTypeMapper roomTypeMapper;
+    private final StorageService storageService;
 
-    public CreateRoomTypeResponse create(CreateRoomTypeRequest request) {
+    public CreateRoomTypeResponse create(CreateRoomTypeRequest request, MultipartFile image) {
         RoomType roomType = new RoomType();
 
         roomType.setName(request.getName());
         roomType.setDescription(request.getDescription());
         roomType.setCapacity(request.getCapacity());
         roomType.setPricePerNight(request.getPricePerNight());
+
+        if (image != null && !image.isEmpty()) {
+            String filename = storageService.generateFilename(image.getOriginalFilename());
+            String imageUrl = storageService.upload(image, filename);
+            roomType.setImageUrl(imageUrl);
+        }
 
         roomTypeRepository.save(roomType);
 
@@ -50,13 +59,23 @@ public class RoomTypeService {
     }
 
     @Transactional
-    public RoomTypeResponse update(Integer id, UpdateRoomTypeRequest request) {
+    public RoomTypeResponse update(Integer id, UpdateRoomTypeRequest request, MultipartFile image) {
         RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type with id " + id + " not found"));
         
         storedroomType.setName(request.getName());
         storedroomType.setDescription(request.getDescription());
         storedroomType.setCapacity(request.getCapacity());
         storedroomType.setPricePerNight(request.getPricePerNight());
+
+        if (image != null && !image.isEmpty()) {
+            // Delete old image if exists
+            if (storedroomType.getImageUrl() != null) {
+                storageService.delete(storedroomType.getImageUrl());
+            }
+            String filename = storageService.generateFilename(image.getOriginalFilename());
+            String imageUrl = storageService.upload(image, filename);
+            storedroomType.setImageUrl(imageUrl);
+        }
 
         roomTypeRepository.save(storedroomType);
 

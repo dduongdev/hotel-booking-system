@@ -93,6 +93,14 @@
                                 <input type="number" id="rt-price" class="ls-form-input" min="0" step="10000" placeholder="VD: 500000" required>
                             </div>
                         </div>
+                        <div class="ls-form-group">
+                            <label class="ls-form-label">Hình ảnh</label>
+                            <div id="rt-image-preview" style="display:none;margin-bottom:8px;">
+                                <img id="rt-image-preview-img" src="" alt="Preview" style="max-width:200px;max-height:120px;border-radius:var(--radius-md);object-fit:cover;border:1px solid var(--slate-200);">
+                            </div>
+                            <input type="file" id="rt-image" accept="image/*" style="font-size:0.8125rem;">
+                            <small style="color:var(--slate-500);display:block;margin-top:4px;font-size:0.75rem;"> JPG, PNG, WebP. Tối đa 5MB.</small>
+                        </div>
                         <div class="ls-form-group" id="rt-hidden-group" style="display:none;">
                             <label class="ls-form-label" style="display:flex;align-items:center;gap:8px;">
                                 <input type="checkbox" id="rt-hidden" style="width:16px;height:16px;cursor:pointer;"> Ẩn loại phòng

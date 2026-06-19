@@ -269,6 +269,48 @@ const RoomTypeAPI = {
             method: 'PATCH',
             body: { hidden }
         });
+    },
+
+    async createWithImage(data, imageFile) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        if (data.description) formData.append('description', data.description);
+        formData.append('capacity', data.capacity);
+        formData.append('pricePerNight', data.pricePerNight);
+        if (imageFile) formData.append('image', imageFile);
+
+        const headers = {};
+        if (TokenManager.getAccessToken()) {
+            headers['Authorization'] = `Bearer ${TokenManager.getAccessToken()}`;
+        }
+
+        const response = await fetch(`${API_BASE}/room-types`, {
+            method: 'POST',
+            headers,
+            body: formData
+        });
+        return handleResponse(response);
+    },
+
+    async updateWithImage(id, data, imageFile) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        if (data.description) formData.append('description', data.description);
+        formData.append('capacity', data.capacity);
+        formData.append('pricePerNight', data.pricePerNight);
+        if (imageFile) formData.append('image', imageFile);
+
+        const headers = {};
+        if (TokenManager.getAccessToken()) {
+            headers['Authorization'] = `Bearer ${TokenManager.getAccessToken()}`;
+        }
+
+        const response = await fetch(`${API_BASE}/room-types/${id}`, {
+            method: 'PUT',
+            headers,
+            body: formData
+        });
+        return handleResponse(response);
     }
 };
 

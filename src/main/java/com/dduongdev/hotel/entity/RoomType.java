@@ -41,6 +41,9 @@ public class RoomType {
 
     private boolean hidden = false;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

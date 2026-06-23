@@ -41,7 +41,7 @@ public class BookingController {
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<MakeBookingResponse>> make(@Valid @RequestBody MakeBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
-        Integer userId = userDetails.getId();
+        Long userId = userDetails.getId();
         MakeBookingResponse response = bookingService.make(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Booking created successfully", response));
     }
@@ -53,7 +53,7 @@ public class BookingController {
         @RequestParam(defaultValue = "10") int size,
         @AuthenticationPrincipal HotelUserDetails userDetails
     ) {
-        Integer userId = userDetails.getId();
+        Long userId = userDetails.getId();
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -64,7 +64,7 @@ public class BookingController {
     @DeleteMapping("/me/cancel")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<Void>> cancelBookingOfCurrentUser(@Valid @RequestBody CancelOwnBookingRequest request, @AuthenticationPrincipal HotelUserDetails userDetails) {
-        Integer userId = userDetails.getId();
+        Long userId = userDetails.getId();
         bookingService.cancel(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", null));
     }
@@ -82,14 +82,14 @@ public class BookingController {
 
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(@PathVariable Long id) {
         BookingResponse response = bookingService.cancel(id);
         return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", response));
     }
 
     @GetMapping("/{id}/best-fit-rooms")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<List<RoomResponse>>> getBestFitRooms(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<List<RoomResponse>>> getBestFitRooms(@PathVariable Long id) {
         List<RoomResponse> rooms = bookingService.getBestFitRooms(id);
         return ResponseEntity.ok(ApiResponse.success(rooms));
     }
@@ -97,7 +97,7 @@ public class BookingController {
     @PatchMapping("/{id}/check-in")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<BookingResponse>> checkIn(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody CheckInRequest request) {
         BookingResponse response = bookingService.checkIn(id, request.getRoomId());
         return ResponseEntity.ok(ApiResponse.success("Check-in completed successfully", response));
@@ -105,7 +105,7 @@ public class BookingController {
 
     @PatchMapping("/{id}/check-out")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<BookingResponse>> checkOut(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<BookingResponse>> checkOut(@PathVariable Long id) {
         BookingResponse response = bookingService.checkOut(id);
         return ResponseEntity.ok(ApiResponse.success("Check-out completed successfully", response));
     }

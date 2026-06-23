@@ -52,7 +52,7 @@ public class RoomController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<RoomResponse>> update(
-        @PathVariable Integer id,
+        @PathVariable Long id,
         @Valid @RequestBody UpdateRoomRequest request
     ) {
         RoomResponse response = roomService.update(id, request);

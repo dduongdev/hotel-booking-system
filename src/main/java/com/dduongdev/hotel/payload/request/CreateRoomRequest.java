@@ -14,5 +14,5 @@ public class CreateRoomRequest {
     private String name;
 
     @NotNull(message = "Room type ID is required")
-    private int roomTypeId;
+    private Long roomTypeId;
 }

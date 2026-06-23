@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class RoomResponse {
-    private int id;
+    private Long id;
     private String name;
     private boolean hidden;
     private RoomTypeResponse roomType;

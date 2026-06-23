@@ -7,5 +7,5 @@ import lombok.Getter;
 public class CancelOwnBookingRequest {
     
     @NotNull(message = "Booking ID is required")
-    private int bookingId;
+    private Long bookingId;
 }

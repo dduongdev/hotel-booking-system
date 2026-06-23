@@ -11,10 +11,10 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.dduongdev.hotel.entity.Room;
 
-public interface RoomRepository extends JpaRepository<Room, Integer> {
+public interface RoomRepository extends JpaRepository<Room, Long> {
     Page<Room> findAll(Pageable pageable);
 
-    Optional<Room> findById(Integer id);
+    Optional<Room> findById(Long id);
 
     @Query("""
             SELECT r
@@ -52,5 +52,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
                 MIN(next_b.checkIn) ASC NULLS LAST,
                 r.bookingCount ASC
             """)
-    List<Room> findBestFitForBooking(int roomTypeId, LocalDateTime checkIn, LocalDateTime checkOut);
+    List<Room> findBestFitForBooking(Long roomTypeId, LocalDateTime checkIn, LocalDateTime checkOut);
 }

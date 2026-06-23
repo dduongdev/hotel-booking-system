@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class MakeBookingResponse {
-    private int id;
+    private Long id;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
     private LocalDateTime createdAt;

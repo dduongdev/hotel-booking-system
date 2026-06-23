@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CreateRoomResponse {
-    private int id;
+    private Long id;
     private String name;
     private RoomTypeResponse roomType;
     private LocalDateTime createdAt;

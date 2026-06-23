@@ -15,11 +15,11 @@ import com.dduongdev.hotel.entity.User;
 @Setter
 public class HotelUserDetails extends org.springframework.security.core.userdetails.User {
     
-    private int id;
+    private Long id;
     private User.Role role;
     private boolean phoneVerified;
 
-    public HotelUserDetails(int id, String username, String password, User.Role role, boolean phoneVerified) {
+    public HotelUserDetails(Long id, String username, String password, User.Role role, boolean phoneVerified) {
         super(username, password, List.of());
         this.id = id;
         this.role = role;

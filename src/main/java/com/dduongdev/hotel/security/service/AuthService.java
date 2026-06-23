@@ -77,7 +77,7 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse changePassword(int userId, ChangePasswordRequest request) {
+    public LoginResponse changePassword(Long userId, ChangePasswordRequest request) {
         User storedUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 

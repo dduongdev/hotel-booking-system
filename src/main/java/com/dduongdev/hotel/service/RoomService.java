@@ -55,7 +55,7 @@ public class RoomService {
     }
 
     @Transactional
-    public RoomResponse update(Integer id, UpdateRoomRequest request) {
+    public RoomResponse update(Long id, UpdateRoomRequest request) {
 
         if (!roomTypeRepository.existsById(request.getRoomTypeId())) {
             throw new ResourceNotFoundException("Room type with id " + request.getRoomTypeId() + " not found");

@@ -28,7 +28,7 @@ public class RefreshTokenService {
     private final SecureRandom secureRandom;
     private final Base64.Encoder base64Encoder;
 
-    public RefreshToken create(int userId) {
+    public RefreshToken create(Long userId) {
         RefreshToken refreshToken = new RefreshToken();
         
         if (!userRepository.existsById(userId)) {
@@ -50,7 +50,7 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
-    public void deleteById(int id) {
+    public void deleteById(Long id) {
         refreshTokenRepository.deleteById(id);
     }
 

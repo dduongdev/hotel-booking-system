@@ -9,7 +9,7 @@ import lombok.Getter;
 public class MakeBookingRequest {
     
     @NotNull(message = "Room Type ID is required")
-    private int roomTypeId;
+    private Long roomTypeId;
 
     @NotNull(message = "Check-in date is required")
     private LocalDate checkIn;

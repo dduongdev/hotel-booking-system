@@ -55,7 +55,7 @@ public class UserService {
         return authService.generateTokenPair(userDetails);
     }
 
-    public LoginResponse activateUserByOtp(int userId, String otpCode) {
+    public LoginResponse activateUserByOtp(Long userId, String otpCode) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -73,7 +73,7 @@ public class UserService {
         return authService.generateTokenPair(userDetails);
     }
 
-    public void sendOtpForActivation(int userId) {
+    public void sendOtpForActivation(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         otpService.sendOtp(user.getPhoneNumber());

@@ -55,7 +55,7 @@ class AuthServiceTest {
     @Captor
     private ArgumentCaptor<User> userCaptor;
 
-    private static final int USER_ID = 1;
+    private static final Long USER_ID = 1L;
     private static final String CURRENT_PASSWORD = "oldPwd123";
     private static final String NEW_PASSWORD = "newPwd456";
     private static final String ENCODED_NEW_PASSWORD = "encodedNewPwd";
@@ -141,7 +141,7 @@ class AuthServiceTest {
         when(jwtService.generateToken(any())).thenReturn(ACCESS_TOKEN);
 
         RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setId(1);
+        refreshToken.setId(1L);
         refreshToken.setToken(REFRESH_TOKEN_VALUE);
         refreshToken.setExpirationTime(LocalDateTime.now().plusDays(7));
         when(refreshTokenService.create(USER_ID)).thenReturn(refreshToken);
@@ -166,7 +166,7 @@ class AuthServiceTest {
         when(jwtService.generateToken(any())).thenReturn(ACCESS_TOKEN);
 
         RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setId(1);
+        refreshToken.setId(1L);
         refreshToken.setToken(REFRESH_TOKEN_VALUE);
         refreshToken.setExpirationTime(LocalDateTime.now().plusDays(7));
         when(refreshTokenService.create(USER_ID)).thenReturn(refreshToken);
@@ -195,7 +195,7 @@ class AuthServiceTest {
         when(jwtService.generateToken(any())).thenReturn(ACCESS_TOKEN);
 
         RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setId(1);
+        refreshToken.setId(1L);
         refreshToken.setToken(REFRESH_TOKEN_VALUE);
         refreshToken.setExpirationTime(LocalDateTime.now().plusDays(7));
         when(refreshTokenService.create(USER_ID)).thenReturn(refreshToken);

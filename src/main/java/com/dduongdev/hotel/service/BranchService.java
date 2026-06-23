@@ -50,7 +50,7 @@ public class BranchService {
     }
 
     @Transactional
-    public BranchResponse update(Integer id, UpdateBranchRequest request) {
+    public BranchResponse update(Long id, UpdateBranchRequest request) {
         Branch storedBranch = branchRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Branch with id " + id + " not found"));
 
@@ -70,7 +70,7 @@ public class BranchService {
     }
 
     @Transactional
-    public BranchResponse changeStatus(Integer id, ChangeBranchStatusRequest request) {
+    public BranchResponse changeStatus(Long id, ChangeBranchStatusRequest request) {
         Branch storedBranch = branchRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Branch with id " + id + " not found"));
 

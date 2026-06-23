@@ -51,7 +51,7 @@ public class BranchController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<BranchResponse>> update(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody UpdateBranchRequest request) {
         BranchResponse response = branchService.update(id, request);
         return ResponseEntity.ok(ApiResponse.success("Branch updated successfully", response));
@@ -60,7 +60,7 @@ public class BranchController {
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<BranchResponse>> changeStatus(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody ChangeBranchStatusRequest request) {
         BranchResponse response = branchService.changeStatus(id, request);
         return ResponseEntity.ok(ApiResponse.success("Branch status changed successfully", response));

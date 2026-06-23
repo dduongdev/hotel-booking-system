@@ -50,6 +50,9 @@ public class Branch extends BaseEntity {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     public static enum Status {
         ACTIVE,
         INACTIVE,

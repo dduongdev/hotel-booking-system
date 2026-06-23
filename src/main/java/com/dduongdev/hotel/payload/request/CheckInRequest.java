@@ -7,5 +7,5 @@ import lombok.Getter;
 public class CheckInRequest {
 
     @NotNull(message = "Room ID is required")
-    private int roomId;
+    private Long roomId;
 }

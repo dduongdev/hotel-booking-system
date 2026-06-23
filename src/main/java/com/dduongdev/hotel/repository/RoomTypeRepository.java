@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.dduongdev.hotel.dto.RoomTypeAvailability;
 import com.dduongdev.hotel.entity.RoomType;
 
-public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
+public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
     Page<RoomType> findAllByOrderByPricePerNightDesc(Pageable pageable);
 
     @Query("""
@@ -63,5 +63,5 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
               AND rt.hidden = false
             GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight, rt.imageUrl
             """)
-    RoomTypeAvailability findRoomTypeAvailabilityByIdAndCheckInAndCheckOut(int id, LocalDateTime checkIn, LocalDateTime checkOut);
+    RoomTypeAvailability findRoomTypeAvailabilityByIdAndCheckInAndCheckOut(Long id, LocalDateTime checkIn, LocalDateTime checkOut);
 }

@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CreateBranchResponse {
-    private int id;
+    private Long id;
     private String description;
     private String phoneNumber;
     private String email;

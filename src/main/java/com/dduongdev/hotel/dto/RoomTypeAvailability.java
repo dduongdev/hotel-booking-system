@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RoomTypeAvailability {
-    private int id;
+    private Long id;
     private String name;
     private String description;
     private int capacity;
@@ -14,7 +14,7 @@ public class RoomTypeAvailability {
     private int availableRoomCount;
     private String imageUrl;
 
-    public RoomTypeAvailability(int id, String name, String description, int capacity, double pricePerNight, long availableRoomCount, String imageUrl) {
+    public RoomTypeAvailability(Long id, String name, String description, int capacity, double pricePerNight, long availableRoomCount, String imageUrl) {
         this.id = id;
         this.name = name;
         this.description = description;

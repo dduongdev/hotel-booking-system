@@ -32,7 +32,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/room-types")
+@RequestMapping("/api/v1/branch/{branch_id}/room-types")
 @RequiredArgsConstructor
 public class RoomTypeController {
     
@@ -67,7 +67,7 @@ public class RoomTypeController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<RoomTypeResponse>> update(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @RequestParam("name") String name,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("capacity") int capacity,
@@ -84,7 +84,7 @@ public class RoomTypeController {
 
     @PatchMapping("/{id}/hidden")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<RoomTypeResponse>> changeHiddenState(@PathVariable Integer id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
+    public ResponseEntity<ApiResponse<RoomTypeResponse>> changeHiddenState(@PathVariable Long id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
         RoomTypeResponse response = roomTypeService.changeHiddenState(id, request);
         return ResponseEntity.ok(ApiResponse.success("Room type hidden state changed successfully", response));
     }

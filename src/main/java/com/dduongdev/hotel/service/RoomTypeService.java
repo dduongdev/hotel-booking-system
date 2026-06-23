@@ -59,7 +59,7 @@ public class RoomTypeService {
     }
 
     @Transactional
-    public RoomTypeResponse update(Integer id, UpdateRoomTypeRequest request, MultipartFile image) {
+    public RoomTypeResponse update(Long id, UpdateRoomTypeRequest request, MultipartFile image) {
         RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type with id " + id + " not found"));
         
         storedroomType.setName(request.getName());
@@ -83,7 +83,7 @@ public class RoomTypeService {
     }
 
     @Transactional
-    public RoomTypeResponse changeHiddenState(Integer id, ChangeRoomTypeHiddenStateRequest request) {
+    public RoomTypeResponse changeHiddenState(Long id, ChangeRoomTypeHiddenStateRequest request) {
         RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type with id " + id + " not found"));
         
         storedroomType.setHidden(request.isHidden());

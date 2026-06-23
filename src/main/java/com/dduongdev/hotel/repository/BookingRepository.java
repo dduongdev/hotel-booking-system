@@ -10,11 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.dduongdev.hotel.entity.Booking;
 
-public interface BookingRepository extends JpaRepository<Booking, Integer> {
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    Page<Booking> findByUserId(Integer userId, Pageable pageable);
+    Page<Booking> findByUserId(Long userId, Pageable pageable);
 
-    Optional<Booking> findByIdAndUserId(Integer id, Integer userId);
+    Optional<Booking> findByIdAndUserId(Long id, Long userId);
 
     Page<Booking> findAll(Pageable pageable);
 
@@ -27,5 +27,5 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
                 AND b.checkIn < :checkOut
                 AND b.checkOut > :checkIn
             """)
-    boolean existsByRoomIdAndOverlappingDates(Integer roomId, LocalDateTime checkIn, LocalDateTime checkOut, Integer bookingId);
+    boolean existsByRoomIdAndOverlappingDates(Long roomId, LocalDateTime checkIn, LocalDateTime checkOut, Long bookingId);
 }

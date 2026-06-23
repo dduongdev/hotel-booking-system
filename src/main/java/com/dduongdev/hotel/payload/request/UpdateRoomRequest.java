@@ -17,5 +17,5 @@ public class UpdateRoomRequest {
     private boolean hidden;
 
     @NotNull(message = "Room type ID is required")
-    private int roomTypeId;
+    private Long roomTypeId;
 }

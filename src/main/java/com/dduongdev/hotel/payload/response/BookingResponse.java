@@ -12,15 +12,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BookingResponse {
-    private int id;
+    private Long id;
     private Booking.Status status;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
-    private Integer roomTypeId;
+    private Long roomTypeId;
     private String roomTypeName;
-    private Integer roomId;
+    private Long roomId;
     private String roomName;
-    private Integer userId;
+    private Long userId;
     private String username;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

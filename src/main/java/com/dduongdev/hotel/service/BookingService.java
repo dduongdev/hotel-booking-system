@@ -43,7 +43,7 @@ public class BookingService {
     private final com.dduongdev.hotel.mapper.RoomMapper roomMapper;
 
     @Transactional
-    public MakeBookingResponse make(Integer userId, MakeBookingRequest request) {
+    public MakeBookingResponse make(Long userId, MakeBookingRequest request) {
         if (request.getCheckIn().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Check-in date cannot be in the past");
         }
@@ -77,12 +77,12 @@ public class BookingService {
         return bookingMapper.toMakeBookingResponse(booking);
     }
 
-    public Page<BookingResponse> getByUserId(Integer userId, Pageable pageable) {
+    public Page<BookingResponse> getByUserId(Long userId, Pageable pageable) {
         return bookingRepository.findByUserId(userId, pageable).map(bookingMapper::toBookingResponse);
     }
 
     @Transactional
-    public void cancel(Integer userId, CancelOwnBookingRequest request) {
+    public void cancel(Long userId, CancelOwnBookingRequest request) {
         Booking booking = bookingRepository.findByIdAndUserId(request.getBookingId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Booking is not found or you don't have permission"));
@@ -98,7 +98,7 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse cancel(Integer id) {
+    public BookingResponse cancel(Long id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking is not found"));
 
@@ -111,7 +111,7 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public List<RoomResponse> getBestFitRooms(Integer bookingId) {
+    public List<RoomResponse> getBestFitRooms(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking with id " + bookingId + " not found"));
 
@@ -126,7 +126,7 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse checkIn(Integer bookingId, Integer roomId) {
+    public BookingResponse checkIn(Long bookingId, Long roomId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking with id " + bookingId + " not found"));
 
@@ -147,7 +147,7 @@ public class BookingService {
             throw new IllegalStateException("Room '" + room.getName() + "' is hidden and cannot be assigned");
         }
 
-        if (room.getRoomType().getId() != booking.getRoomType().getId()) {
+        if (!room.getRoomType().getId().equals(booking.getRoomType().getId())) {
             throw new IllegalArgumentException(
                     "Room '" + room.getName() + "' does not belong to the booking's room type");
         }
@@ -170,7 +170,7 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse checkOut(Integer bookingId) {
+    public BookingResponse checkOut(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking with id " + bookingId + " not found"));
 

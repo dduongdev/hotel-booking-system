@@ -23,7 +23,7 @@ import lombok.Setter;
 public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

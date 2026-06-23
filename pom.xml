@@ -124,6 +124,13 @@
 			<artifactId>minio</artifactId>
 			<version>8.5.7</version>
 		</dependency>
+
+		<!-- Twilio SDK for production SMS -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>12.1.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

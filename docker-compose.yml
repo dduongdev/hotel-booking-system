@@ -14,17 +14,19 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - DEFAULT_MANAGER_USERNAME=${DEFAULT_MANAGER_USERNAME}
       - DEFAULT_MANAGER_PASSWORD=${DEFAULT_MANAGER_PASSWORD}
-      - JWT_SECRET={JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
     depends_on:
       db:
         condition: service_healthy
       minio:
         condition: service_healthy
-    environment:
-      - MINIO_ENDPOINT=http://minio:9000
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:minioadmin}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:minioadmin}
-      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:http://localhost:9000}
     restart: unless-stopped
     networks:
       - hotel-network
@@ -39,8 +41,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:minioadmin}
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"

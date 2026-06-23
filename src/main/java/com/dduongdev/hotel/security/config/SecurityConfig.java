@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/room-types/availability").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/rooms").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/rooms/available").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/branches").permitAll()
 
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/", "/index.html").permitAll()

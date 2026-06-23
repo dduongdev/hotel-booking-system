@@ -43,6 +43,10 @@ public class Booking extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
     public static enum Status {
         CONFIRMED,
         CANCELLED,

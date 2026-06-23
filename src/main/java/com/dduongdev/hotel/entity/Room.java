@@ -29,4 +29,8 @@ public class Room extends BaseEntity {
 
     private int bookingCount = 0;
 
+    @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
 }

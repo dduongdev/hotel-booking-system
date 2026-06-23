@@ -12,6 +12,7 @@ public class BranchMapper {
     public BranchResponse toBranchResponse(Branch branch) {
         return new BranchResponse(
                 branch.getId(),
+                branch.getName(),
                 branch.getDescription(),
                 branch.getPhoneNumber(),
                 branch.getEmail(),
@@ -22,6 +23,7 @@ public class BranchMapper {
                 branch.getCheckInTime().toString(),
                 branch.getCheckOutTime().toString(),
                 branch.getStatus(),
+                branch.getImageUrl(),
                 branch.getCreatedAt(),
                 branch.getUpdatedAt()
         );
@@ -30,6 +32,7 @@ public class BranchMapper {
     public CreateBranchResponse toCreateBranchResponse(Branch branch) {
         return new CreateBranchResponse(
                 branch.getId(),
+                branch.getName(),
                 branch.getDescription(),
                 branch.getPhoneNumber(),
                 branch.getEmail(),
@@ -40,6 +43,7 @@ public class BranchMapper {
                 branch.getCheckInTime().toString(),
                 branch.getCheckOutTime().toString(),
                 branch.getStatus(),
+                branch.getImageUrl(),
                 branch.getCreatedAt()
         );
     }

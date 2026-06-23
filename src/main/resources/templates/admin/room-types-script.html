@@ -6,6 +6,7 @@
         <script>
             let adminRoomTypesPage = 0;
             const adminRoomTypesPageSize = 12;
+            let adminSelectedBranchId = null;
 
             document.addEventListener('DOMContentLoaded', () => {
                 if (!TokenManager.isAuthenticated()) {
@@ -17,16 +18,47 @@
                     window.location.href = '/';
                     return;
                 }
-                loadAdminRoomTypes();
+                loadAdminBranches();
             });
 
+            async function loadAdminBranches() {
+                try {
+                    const result = await BranchAPI.getAll();
+                    const branches = result.content || [];
+                    const select = document.getElementById('admin-branch-select');
+                    select.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
+                    branches.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
+                        select.appendChild(opt);
+                    });
+                } catch (error) {
+                    ToastManager.show('Lỗi tải danh sách chi nhánh.', 'error');
+                }
+            }
+
+            function onAdminBranchChange() {
+                const select = document.getElementById('admin-branch-select');
+                adminSelectedBranchId = select.value ? parseInt(select.value) : null;
+                if (adminSelectedBranchId) {
+                    loadAdminRoomTypes(0);
+                } else {
+                    document.getElementById('admin-room-types-container').innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách loại phòng.</p></div>';
+                }
+            }
+
             async function loadAdminRoomTypes(page = 0) {
+                if (!adminSelectedBranchId) {
+                    document.getElementById('admin-room-types-container').innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách loại phòng.</p></div>';
+                    return;
+                }
                 adminRoomTypesPage = page;
                 const container = document.getElementById('admin-room-types-container');
                 container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải danh sách loại phòng...</p></div>';
                 
                 try {
-                    const result = await RoomTypeAPI.getAll(page, adminRoomTypesPageSize);
+                    const result = await RoomTypeAPI.getAll(adminSelectedBranchId, page, adminRoomTypesPageSize);
                     const roomTypes = result.content || [];
                     const totalPages = result.totalPages || 0;
                     
@@ -99,27 +131,17 @@
                 }
             }
 
-            function showAddRoomTypeModal() {
-                document.getElementById('room-type-modal-title').textContent = 'Thêm loại phòng';
-                document.getElementById('room-type-id').value = '';
-                document.getElementById('rt-name').value = '';
-                document.getElementById('rt-description').value = '';
-                document.getElementById('rt-capacity').value = '2';
-                document.getElementById('rt-price').value = '';
-                document.getElementById('rt-image').value = '';
-                document.getElementById('rt-image-preview').style.display = 'none';
-                document.getElementById('rt-hidden').checked = false;
-                document.getElementById('rt-hidden-group').style.display = 'none';
-                document.getElementById('room-type-form-error').style.display = 'none';
-                document.getElementById('room-type-modal').classList.add('ls-modal-overlay--active');
-            }
-
             async function editRoomType(id) {
+                if (!adminSelectedBranchId) {
+                    ToastManager.show('Vui lòng chọn chi nhánh trước.', 'warning');
+                    return;
+                }
                 document.getElementById('room-type-modal-title').textContent = 'Sửa loại phòng';
                 document.getElementById('room-type-form-error').style.display = 'none';
                 
                 try {
-                    const roomTypes = (await RoomTypeAPI.getAll()).content;
+                    const result = await RoomTypeAPI.getAll(adminSelectedBranchId);
+                    const roomTypes = result.content || [];
                     const rt = roomTypes.find(r => r.id === id);
                     
                     if (!rt) {
@@ -147,6 +169,25 @@
                 }
             }
 
+            function showAddRoomTypeModal() {
+                if (!adminSelectedBranchId) {
+                    ToastManager.show('Vui lòng chọn chi nhánh trước.', 'warning');
+                    return;
+                }
+                document.getElementById('room-type-modal-title').textContent = 'Thêm loại phòng';
+                document.getElementById('room-type-id').value = '';
+                document.getElementById('rt-name').value = '';
+                document.getElementById('rt-description').value = '';
+                document.getElementById('rt-capacity').value = '2';
+                document.getElementById('rt-price').value = '';
+                document.getElementById('rt-image').value = '';
+                document.getElementById('rt-image-preview').style.display = 'none';
+                document.getElementById('rt-hidden').checked = false;
+                document.getElementById('rt-hidden-group').style.display = 'none';
+                document.getElementById('room-type-form-error').style.display = 'none';
+                document.getElementById('room-type-modal').classList.add('ls-modal-overlay--active');
+            }
+
             function closeRoomTypeModal() {
                 document.getElementById('room-type-modal').classList.remove('ls-modal-overlay--active');
             }
@@ -155,6 +196,12 @@
                 event.preventDefault();
                 const errorDiv = document.getElementById('room-type-form-error');
                 errorDiv.style.display = 'none';
+                
+                if (!adminSelectedBranchId) {
+                    errorDiv.textContent = 'Vui lòng chọn chi nhánh trước.';
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
                 
                 const id = document.getElementById('room-type-id').value;
                 const name = document.getElementById('rt-name').value;
@@ -172,10 +219,10 @@
                 
                 try {
                     if (id) {
-                        await RoomTypeAPI.updateWithImage(parseInt(id), { name, description, capacity, pricePerNight }, imageFile);
+                        await RoomTypeAPI.updateWithImage(adminSelectedBranchId, parseInt(id), { name, description, capacity, pricePerNight }, imageFile);
                         ToastManager.show('Cập nhật loại phòng thành công.', 'success');
                     } else {
-                        await RoomTypeAPI.createWithImage({ name, description, capacity, pricePerNight }, imageFile);
+                        await RoomTypeAPI.createWithImage(adminSelectedBranchId, { name, description, capacity, pricePerNight }, imageFile);
                         ToastManager.show('Thêm loại phòng thành công.', 'success');
                     }
                     closeRoomTypeModal();
@@ -188,8 +235,12 @@
             }
 
             async function toggleRoomTypeHidden(id, hidden) {
+                if (!adminSelectedBranchId) {
+                    ToastManager.show('Vui lòng chọn chi nhánh trước.', 'warning');
+                    return;
+                }
                 try {
-                    await RoomTypeAPI.changeHiddenState(id, hidden);
+                    await RoomTypeAPI.changeHiddenState(adminSelectedBranchId, id, hidden);
                     ToastManager.show(`Loại phòng đã ${hidden ? 'ẩn' : 'hiện'}.`, 'success');
                     loadAdminRoomTypes(adminRoomTypesPage);
                 } catch (error) {

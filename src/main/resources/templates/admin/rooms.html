@@ -46,12 +46,19 @@
             
             <!-- Main Content -->
             <main class="ls-main-content">
-                <div class="ls-page-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="ls-page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
                     <div>
                         <h1>Quản lý Phòng</h1>
                         <p>Thêm, sửa và quản lý phòng khách sạn.</p>
                     </div>
-                    <button onclick="showAddRoomModal()" class="ls-btn ls-btn--primary ls-btn--sm">+ Thêm phòng</button>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="ls-form-group" style="margin-bottom:0;">
+                            <select id="admin-rooms-branch-select" class="ls-form-input" onchange="onAdminRoomsBranchChange()" style="min-width:220px;">
+                                <option value="">-- Chọn chi nhánh --</option>
+                            </select>
+                        </div>
+                        <button onclick="showAddRoomModal()" class="ls-btn ls-btn--primary ls-btn--sm">+ Thêm phòng</button>
+                    </div>
                 </div>
                 
                 <div id="admin-rooms-container">

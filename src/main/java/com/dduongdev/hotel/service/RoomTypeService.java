@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dduongdev.hotel.dto.RoomTypeAvailability;
+import com.dduongdev.hotel.entity.Branch;
 import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
+import com.dduongdev.hotel.exception.RoomTypeNotBelongToBranchException;
 import com.dduongdev.hotel.mapper.RoomTypeMapper;
 import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
@@ -19,8 +21,8 @@ import com.dduongdev.hotel.payload.request.UpdateRoomTypeRequest;
 import com.dduongdev.hotel.payload.response.CreateRoomTypeResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeAvailabilityResponse;
 import com.dduongdev.hotel.payload.response.RoomTypeResponse;
+import com.dduongdev.hotel.repository.BranchRepository;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
-import com.dduongdev.hotel.util.Constants;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,14 +35,21 @@ public class RoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
     private final RoomTypeMapper roomTypeMapper;
     private final StorageService storageService;
+    private final BranchRepository branchRepository;
 
-    public CreateRoomTypeResponse create(CreateRoomTypeRequest request, MultipartFile image) {
+    @Transactional
+    public CreateRoomTypeResponse create(Long branchId, CreateRoomTypeRequest request) {
+        Branch branch = branchRepository.findById(branchId).orElseThrow(() -> new ResourceNotFoundException("Branch not found"));
+
         RoomType roomType = new RoomType();
 
         roomType.setName(request.getName());
         roomType.setDescription(request.getDescription());
         roomType.setCapacity(request.getCapacity());
         roomType.setPricePerNight(request.getPricePerNight());
+        roomType.setBranch(branch);
+
+        MultipartFile image = request.getImage();
 
         if (image != null && !image.isEmpty()) {
             String filename = storageService.generateFilename(image.getOriginalFilename());
@@ -53,19 +62,30 @@ public class RoomTypeService {
         return roomTypeMapper.toCreateRoomTypeResponse(roomType);
     }
 
-    public Page<RoomTypeResponse> getAll(Pageable pageable) {
-        Page<RoomType> roomTypes = roomTypeRepository.findAllByOrderByPricePerNightDesc(pageable);
+    @Transactional(readOnly = true)
+    public Page<RoomTypeResponse> getAllByBranch(Long branchId, Pageable pageable) {
+        Page<RoomType> roomTypes = roomTypeRepository.findAllByBranchIdOrderByPricePerNightDesc(branchId, pageable);
         return roomTypes.map(roomTypeMapper::toRoomTypeResponse);
     }
 
     @Transactional
-    public RoomTypeResponse update(Long id, UpdateRoomTypeRequest request, MultipartFile image) {
+    public RoomTypeResponse update(Long id, Long branchId, UpdateRoomTypeRequest request) {
+        if (!branchRepository.existsById(branchId)) {
+            throw new ResourceNotFoundException("Branch with id " + branchId + " not found");
+        }
+
         RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type with id " + id + " not found"));
         
+        if (storedroomType.getBranch() == null || !storedroomType.getBranch().getId().equals(branchId)) {
+            throw new RoomTypeNotBelongToBranchException();
+        }
+
         storedroomType.setName(request.getName());
         storedroomType.setDescription(request.getDescription());
         storedroomType.setCapacity(request.getCapacity());
         storedroomType.setPricePerNight(request.getPricePerNight());
+
+        MultipartFile image = request.getImage();
 
         if (image != null && !image.isEmpty()) {
             // Delete old image if exists
@@ -83,9 +103,17 @@ public class RoomTypeService {
     }
 
     @Transactional
-    public RoomTypeResponse changeHiddenState(Long id, ChangeRoomTypeHiddenStateRequest request) {
+    public RoomTypeResponse changeHiddenState(Long id, Long branchId, ChangeRoomTypeHiddenStateRequest request) {
+        if (!branchRepository.existsById(branchId)) {
+            throw new ResourceNotFoundException("Branch with id " + branchId + " not found");
+        }
+
         RoomType storedroomType = roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type with id " + id + " not found"));
         
+        if (storedroomType.getBranch() == null || !storedroomType.getBranch().getId().equals(branchId)) {
+            throw new RoomTypeNotBelongToBranchException();
+        }
+
         storedroomType.setHidden(request.isHidden());
 
         roomTypeRepository.save(storedroomType);
@@ -93,7 +121,10 @@ public class RoomTypeService {
         return roomTypeMapper.toRoomTypeResponse(storedroomType);
     }
 
-    public List<RoomTypeAvailabilityResponse> getAllRoomTypeAvailability(LocalDate checkIn, LocalDate checkOut) {
+    @Transactional(readOnly = true)
+    public List<RoomTypeAvailabilityResponse> getAvailabilitiesByBranch(Long branchId, LocalDate checkIn, LocalDate checkOut) {
+        Branch branch = branchRepository.findById(branchId).orElseThrow(() -> new ResourceNotFoundException("Branch not found"));
+        
         if (checkIn.isAfter(checkOut)) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
         }
@@ -102,10 +133,10 @@ public class RoomTypeService {
             throw new IllegalArgumentException("Check-in date cannot be in the past");
         }
 
-        LocalDateTime checkInTime = LocalDateTime.of(checkIn, Constants.CHECK_IN_TIME);
-        LocalDateTime checkOutTime = LocalDateTime.of(checkOut, Constants.CHECK_OUT_TIME);
+        LocalDateTime checkInTime = LocalDateTime.of(checkIn, branch.getCheckInTime());
+        LocalDateTime checkOutTime = LocalDateTime.of(checkOut, branch.getCheckOutTime());
 
-        List<RoomTypeAvailability> roomTypes = roomTypeRepository.findAllRoomTypeAvailabilityByCheckInAndCheckOutOrderByPricePerNightDesc(checkInTime, checkOutTime);
+        List<RoomTypeAvailability> roomTypes = roomTypeRepository.findAvailabilitiesByBranch(branch.getId(), checkInTime, checkOutTime);
         return roomTypes.stream().map(roomType -> roomTypeMapper.toRoomTypeAvailabilityResponse(roomType)).toList();
     }
 }

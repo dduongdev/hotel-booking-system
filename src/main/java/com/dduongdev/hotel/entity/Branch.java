@@ -20,6 +20,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Branch extends BaseEntity {
 
+    @Column(nullable = false)
+    private String name;
+
     private String description;
 
     @Column(name = "phone_number", nullable = false)

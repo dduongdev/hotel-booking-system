@@ -6,6 +6,7 @@
         <script>
             let adminRoomsPage = 0;
             const adminRoomsPageSize = 15;
+            let adminRoomsSelectedBranchId = null;
 
             document.addEventListener('DOMContentLoaded', () => {
                 if (!TokenManager.isAuthenticated()) {
@@ -17,19 +18,50 @@
                     window.location.href = '/';
                     return;
                 }
-                loadAdminRooms();
+                loadAdminBranchesForRooms();
             });
 
+            async function loadAdminBranchesForRooms() {
+                try {
+                    const result = await BranchAPI.getAll();
+                    const branches = result.content || [];
+                    const select = document.getElementById('admin-rooms-branch-select');
+                    select.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
+                    branches.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
+                        select.appendChild(opt);
+                    });
+                } catch (error) {
+                    ToastManager.show('Lỗi tải danh sách chi nhánh.', 'error');
+                }
+            }
+
+            function onAdminRoomsBranchChange() {
+                const select = document.getElementById('admin-rooms-branch-select');
+                adminRoomsSelectedBranchId = select.value ? parseInt(select.value) : null;
+                if (adminRoomsSelectedBranchId) {
+                    loadAdminRooms(0);
+                } else {
+                    document.getElementById('admin-rooms-container').innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách phòng.</p></div>';
+                }
+            }
+
             async function loadAdminRooms(page = 0) {
+                if (!adminRoomsSelectedBranchId) {
+                    document.getElementById('admin-rooms-container').innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách phòng.</p></div>';
+                    return;
+                }
                 adminRoomsPage = page;
                 const container = document.getElementById('admin-rooms-container');
                 container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải danh sách phòng...</p></div>';
                 
                 try {
-                    const result = await RoomAPI.getAll(page, adminRoomsPageSize);
+                    const result = await RoomAPI.getAll(adminRoomsSelectedBranchId, page, adminRoomsPageSize);
                     const rooms = result.content || [];
                     const totalPages = result.totalPages || 0;
-                    const roomTypes = (await RoomTypeAPI.getAll()).content;
+                    const roomTypes = (await RoomTypeAPI.getAll(adminRoomsSelectedBranchId)).content;
                     
                     if (rooms.length === 0) {
                         container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Không có phòng</div><p class="ls-empty__text">Chưa có phòng nào được tạo.</p></div>';
@@ -87,8 +119,9 @@
             }
 
             async function populateRoomTypeSelect(selectedId) {
+                if (!adminRoomsSelectedBranchId) return;
                 try {
-                    const roomTypes = (await RoomTypeAPI.getAll()).content;
+                    const roomTypes = (await RoomTypeAPI.getAll(adminRoomsSelectedBranchId)).content;
                     const select = document.getElementById('room-type-select');
                     select.innerHTML = '<option value="">-- Chọn loại phòng --</option>';
                     roomTypes.forEach(rt => {
@@ -104,6 +137,10 @@
             }
 
             function showAddRoomModal() {
+                if (!adminRoomsSelectedBranchId) {
+                    ToastManager.show('Vui lòng chọn chi nhánh trước.', 'warning');
+                    return;
+                }
                 document.getElementById('room-modal-title').textContent = 'Thêm phòng';
                 document.getElementById('room-id').value = '';
                 document.getElementById('room-name').value = '';
@@ -147,10 +184,10 @@
                 
                 try {
                     if (id) {
-                        await RoomAPI.update(parseInt(id), { name, roomTypeId, hidden });
+                        await RoomAPI.update(adminRoomsSelectedBranchId, parseInt(id), { name, roomTypeId, hidden });
                         ToastManager.show('Cập nhật phòng thành công.', 'success');
                     } else {
-                        await RoomAPI.create({ name, roomTypeId });
+                        await RoomAPI.create(adminRoomsSelectedBranchId, { name, roomTypeId });
                         ToastManager.show('Thêm phòng thành công.', 'success');
                     }
                     closeRoomModal();

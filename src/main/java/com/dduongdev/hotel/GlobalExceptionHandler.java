@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.dduongdev.hotel.exception.BaseBookingException;
 import com.dduongdev.hotel.exception.BaseException;
 import com.dduongdev.hotel.exception.BaseRoomException;
+import com.dduongdev.hotel.exception.BaseRoomTypeException;
 import com.dduongdev.hotel.payload.response.ApiResponse;
 
 import jakarta.validation.ConstraintViolation;
@@ -48,6 +49,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseBookingException.class)
     public ResponseEntity<ApiResponse<Void>> handleBookingException(BaseBookingException ex) {
+        return ResponseEntity.status(ex.getHttpStatusCode())
+                .body(ApiResponse.error(ex.getHttpStatusCode().value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(BaseRoomTypeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRoomTypeException(BaseRoomTypeException ex) {
         return ResponseEntity.status(ex.getHttpStatusCode())
                 .body(ApiResponse.error(ex.getHttpStatusCode().value(), ex.getMessage()));
     }

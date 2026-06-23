@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 public class CreateBranchResponse {
     private Long id;
+    private String name;
     private String description;
     private String phoneNumber;
     private String email;
@@ -23,5 +24,6 @@ public class CreateBranchResponse {
     private String checkInTime;
     private String checkOutTime;
     private Status status;
+    private String imageUrl;
     private LocalDateTime createdAt;
 }

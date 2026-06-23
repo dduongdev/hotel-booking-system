@@ -4,18 +4,48 @@
 <body>
     <th:block th:fragment="script">
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            let selectedBranchId = null;
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                // Load branches
+                try {
+                    const result = await BranchAPI.getAll();
+                    const branches = result.content || [];
+                    const select = document.getElementById('room-list-branch-select');
+                    select.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
+                    branches.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
+                        select.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error('Failed to load branches', e);
+                }
+
                 const today = new Date();
                 const tomorrow = new Date(today);
                 tomorrow.setDate(tomorrow.getDate() + 1);
 
                 document.getElementById('check-in').value = today.toISOString().split('T')[0];
                 document.getElementById('check-out').value = tomorrow.toISOString().split('T')[0];
-
-                searchAvailability();
             });
 
+            function onBranchChange() {
+                const select = document.getElementById('room-list-branch-select');
+                selectedBranchId = select.value ? parseInt(select.value) : null;
+                if (selectedBranchId) {
+                    searchAvailability();
+                } else {
+                    document.getElementById('room-types-grid').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách phòng.</p></div>';
+                }
+            }
+
             async function searchAvailability() {
+                if (!selectedBranchId) {
+                    ToastManager.show('Vui lòng chọn chi nhánh.', 'warning');
+                    return;
+                }
                 const checkIn = document.getElementById('check-in').value;
                 const checkOut = document.getElementById('check-out').value;
                 const grid = document.getElementById('room-types-grid');
@@ -33,7 +63,7 @@
                 grid.innerHTML = '<div class="ls-loading" style="grid-column:1/-1;"><div class="ls-spinner"></div><p>Đang tải phòng trống...</p></div>';
 
                 try {
-                    const results = await RoomTypeAPI.getAvailability(checkIn, checkOut);
+                    const results = await RoomTypeAPI.getAvailability(selectedBranchId, checkIn, checkOut);
 
                     if (!results || results.length === 0) {
                         grid.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng trống cho ngày đã chọn. Vui lòng chọn ngày khác.</p></div>';
@@ -80,7 +110,7 @@
             async function bookNow(roomTypeId, checkIn, checkOut, btn) {
                 if (btn) { btn.disabled = true; btn.innerHTML = '<span class="ls-spinner ls-spinner--sm" style="display:inline-block;margin:0 auto;"></span> Đang đặt...'; }
                 try {
-                    const result = await BookingAPI.make({
+                    const result = await BookingAPI.make(selectedBranchId, {
                         roomTypeId: roomTypeId,
                         checkIn: checkIn,
                         checkOut: checkOut

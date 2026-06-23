@@ -9,17 +9,23 @@
                 <p style="color:var(--slate-500);font-size:0.9375rem;">Tìm kiếm phòng trống theo ngày mong muốn của bạn.</p>
             </div>
             
-            <!-- Search Bar -->
-            <div class="ls-filter-bar">
-                <div class="ls-form-group" style="flex:1;">
+            <!-- Branch Selector + Search Bar -->
+            <div class="ls-filter-bar" style="flex-wrap:wrap;">
+                <div class="ls-form-group" style="flex:1;min-width:200px;margin-bottom:0;">
+                    <label class="ls-form-label" for="avail-branch-select">Chi nhánh</label>
+                    <select id="avail-branch-select" class="ls-form-input" onchange="onAvailBranchChange()">
+                        <option value="">-- Chọn chi nhánh --</option>
+                    </select>
+                </div>
+                <div class="ls-form-group" style="flex:1;min-width:150px;margin-bottom:0;">
                     <label class="ls-form-label" for="avail-check-in">Ngày nhận phòng</label>
                     <input type="date" id="avail-check-in" class="ls-form-input">
                 </div>
-                <div class="ls-form-group" style="flex:1;">
+                <div class="ls-form-group" style="flex:1;min-width:150px;margin-bottom:0;">
                     <label class="ls-form-label" for="avail-check-out">Ngày trả phòng</label>
                     <input type="date" id="avail-check-out" class="ls-form-input">
                 </div>
-                <button onclick="searchAvailability()" class="ls-btn ls-btn--secondary" style="flex-shrink:0;">
+                <button onclick="searchAvailability()" class="ls-btn ls-btn--secondary" style="flex-shrink:0;margin-top:20px;">
                     <span class="ls-icon ls-icon--sm">search</span>
                     Tìm kiếm
                 </button>

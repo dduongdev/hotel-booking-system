@@ -13,5 +13,6 @@ public class MakeBookingResponse {
     private Long id;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
+    private Long branchId;
     private LocalDateTime createdAt;
 }

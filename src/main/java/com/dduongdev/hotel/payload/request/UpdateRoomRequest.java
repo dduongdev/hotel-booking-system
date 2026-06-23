@@ -13,8 +13,7 @@ public class UpdateRoomRequest {
     @NotBlank(message = "Room name cannot be blank")
     private String name;
 
-    @NotNull(message = "Hidden status is required")
-    private boolean hidden;
+    private Boolean hidden;
 
     @NotNull(message = "Room type ID is required")
     private Long roomTypeId;

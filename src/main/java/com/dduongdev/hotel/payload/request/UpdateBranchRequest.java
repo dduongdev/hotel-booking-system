@@ -1,5 +1,7 @@
 package com.dduongdev.hotel.payload.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.dduongdev.hotel.util.Constants;
@@ -13,6 +15,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class UpdateBranchRequest {
+
+    @NotBlank(message = "Branch name cannot be blank")
+    private String name;
 
     @NotBlank(message = "Description cannot be blank")
     private String description;
@@ -40,4 +45,6 @@ public class UpdateBranchRequest {
 
     @NotNull(message = "Check-out time is required")
     private String checkOutTime;
+
+    private MultipartFile image;
 }

@@ -101,6 +101,14 @@
                     </a>
                 </div>
 
+                <div style="display:flex;gap:12px;align-items:center;margin-bottom:24px;grid-column:1/-1;">
+                    <div class="ls-form-group" style="margin-bottom:0;flex:1;max-width:300px;">
+                        <label class="ls-form-label" for="home-branch-select">Chi nhánh</label>
+                        <select id="home-branch-select" class="ls-form-input" onchange="onHomeBranchChange()">
+                            <option value="">-- Chọn chi nhánh --</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="home-room-types" class="grid grid-cols-12 gap-6">
                     <div class="ls-loading" style="grid-column: 1/-1;">
                         <div class="ls-spinner"></div>
@@ -225,7 +233,9 @@
         </footer>
 
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            let homeBranchId = null;
+
+            document.addEventListener('DOMContentLoaded', async () => {
                 // Hide CTA if logged in
                 if (TokenManager.isAuthenticated()) {
                     document.getElementById('guest-cta').style.display = 'none';
@@ -241,15 +251,54 @@
                 if (checkIn) checkIn.value = today.toISOString().split('T')[0];
                 if (checkOut) checkOut.value = tomorrow.toISOString().split('T')[0];
                 
+                // Load branches for home page selector
+                try {
+                    const branchResult = await BranchAPI.getAll(0, 100);
+                    const branches = branchResult.content || [];
+                    const select = document.getElementById('home-branch-select');
+                    if (select) {
+                        select.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
+                        branches.forEach(b => {
+                            const opt = document.createElement('option');
+                            opt.value = b.id;
+                            opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
+                            select.appendChild(opt);
+                        });
+                    }
+                    if (branches.length > 0) {
+                        homeBranchId = branches[0].id;
+                        if (select) select.value = homeBranchId;
+                    }
+                } catch (e) {
+                    console.error('Failed to load branches', e);
+                }
+                
                 // Load room types for home page
-                loadHomeRoomTypes();
+                if (homeBranchId) {
+                    loadHomeRoomTypes();
+                }
+            });
+            
+            function onHomeBranchChange() {
+                const select = document.getElementById('home-branch-select');
+                homeBranchId = select.value ? parseInt(select.value) : null;
+                if (homeBranchId) {
+                    loadHomeRoomTypes();
+                } else {
+                    document.getElementById('home-room-types').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách phòng.</p></div>';
+                }
+            }
             });
             
             async function loadHomeRoomTypes() {
+                if (!homeBranchId) {
+                    document.getElementById('home-room-types').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chưa có dữ liệu</div><p class="ls-empty__text">Chưa có chi nhánh nào. Vui lòng quay lại sau.</p></div>';
+                    return;
+                }
                 const container = document.getElementById('home-room-types');
                 
                 try {
-                    const result = await RoomTypeAPI.getAll(0, 10);
+                    const result = await RoomTypeAPI.getAll(homeBranchId, 0, 10);
                     const roomTypes = result.content || [];
                     
                     if (roomTypes.length === 0) {
@@ -335,11 +384,15 @@
             }
             
             async function bookNow(roomTypeId) {
+                if (!homeBranchId) {
+                    ToastManager.show('Không tìm thấy chi nhánh.', 'error');
+                    return;
+                }
                 const checkIn = document.getElementById('hero-check-in')?.value || new Date().toISOString().split('T')[0];
                 const checkOut = document.getElementById('hero-check-out')?.value || new Date(Date.now() + 86400000).toISOString().split('T')[0];
                 
                 try {
-                    const result = await BookingAPI.make({
+                    const result = await BookingAPI.make(homeBranchId, {
                         roomTypeId: roomTypeId,
                         checkIn: checkIn,
                         checkOut: checkOut

@@ -21,11 +21,29 @@
                 const mainContent = document.getElementById('admin-main-content');
                 
                 try {
-                    const [roomTypeResult, roomsResult, bookingsResult] = await Promise.all([
-                        RoomTypeAPI.getAll(),
-                        RoomAPI.getAll(0, 1),
-                        BookingAPI.getAll(0, 1)
-                    ]);
+                    // Load first branch for dashboard stats
+                    let dashBranchId = null;
+                    try {
+                        const branchResult = await BranchAPI.getAll(0, 1);
+                        const branches = branchResult.content || [];
+                        if (branches.length > 0) {
+                            dashBranchId = branches[0].id;
+                        }
+                    } catch (e) {
+                        console.error('Failed to load branch', e);
+                    }
+
+                    let roomTypeResult = { content: [] };
+                    let roomsResult = { totalElements: 0 };
+                    let bookingsResult = { totalElements: 0 };
+
+                    if (dashBranchId) {
+                        [roomTypeResult, roomsResult, bookingsResult] = await Promise.all([
+                            RoomTypeAPI.getAll(dashBranchId),
+                            RoomAPI.getAll(dashBranchId, 0, 1),
+                            BookingAPI.getAll(0, 1)
+                        ]);
+                    }
                     
                     const roomTypes = roomTypeResult.content || [];
                     const totalRoomTypes = roomTypes.length;

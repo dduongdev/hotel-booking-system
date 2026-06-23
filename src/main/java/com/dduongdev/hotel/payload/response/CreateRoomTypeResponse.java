@@ -16,5 +16,6 @@ public class CreateRoomTypeResponse {
     private int capacity;
     private double pricePerNight;
     private String imageUrl;
+    private Long branchId;
     private LocalDateTime createdAt;
 }

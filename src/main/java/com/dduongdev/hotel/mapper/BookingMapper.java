@@ -17,6 +17,7 @@ public class BookingMapper {
                 booking.getId(),
                 booking.getCheckIn(),
                 booking.getCheckOut(),
+                booking.getBranch() != null ? booking.getBranch().getId() : null,
                 booking.getCreatedAt());
     }
 
@@ -32,6 +33,10 @@ public class BookingMapper {
                 booking.getRoom() != null ? booking.getRoom().getName() : null,
                 booking.getUser() != null ? booking.getUser().getId() : null,
                 booking.getUser() != null ? booking.getUser().getUsername() : null,
+                booking.getBranch() != null ? booking.getBranch().getId() : null,
+                booking.getBranch() != null ? booking.getBranch().getName() : null,
+                booking.getBranch() != null ? booking.getBranch().getAddress() : null,
+                booking.getBranch() != null ? booking.getBranch().getCity() : null,
                 booking.getCreatedAt(),
                 booking.getUpdatedAt());
     }

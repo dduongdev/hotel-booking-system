@@ -55,6 +55,7 @@ public class UserService {
         return authService.generateTokenPair(userDetails);
     }
 
+    @Transactional
     public LoginResponse activateUserByOtp(Long userId, String otpCode) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

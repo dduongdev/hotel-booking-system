@@ -4,7 +4,25 @@
 <body>
     <th:block th:fragment="script">
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            let availSelectedBranchId = null;
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                // Load branches
+                try {
+                    const result = await BranchAPI.getAll();
+                    const branches = result.content || [];
+                    const select = document.getElementById('avail-branch-select');
+                    select.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
+                    branches.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
+                        select.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error('Failed to load branches', e);
+                }
+
                 const today = new Date();
                 const tomorrow = new Date(today);
                 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -15,7 +33,21 @@
                 if (checkOut) checkOut.value = tomorrow.toISOString().split('T')[0];
             });
 
+            function onAvailBranchChange() {
+                const select = document.getElementById('avail-branch-select');
+                availSelectedBranchId = select.value ? parseInt(select.value) : null;
+                if (availSelectedBranchId) {
+                    searchAvailability();
+                } else {
+                    document.getElementById('availability-results').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách phòng.</p></div>';
+                }
+            }
+
             async function searchAvailability() {
+                if (!availSelectedBranchId) {
+                    ToastManager.show('Vui lòng chọn chi nhánh.', 'warning');
+                    return;
+                }
                 const checkInInput = document.getElementById('avail-check-in') || document.getElementById('check-in');
                 const checkOutInput = document.getElementById('avail-check-out') || document.getElementById('check-out');
                 const resultsDiv = document.getElementById('availability-results');
@@ -41,7 +73,7 @@
                 resultsDiv.innerHTML = '<div class="ls-loading" style="grid-column:1/-1;"><div class="ls-spinner"></div><p>Đang tìm kiếm phòng trống...</p></div>';
                 
                 try {
-                    const results = await RoomTypeAPI.getAvailability(checkIn, checkOut);
+                    const results = await RoomTypeAPI.getAvailability(availSelectedBranchId, checkIn, checkOut);
                     
                     if (!results || results.length === 0) {
                         resultsDiv.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Không có phòng trống</div><p class="ls-empty__text">Không có phòng trống cho ngày đã chọn. Vui lòng thử ngày khác.</p></div>';

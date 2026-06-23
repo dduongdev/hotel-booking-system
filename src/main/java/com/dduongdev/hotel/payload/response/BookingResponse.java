@@ -22,6 +22,10 @@ public class BookingResponse {
     private String roomName;
     private Long userId;
     private String username;
+    private Long branchId;
+    private String branchName;
+    private String branchAddress;
+    private String branchCity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

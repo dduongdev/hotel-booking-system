@@ -18,6 +18,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findAll(Pageable pageable);
 
+    Page<Booking> findByBranchId(Long branchId, Pageable pageable);
+
     @Query("""
             SELECT COUNT(b) > 0
             FROM Booking b

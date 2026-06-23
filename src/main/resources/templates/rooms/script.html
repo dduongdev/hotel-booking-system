@@ -7,17 +7,35 @@
             let currentPage = 0;
             const pageSize = 12;
 
-            document.addEventListener('DOMContentLoaded', () => {
-                loadRooms();
+            let roomsBranchId = null;
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                // Load first branch for room listing
+                try {
+                    const branchResult = await BranchAPI.getAll(0, 1);
+                    const branches = branchResult.content || [];
+                    if (branches.length > 0) {
+                        roomsBranchId = branches[0].id;
+                    }
+                } catch (e) {
+                    console.error('Failed to load branches', e);
+                }
+                if (roomsBranchId) {
+                    loadRooms();
+                }
             });
 
             async function loadRooms(page = 0) {
+                if (!roomsBranchId) {
+                    document.getElementById('rooms-container').innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Chưa có dữ liệu</div><p class="ls-empty__text">Chưa có chi nhánh nào.</p></div>';
+                    return;
+                }
                 currentPage = page;
                 const container = document.getElementById('rooms-container');
                 container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải danh sách phòng...</p></div>';
                 
                 try {
-                    const result = await RoomAPI.getAll(page, pageSize);
+                    const result = await RoomAPI.getAll(roomsBranchId, page, pageSize);
                     const rooms = result.content || [];
                     const totalPages = result.totalPages || 0;
                     

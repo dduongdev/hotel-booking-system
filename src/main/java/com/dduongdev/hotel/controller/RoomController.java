@@ -27,46 +27,52 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/rooms")
+@RequestMapping("/api/v1/branches/{branchId}/rooms")
 @RequiredArgsConstructor
 public class RoomController {
     
     private final RoomService roomService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<RoomResponse>>> getAll(
+    public ResponseEntity<ApiResponse<Page<RoomResponse>>> getAllByBranch(
+        @PathVariable Long branchId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(ApiResponse.success(roomService.getAll(pageable)));
+        return ResponseEntity.ok(ApiResponse.success(roomService.getAllByBranch(branchId, pageable)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<CreateRoomResponse>> create(@Valid @RequestBody CreateRoomRequest request) {
-        CreateRoomResponse response = roomService.create(request);
+    public ResponseEntity<ApiResponse<CreateRoomResponse>> create(
+        @PathVariable Long branchId,
+        @Valid @RequestBody CreateRoomRequest request) {
+        CreateRoomResponse response = roomService.create(branchId, request);
         return ResponseEntity.ok(ApiResponse.success("Room created successfully", response));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<RoomResponse>> update(
+        @PathVariable Long branchId,
         @PathVariable Long id,
         @Valid @RequestBody UpdateRoomRequest request
     ) {
-        RoomResponse response = roomService.update(id, request);
+        RoomResponse response = roomService.update(id, branchId, request);
         return ResponseEntity.ok(ApiResponse.success("Room updated successfully", response));
     }
 
     @GetMapping("/available")
-    public ResponseEntity<ApiResponse<Page<RoomResponse>>> getAvailableRoomsByCheckInAndCheckOut(
+    public ResponseEntity<ApiResponse<Page<RoomResponse>>> getAvailableRoomsByBranch(
+        @PathVariable Long branchId,
         @RequestParam String checkIn,
         @RequestParam String checkOut,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(ApiResponse.success(roomService.getAvailableRoomsByCheckInAndCheckOut(LocalDate.parse(checkIn), LocalDate.parse(checkOut), pageable)));
+        return ResponseEntity.ok(ApiResponse.success(
+            roomService.getAvailableRoomsByCheckInAndCheckOut(branchId, LocalDate.parse(checkIn), LocalDate.parse(checkOut), pageable)));
     }
 }

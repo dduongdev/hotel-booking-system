@@ -14,13 +14,16 @@ import com.dduongdev.hotel.entity.Room;
 public interface RoomRepository extends JpaRepository<Room, Long> {
     Page<Room> findAll(Pageable pageable);
 
+    Page<Room> findAllByBranchId(Long branchId, Pageable pageable);
+
     Optional<Room> findById(Long id);
 
     @Query("""
             SELECT r
             FROM Room r
             JOIN FETCH r.roomType
-            WHERE r.hidden = false
+            WHERE r.branch.id = :branchId
+              AND r.hidden = false
               AND r.id NOT IN (
                 SELECT b.room.id
                 FROM Booking b
@@ -29,7 +32,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
                   AND b.checkIn < :checkOut
             )
             """)
-    Page<Room> findAvailableRoomsByCheckInAndCheckOut(LocalDateTime checkIn, LocalDateTime checkOut, Pageable pageable);
+    Page<Room> findAvailableRoomsByCheckInAndCheckOut(Long branchId, LocalDateTime checkIn, LocalDateTime checkOut, Pageable pageable);
 
     @Query("""
             SELECT r
@@ -38,6 +41,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
                 AND (next_b.status = 'CONFIRMED' OR next_b.status = 'CHECKED_IN')
                 AND next_b.checkIn >= :checkOut
             WHERE r.roomType.id = :roomTypeId
+                AND r.branch.id = :branchId
                 AND r.hidden = false
                 AND NOT EXISTS (
                     SELECT b.id
@@ -52,5 +56,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
                 MIN(next_b.checkIn) ASC NULLS LAST,
                 r.bookingCount ASC
             """)
-    List<Room> findBestFitForBooking(Long roomTypeId, LocalDateTime checkIn, LocalDateTime checkOut);
+    List<Room> findBestFitForBooking(Long roomTypeId, Long branchId, LocalDateTime checkIn, LocalDateTime checkOut);
 }

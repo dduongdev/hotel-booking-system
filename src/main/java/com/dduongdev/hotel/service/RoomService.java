@@ -8,19 +8,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dduongdev.hotel.entity.Branch;
 import com.dduongdev.hotel.entity.Room;
 import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
+import com.dduongdev.hotel.exception.RoomNotBelongToBranchException;
+import com.dduongdev.hotel.exception.RoomTypeNotBelongToBranchException;
 import com.dduongdev.hotel.mapper.RoomMapper;
 import com.dduongdev.hotel.payload.request.CreateRoomRequest;
 import com.dduongdev.hotel.payload.request.UpdateRoomRequest;
 import com.dduongdev.hotel.payload.response.CreateRoomResponse;
 import com.dduongdev.hotel.payload.response.RoomResponse;
+import com.dduongdev.hotel.repository.BranchRepository;
 import com.dduongdev.hotel.repository.RoomRepository;
 import com.dduongdev.hotel.repository.RoomTypeRepository;
-import com.dduongdev.hotel.util.Constants;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,44 +30,68 @@ import lombok.RequiredArgsConstructor;
 public class RoomService {
     
     private final RoomRepository roomRepository;
-    private final EntityManager entityManager;
     private final RoomMapper roomMapper;
     private final RoomTypeRepository roomTypeRepository;
+    private final BranchRepository branchRepository;
 
-    public CreateRoomResponse create(CreateRoomRequest request) {
-
-        if (!roomTypeRepository.existsById(request.getRoomTypeId())) {
-            throw new ResourceNotFoundException("Room type with id " + request.getRoomTypeId() + " not found");
+    @Transactional
+    public CreateRoomResponse create(Long branchId, CreateRoomRequest request) {
+        if (!branchRepository.existsById(branchId)) {
+            throw new ResourceNotFoundException("Branch not found");
         }
 
-        RoomType roomTypeProxy = entityManager.getReference(RoomType.class, request.getRoomTypeId());
+        if (!roomTypeRepository.existsById(request.getRoomTypeId())) {
+            throw new ResourceNotFoundException("Room type not found");
+        }
+
+        if (!roomTypeRepository.existsByIdAndBranchId(request.getRoomTypeId(), branchId)) {
+            throw new RoomTypeNotBelongToBranchException();
+        }
+
+        Branch branchProxy = branchRepository.getReferenceById(branchId);
+        RoomType roomTypeProxy = roomTypeRepository.getReferenceById(request.getRoomTypeId());
 
         Room room = new Room();
         room.setName(request.getName());
         room.setRoomType(roomTypeProxy);
+        room.setBranch(branchProxy);
         
         roomRepository.save(room);
 
         return roomMapper.toCreateRoomResponse(room);
     }
 
-    public Page<RoomResponse> getAll(Pageable pageable) {
-        Page<Room> roomsPage = roomRepository.findAll(pageable);
+    @Transactional(readOnly = true)
+    public Page<RoomResponse> getAllByBranch(Long branchId, Pageable pageable) {
+        Page<Room> roomsPage = roomRepository.findAllByBranchId(branchId, pageable);
         return roomsPage.map(roomMapper::toRoomResponse);
     }
 
     @Transactional
-    public RoomResponse update(Long id, UpdateRoomRequest request) {
-
-        if (!roomTypeRepository.existsById(request.getRoomTypeId())) {
-            throw new ResourceNotFoundException("Room type with id " + request.getRoomTypeId() + " not found");
+    public RoomResponse update(Long id, Long branchId, UpdateRoomRequest request) {
+        if (!branchRepository.existsById(branchId)) {
+            throw new ResourceNotFoundException("Branch not found");
         }
 
-        Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room with id " + id + " not found"));
-        room.setName(request.getName());
-        room.setHidden(request.isHidden());
+        if (!roomTypeRepository.existsById(request.getRoomTypeId())) {
+            throw new ResourceNotFoundException("Room type not found");
+        }
 
-        RoomType roomTypeProxy = entityManager.getReference(RoomType.class, request.getRoomTypeId());
+        if (!roomTypeRepository.existsByIdAndBranchId(request.getRoomTypeId(), branchId)) {
+            throw new RoomTypeNotBelongToBranchException();
+        }
+
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+
+        if (room.getBranch() == null || !room.getBranch().getId().equals(branchId)) {
+            throw new RoomNotBelongToBranchException();
+        }
+
+        room.setName(request.getName());
+        room.setHidden(Boolean.TRUE.equals(request.getHidden()));
+
+        RoomType roomTypeProxy = roomTypeRepository.getReferenceById(request.getRoomTypeId());
         room.setRoomType(roomTypeProxy);
 
         roomRepository.save(room);
@@ -73,7 +99,8 @@ public class RoomService {
         return roomMapper.toRoomResponse(room);
     }
 
-    public Page<RoomResponse> getAvailableRoomsByCheckInAndCheckOut(LocalDate checkIn, LocalDate checkOut, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<RoomResponse> getAvailableRoomsByCheckInAndCheckOut(Long branchId, LocalDate checkIn, LocalDate checkOut, Pageable pageable) {
         if (checkIn.isAfter(checkOut)) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
         }
@@ -82,10 +109,13 @@ public class RoomService {
             throw new IllegalArgumentException("Check-in date cannot be in the past");
         }
 
-        LocalDateTime checkInTime = LocalDateTime.of(checkIn, Constants.CHECK_IN_TIME);
-        LocalDateTime checkOutTime = LocalDateTime.of(checkOut, Constants.CHECK_OUT_TIME);
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch with id " + branchId + " not found"));
 
-        Page<Room> roomsPage = roomRepository.findAvailableRoomsByCheckInAndCheckOut(checkInTime, checkOutTime, pageable);
+        LocalDateTime checkInTime = LocalDateTime.of(checkIn, branch.getCheckInTime());
+        LocalDateTime checkOutTime = LocalDateTime.of(checkOut, branch.getCheckOutTime());
+
+        Page<Room> roomsPage = roomRepository.findAvailableRoomsByCheckInAndCheckOut(branchId, checkInTime, checkOutTime, pageable);
         return roomsPage.map(roomMapper::toRoomResponse);
     }
 }

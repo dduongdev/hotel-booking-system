@@ -234,44 +234,54 @@ const AuthAPI = {
     }
 };
 
+// Branch API
+const BranchAPI = {
+    async getAll(page = 0, size = 100) {
+        return apiRequest('/branches', {
+            useAuth: false,
+            params: { page, size }
+        });
+    }
+};
+
 // Room Type API
 const RoomTypeAPI = {
-    async getAll(page = 0, size = 1000) {
-        return apiRequest('/room-types', {
+    async getAll(branchId, page = 0, size = 1000) {
+        return apiRequest(`/branches/${branchId}/room-types`, {
             useAuth: false,
             params: { page, size }
         });
     },
     
-    async getAvailability(checkIn, checkOut) {
-        return apiRequest('/room-types/availability', {
+    async getAvailability(branchId, checkIn, checkOut) {
+        return apiRequest(`/branches/${branchId}/room-types/availabilities`, {
             useAuth: false,
             params: { checkIn, checkOut }
         });
     },
     
-    async create(data) {
-        return apiRequest('/room-types', {
+    async create(branchId, data) {
+        return apiRequest(`/branches/${branchId}/room-types`, {
             method: 'POST',
             body: data
         });
     },
     
-    async update(id, data) {
-        return apiRequest(`/room-types/${id}`, {
+    async update(branchId, id, data) {
+        return apiRequest(`/branches/${branchId}/room-types/${id}`, {
             method: 'PUT',
             body: data
         });
     },
     
-    async changeHiddenState(id, hidden) {
-        return apiRequest(`/room-types/${id}/hidden`, {
+    async changeHiddenState(branchId, id, hidden) {
+        return apiRequest(`/branches/${branchId}/room-types/${id}/hidden`, {
             method: 'PATCH',
             body: { hidden }
         });
     },
 
-    async createWithImage(data, imageFile) {
+    async createWithImage(branchId, data, imageFile) {
         const formData = new FormData();
         formData.append('name', data.name);
         if (data.description) formData.append('description', data.description);
@@ -284,7 +294,7 @@ const RoomTypeAPI = {
             headers['Authorization'] = `Bearer ${TokenManager.getAccessToken()}`;
         }
 
-        const response = await fetch(`${API_BASE}/room-types`, {
+        const response = await fetch(`${API_BASE}/branches/${branchId}/room-types`, {
             method: 'POST',
             headers,
             body: formData
@@ -292,7 +302,7 @@ const RoomTypeAPI = {
         return handleResponse(response);
     },
 
-    async updateWithImage(id, data, imageFile) {
+    async updateWithImage(branchId, id, data, imageFile) {
         const formData = new FormData();
         formData.append('name', data.name);
         if (data.description) formData.append('description', data.description);
@@ -305,7 +315,7 @@ const RoomTypeAPI = {
             headers['Authorization'] = `Bearer ${TokenManager.getAccessToken()}`;
         }
 
-        const response = await fetch(`${API_BASE}/room-types/${id}`, {
+        const response = await fetch(`${API_BASE}/branches/${branchId}/room-types/${id}`, {
             method: 'PUT',
             headers,
             body: formData
@@ -316,29 +326,29 @@ const RoomTypeAPI = {
 
 // Room API
 const RoomAPI = {
-    async getAll(page = 0, size = 10) {
-        return apiRequest('/rooms', {
+    async getAll(branchId, page = 0, size = 10) {
+        return apiRequest(`/branches/${branchId}/rooms`, {
             useAuth: false,
             params: { page, size }
         });
     },
     
-    async getAvailable(checkIn, checkOut, page = 0, size = 10) {
-        return apiRequest('/rooms/available', {
+    async getAvailable(branchId, checkIn, checkOut, page = 0, size = 10) {
+        return apiRequest(`/branches/${branchId}/rooms/available`, {
             useAuth: false,
             params: { checkIn, checkOut, page, size }
         });
     },
     
-    async create(data) {
-        return apiRequest('/rooms', {
+    async create(branchId, data) {
+        return apiRequest(`/branches/${branchId}/rooms`, {
             method: 'POST',
             body: data
         });
     },
     
-    async update(id, data) {
-        return apiRequest(`/rooms/${id}`, {
+    async update(branchId, id, data) {
+        return apiRequest(`/branches/${branchId}/rooms/${id}`, {
             method: 'PUT',
             body: data
         });
@@ -347,8 +357,8 @@ const RoomAPI = {
 
 // Booking API
 const BookingAPI = {
-    async make(data) {
-        return apiRequest('/bookings', {
+    async make(branchId, data) {
+        return apiRequest(`/branches/${branchId}/bookings`, {
             method: 'POST',
             body: data
         });
@@ -361,9 +371,8 @@ const BookingAPI = {
     },
     
     async cancelMyBooking(bookingId) {
-        return apiRequest('/bookings/me/cancel', {
-            method: 'DELETE',
-            body: { bookingId }
+        return apiRequest(`/bookings/me/${bookingId}/cancel`, {
+            method: 'PATCH'
         });
     },
     

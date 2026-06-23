@@ -12,7 +12,9 @@ import com.dduongdev.hotel.dto.RoomTypeAvailability;
 import com.dduongdev.hotel.entity.RoomType;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
-    Page<RoomType> findAllByOrderByPricePerNightDesc(Pageable pageable);
+    Page<RoomType> findAllByBranchIdOrderByPricePerNightDesc(Long branchId, Pageable pageable);
+
+    boolean existsByIdAndBranchId(Long id, Long branchId);
 
     @Query("""
             SELECT new com.dduongdev.hotel.dto.RoomTypeAvailability(
@@ -29,15 +31,16 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
                         AND b.checkIn < :checkOut
                         AND b.checkOut > :checkIn
                 ),
-                rt.imageUrl
+                rt.imageUrl,
+                rt.branch.id
             )
             FROM RoomType rt
             LEFT JOIN Room r ON r.roomType.id = rt.id AND r.hidden = false
-            WHERE rt.hidden = false
-            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight, rt.imageUrl
+            WHERE rt.branch.id = :branchId AND rt.hidden = false
+            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight, rt.imageUrl, rt.branch.id
             ORDER BY rt.pricePerNight DESC
             """)
-    List<RoomTypeAvailability> findAllRoomTypeAvailabilityByCheckInAndCheckOutOrderByPricePerNightDesc(LocalDateTime checkIn,
+    List<RoomTypeAvailability> findAvailabilitiesByBranch(Long branchId, LocalDateTime checkIn,
             LocalDateTime checkOut);
 
     @Query("""
@@ -55,13 +58,15 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
                         AND b.checkIn < :checkOut
                         AND b.checkOut > :checkIn
                 ),
-                rt.imageUrl
+                rt.imageUrl,
+                rt.branch.id
             )
             FROM RoomType rt
             LEFT JOIN Room r ON r.roomType.id = rt.id AND r.hidden = false
-            WHERE rt.id = :id
-              AND rt.hidden = false
-            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight, rt.imageUrl
+            WHERE rt.branch.id = :branchId
+                AND rt.id = :id
+                AND rt.hidden = false
+            GROUP BY rt.id, rt.name, rt.description, rt.capacity, rt.pricePerNight, rt.imageUrl, rt.branch.id
             """)
-    RoomTypeAvailability findRoomTypeAvailabilityByIdAndCheckInAndCheckOut(Long id, LocalDateTime checkIn, LocalDateTime checkOut);
+    RoomTypeAvailability findRoomTypeAvailability(Long id, Long branchId, LocalDateTime checkIn, LocalDateTime checkOut);
 }

@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.dduongdev.hotel.payload.request.ChangeRoomTypeHiddenStateRequest;
 import com.dduongdev.hotel.payload.request.CreateRoomTypeRequest;
@@ -32,7 +32,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/branch/{branch_id}/room-types")
+@RequestMapping("/api/v1/branches/{branchId}/room-types")
 @RequiredArgsConstructor
 public class RoomTypeController {
     
@@ -41,59 +41,48 @@ public class RoomTypeController {
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<CreateRoomTypeResponse>> create(
-            @RequestParam("name") String name,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam("capacity") int capacity,
-            @RequestParam("pricePerNight") double pricePerNight,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
-        CreateRoomTypeRequest request = new CreateRoomTypeRequest();
-        request.setName(name);
-        request.setDescription(description);
-        request.setCapacity(capacity);
-        request.setPricePerNight(pricePerNight);
-        CreateRoomTypeResponse response = roomTypeService.create(request, image);
+            @PathVariable Long branchId,
+            @Valid @ModelAttribute CreateRoomTypeRequest request) {
+        CreateRoomTypeResponse response = roomTypeService.create(branchId, request);
         return ResponseEntity.ok(ApiResponse.success("Room type created successfully", response));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<RoomTypeResponse>>> getAll(
+    public ResponseEntity<ApiResponse<Page<RoomTypeResponse>>> getAllByBranch(
+        @PathVariable Long branchId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(ApiResponse.success(roomTypeService.getAll(pageable)));
+        return ResponseEntity.ok(ApiResponse.success(roomTypeService.getAllByBranch(branchId, pageable)));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<RoomTypeResponse>> update(
+            @PathVariable Long branchId,
             @PathVariable Long id,
-            @RequestParam("name") String name,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam("capacity") int capacity,
-            @RequestParam("pricePerNight") double pricePerNight,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
-        UpdateRoomTypeRequest request = new UpdateRoomTypeRequest();
-        request.setName(name);
-        request.setDescription(description);
-        request.setCapacity(capacity);
-        request.setPricePerNight(pricePerNight);
-        RoomTypeResponse response = roomTypeService.update(id, request, image);
+            @Valid @ModelAttribute UpdateRoomTypeRequest request) {
+        RoomTypeResponse response = roomTypeService.update(id, branchId, request);
         return ResponseEntity.ok(ApiResponse.success("Room type updated successfully", response));
     }
 
     @PatchMapping("/{id}/hidden")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<RoomTypeResponse>> changeHiddenState(@PathVariable Long id, @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
-        RoomTypeResponse response = roomTypeService.changeHiddenState(id, request);
+    public ResponseEntity<ApiResponse<RoomTypeResponse>> changeHiddenState(
+        @PathVariable Long branchId,
+        @PathVariable Long id, 
+        @Valid @RequestBody ChangeRoomTypeHiddenStateRequest request) {
+        RoomTypeResponse response = roomTypeService.changeHiddenState(id, branchId, request);
         return ResponseEntity.ok(ApiResponse.success("Room type hidden state changed successfully", response));
     }
 
-    @GetMapping("/availability")
-    public ResponseEntity<ApiResponse<List<RoomTypeAvailabilityResponse>>> getAllRoomTypeAvailability(
+    @GetMapping("/availabilities")
+    public ResponseEntity<ApiResponse<List<RoomTypeAvailabilityResponse>>> getAvailabilitiesByBranch(
+        @PathVariable Long branchId,
         @RequestParam String checkIn, 
         @RequestParam String checkOut) {
-        List<RoomTypeAvailabilityResponse> response = roomTypeService.getAllRoomTypeAvailability(LocalDate.parse(checkIn), LocalDate.parse(checkOut));
+        List<RoomTypeAvailabilityResponse> response = roomTypeService.getAvailabilitiesByBranch(branchId, LocalDate.parse(checkIn), LocalDate.parse(checkOut));
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

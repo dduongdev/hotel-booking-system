@@ -13,8 +13,9 @@ public class RoomTypeAvailability {
     private double pricePerNight;
     private int availableRoomCount;
     private String imageUrl;
+    private Long branchId;
 
-    public RoomTypeAvailability(Long id, String name, String description, int capacity, double pricePerNight, long availableRoomCount, String imageUrl) {
+    public RoomTypeAvailability(Long id, String name, String description, int capacity, double pricePerNight, long availableRoomCount, String imageUrl, Long branchId) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -22,5 +23,6 @@ public class RoomTypeAvailability {
         this.pricePerNight = pricePerNight;
         this.availableRoomCount = (int) availableRoomCount;
         this.imageUrl = imageUrl;
+        this.branchId = branchId;
     }
 }

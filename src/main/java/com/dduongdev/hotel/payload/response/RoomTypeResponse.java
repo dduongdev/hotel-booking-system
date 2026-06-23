@@ -17,6 +17,7 @@ public class RoomTypeResponse {
     private double pricePerNight;
     private boolean hidden;
     private String imageUrl;
+    private Long branchId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

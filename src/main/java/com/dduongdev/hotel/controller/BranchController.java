@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,8 +36,9 @@ public class BranchController {
 
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<CreateBranchResponse>> create(@Valid @RequestBody CreateBranchRequest request) {
-        CreateBranchResponse response = branchService.create(request);
+    public ResponseEntity<ApiResponse<CreateBranchResponse>> create(
+            @Valid @ModelAttribute CreateBranchRequest request) {
+        CreateBranchResponse response = branchService.create(request, request.getImage());
         return ResponseEntity.ok(ApiResponse.success("Branch created successfully", response));
     }
 
@@ -48,12 +50,18 @@ public class BranchController {
         return ResponseEntity.ok(ApiResponse.success(branchService.getAll(pageable)));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BranchResponse>> getById(@PathVariable Long id) {
+        BranchResponse response = branchService.getById(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<BranchResponse>> update(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateBranchRequest request) {
-        BranchResponse response = branchService.update(id, request);
+            @Valid @ModelAttribute UpdateBranchRequest request) {
+        BranchResponse response = branchService.update(id, request, request.getImage());
         return ResponseEntity.ok(ApiResponse.success("Branch updated successfully", response));
     }
 

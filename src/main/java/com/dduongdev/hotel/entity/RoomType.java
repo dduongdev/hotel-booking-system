@@ -22,11 +22,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoomType {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class RoomType extends BaseEntity {
 
     @Column(nullable = false)
     private String name;
@@ -44,11 +40,4 @@ public class RoomType {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

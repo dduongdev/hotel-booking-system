@@ -26,11 +26,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Booking {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class Booking extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.CONFIRMED;
@@ -52,14 +48,6 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     public static enum Status {
         CONFIRMED,

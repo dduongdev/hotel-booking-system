@@ -21,11 +21,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OtpVerification {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class OtpVerification extends BaseEntity {
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
@@ -41,8 +37,4 @@ public class OtpVerification {
 
     @Column(name = "attempt_count", nullable = false)
     private int attemptCount = 0;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
 }

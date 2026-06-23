@@ -26,11 +26,18 @@
                 const today = new Date();
                 const tomorrow = new Date(today);
                 tomorrow.setDate(tomorrow.getDate() + 1);
+
+                function fmt(d) {
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return y + '-' + m + '-' + day;
+                }
                 
                 const checkIn = document.getElementById('avail-check-in');
                 const checkOut = document.getElementById('avail-check-out');
-                if (checkIn) checkIn.value = today.toISOString().split('T')[0];
-                if (checkOut) checkOut.value = tomorrow.toISOString().split('T')[0];
+                if (checkIn) checkIn.value = fmt(today);
+                if (checkOut) checkOut.value = fmt(tomorrow);
             });
 
             function onAvailBranchChange() {
@@ -104,7 +111,7 @@
                         </div>
                     `).join('');
                 } catch (error) {
-                    resultsDiv.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Tìm kiếm thất bại</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                    resultsDiv.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Tìm kiếm thất bại</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                     ToastManager.show(error.message, 'error');
                 }
             }

@@ -40,4 +40,12 @@ public class AdminWebController {
         model.addAttribute("extraScript", "admin/room-types-script :: script");
         return "fragments/layout";
     }
+
+    @GetMapping("/branches")
+    public String branchesPage(Model model) {
+        model.addAttribute("title", "Manage Branches - Hotel Booking");
+        model.addAttribute("view", "admin/branches :: content");
+        model.addAttribute("extraScript", "admin/branches-script :: script");
+        return "fragments/layout";
+    }
 }

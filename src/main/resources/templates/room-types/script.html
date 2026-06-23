@@ -7,6 +7,24 @@
             let selectedBranchId = null;
 
             document.addEventListener('DOMContentLoaded', async () => {
+                // Read branchId from URL params
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlBranchId = urlParams.get('branchId');
+
+                function fmt(d) {
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return y + '-' + m + '-' + day;
+                }
+
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+
+                document.getElementById('check-in').value = fmt(today);
+                document.getElementById('check-out').value = fmt(tomorrow);
+
                 // Load branches
                 try {
                     const result = await BranchAPI.getAll();
@@ -16,19 +34,30 @@
                     branches.forEach(b => {
                         const opt = document.createElement('option');
                         opt.value = b.id;
-                        opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
+                        opt.textContent = `${b.name || 'Branch #' + b.id} - ${b.city || ''}`;
                         select.appendChild(opt);
                     });
+
+                    // Auto-select branch from URL if present
+                    if (urlBranchId) {
+                        const matchingOption = Array.from(select.options).find(o => o.value === urlBranchId);
+                        if (matchingOption) {
+                            select.value = urlBranchId;
+                            selectedBranchId = parseInt(urlBranchId);
+                        }
+                    }
                 } catch (e) {
                     console.error('Failed to load branches', e);
+                    document.getElementById('room-types-grid').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">Không thể tải danh sách chi nhánh. Vui lòng thử lại sau.</p></div>';
+                    return;
                 }
 
-                const today = new Date();
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-
-                document.getElementById('check-in').value = today.toISOString().split('T')[0];
-                document.getElementById('check-out').value = tomorrow.toISOString().split('T')[0];
+                // If no branch auto-selected from URL, show a message instead of the loading spinner
+                if (!selectedBranchId) {
+                    document.getElementById('room-types-grid').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh và nhấn Tìm kiếm để xem danh sách phòng trống.</p></div>';
+                } else {
+                    searchAvailability();
+                }
             });
 
             function onBranchChange() {
@@ -103,7 +132,7 @@
                         `;
                     }).join('');
                 } catch (error) {
-                    grid.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                    grid.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 

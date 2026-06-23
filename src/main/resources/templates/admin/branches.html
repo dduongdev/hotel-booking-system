@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head></head>
+<body>
+    <th:block th:fragment="content">
+        <div class="ls-admin-layout ls-admin-wrapper">
+            <!-- Sidebar -->
+            <aside class="ls-sidebar">
+                <div class="ls-sidebar__header">
+                    <div class="ls-sidebar__logo">
+                        <span class="ls-icon" style="font-variation-settings:'FILL' 1;">hotel_class</span>
+                    </div>
+                    <div>
+                        <div class="ls-sidebar__title">LuxeStay Admin</div>
+                        <div class="ls-sidebar__subtitle">Hệ thống quản lý chuỗi</div>
+                    </div>
+                </div>
+                
+                <nav class="ls-sidebar__nav">
+                    <a href="/admin/dashboard" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">dashboard</span> Bảng điều khiển
+                    </a>
+                    <a href="/admin/branches" class="ls-sidebar__nav-item ls-sidebar__nav-item--active">
+                        <span class="ls-icon ls-icon--sm">business</span> Chi nhánh
+                    </a>
+                    <a href="/admin/bookings" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">calendar_today</span> Lịch đặt phòng
+                    </a>
+                    <a href="/admin/rooms" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">bed</span> Quản lý phòng
+                    </a>
+                    <a href="/admin/room-types" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">category</span> Loại phòng
+                    </a>
+                </nav>
+                
+                <div class="ls-sidebar__footer">
+                    <button onclick="showAddBranchModal()" class="ls-sidebar__add-btn">
+                        <span class="ls-icon ls-icon--sm">add_circle</span>
+                        Thêm chi nhánh mới
+                    </button>
+                    <div style="margin-top:12px;">
+                        <a href="#" onclick="event.preventDefault(); logoutUser();" style="width:100%;padding:12px;display:flex;align-items:center;gap:12px;border-radius:var(--radius-lg);font-size:0.75rem;font-weight:700;color:var(--danger);text-decoration:none;transition:var(--transition);" onmouseover="this.style.background='var(--danger-bg)'" onmouseout="this.style.background='transparent'">
+                            <span class="ls-icon ls-icon--sm">logout</span> Đăng xuất Admin
+                        </a>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <main class="ls-main-content">
+                <div class="ls-page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h1>Quản lý Chi nhánh</h1>
+                        <p>Thêm, sửa và quản lý các chi nhánh khách sạn.</p>
+                    </div>
+                    <button onclick="showAddBranchModal()" class="ls-btn ls-btn--primary ls-btn--sm">+ Thêm chi nhánh</button>
+                </div>
+                
+                <div id="admin-branches-container">
+                    <div class="ls-loading">
+                        <div class="ls-spinner"></div>
+                        <p>Đang tải danh sách chi nhánh...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Add/Edit Branch Modal -->
+        <div id="branch-modal" class="ls-modal-overlay">
+            <div class="ls-modal-backdrop" onclick="closeBranchModal()"></div>
+            <div class="ls-modal" style="max-width:680px;">
+                <div class="ls-modal__header">
+                    <h3 id="branch-modal-title">Thêm chi nhánh</h3>
+                    <button class="ls-modal__close" onclick="closeBranchModal()">&times;</button>
+                </div>
+                <form id="branch-form" onsubmit="return saveBranch(event)">
+                    <div class="ls-modal__body" style="max-height:65vh;overflow-y:auto;">
+                        <div id="branch-form-error" class="ls-alert ls-alert--danger" style="display:none;"></div>
+                        <input type="hidden" id="branch-id">
+                        
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="branch-name">Tên chi nhánh</label>
+                            <input type="text" id="branch-name" class="ls-form-input" placeholder="VD: LuxeStay Center" required>
+                        </div>
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="branch-description">Mô tả</label>
+                            <textarea id="branch-description" class="ls-form-input" rows="2" placeholder="Mô tả chi nhánh..." style="resize:vertical;"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="branch-phone">Số điện thoại</label>
+                                <input type="text" id="branch-phone" class="ls-form-input" placeholder="VD: 0123456789" required>
+                            </div>
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="branch-email">Email</label>
+                                <input type="email" id="branch-email" class="ls-form-input" placeholder="VD: contact@luxestay.vn" required>
+                            </div>
+                        </div>
+                        
+                        <div class="ls-form-group">
+                            <label class="ls-form-label" for="branch-address">Địa chỉ</label>
+                            <input type="text" id="branch-address" class="ls-form-input" placeholder="VD: 123 Đường Luxury" required>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="branch-city">Tỉnh/Thành phố</label>
+                                <select id="branch-city" class="ls-form-input" required>
+                                    <option value="">-- Chọn tỉnh/thành phố --</option>
+                                </select>
+                            </div>
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="branch-latitude">Vĩ độ (tùy chọn)</label>
+                                <input type="number" id="branch-latitude" class="ls-form-input" step="any" placeholder="VD: 10.7755">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="ls-form-group">
+                                <label class="ls-form-label" for="branch-longitude">Kinh độ (tùy chọn)</label>
+                                <input type="number" id="branch-longitude" class="ls-form-input" step="any" placeholder="VD: 106.7018">
+                            </div>
+                            <div class="ls-form-group">
+                                <label class="ls-form-label">Hình ảnh (tùy chọn)</label>
+                                <div id="branch-image-preview" style="display:none;margin-bottom:8px;">
+                                    <img id="branch-image-preview-img" src="" alt="Preview" style="max-width:200px;max-height:120px;border-radius:var(--radius-md);object-fit:cover;border:1px solid var(--slate-200);">
+                                </div>
+                                <input type="file" id="branch-image" accept="image/*" style="font-size:0.8125rem;">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="ls-form-group">
+                                <label class="ls-form-label">Giờ nhận phòng</label>
+                                <div class="time-picker-group">
+                                    <select id="branch-check-in-h" class="ls-form-input" required></select>
+                                    <span class="time-picker-sep">:</span>
+                                    <select id="branch-check-in-m" class="ls-form-input" required></select>
+                                </div>
+                            </div>
+                            <div class="ls-form-group">
+                                <label class="ls-form-label">Giờ trả phòng</label>
+                                <div class="time-picker-group">
+                                    <select id="branch-check-out-h" class="ls-form-input" required></select>
+                                    <span class="time-picker-sep">:</span>
+                                    <select id="branch-check-out-m" class="ls-form-input" required></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ls-form-group" id="branch-status-group" style="display:none;">
+                            <label class="ls-form-label" for="branch-status-select">Trạng thái</label>
+                            <select id="branch-status-select" class="ls-form-input">
+                                <option value="ACTIVE">Đang hoạt động</option>
+                                <option value="INACTIVE">Tạm ngừng</option>
+                                <option value="MAINTENANCE">Bảo trì</option>
+                                <option value="CLOSED">Đã đóng cửa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ls-modal__footer">
+                        <button type="button" onclick="closeBranchModal()" class="ls-btn ls-btn--outline ls-btn--sm">Hủy</button>
+                        <button type="submit" class="ls-btn ls-btn--primary ls-btn--sm">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

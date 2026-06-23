@@ -20,6 +20,9 @@
                     <a href="/admin/dashboard" class="ls-sidebar__nav-item">
                         <span class="ls-icon ls-icon--sm">dashboard</span> Bảng điều khiển
                     </a>
+                    <a href="/admin/branches" class="ls-sidebar__nav-item">
+                        <span class="ls-icon ls-icon--sm">business</span> Chi nhánh
+                    </a>
                     <a href="/admin/bookings" class="ls-sidebar__nav-item ls-sidebar__nav-item--active">
                         <span class="ls-icon ls-icon--sm">calendar_today</span> Lịch đặt phòng
                     </a>
@@ -47,6 +50,16 @@
                         <h1>Quản lý Đặt phòng</h1>
                         <p>Xem và quản lý tất cả đặt phòng khách sạn.</p>
                     </div>
+                </div>
+                
+                <div class="ls-filter-bar" style="flex-wrap:wrap;margin-bottom:24px;">
+                    <div class="ls-form-group" style="flex:1;min-width:250px;margin-bottom:0;">
+                        <label class="ls-form-label" for="admin-booking-branch-select">Chi nhánh</label>
+                        <select id="admin-booking-branch-select" class="ls-form-input" onchange="onAdminBookingBranchChange()">
+                            <option value="">-- Tất cả chi nhánh --</option>
+                        </select>
+                    </div>
+                    <button onclick="resetAdminBookingFilter()" class="ls-btn ls-btn--outline ls-btn--sm" style="margin-top:20px;flex-shrink:0;">Xem tất cả</button>
                 </div>
                 
                 <div id="admin-bookings-container">

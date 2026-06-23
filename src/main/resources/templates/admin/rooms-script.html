@@ -30,11 +30,19 @@
                     branches.forEach(b => {
                         const opt = document.createElement('option');
                         opt.value = b.id;
-                        opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
+                        opt.textContent = `${b.name || 'Branch #' + b.id} - ${b.city || ''}`;
                         select.appendChild(opt);
                     });
+
+                    // Auto-select first branch and load rooms
+                    if (branches.length > 0) {
+                        select.value = branches[0].id;
+                        onAdminRoomsBranchChange();
+                    } else {
+                        document.getElementById('admin-rooms-container').innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Chưa có chi nhánh</div><p class="ls-empty__text">Vui lòng <a href="/admin/branches" style="color:var(--color-secondary);font-weight:700;">tạo chi nhánh</a> trước khi quản lý phòng.</p></div>';
+                    }
                 } catch (error) {
-                    ToastManager.show('Lỗi tải danh sách chi nhánh.', 'error');
+                    document.getElementById('admin-rooms-container').innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 
@@ -114,7 +122,7 @@
                         });
                     });
                 } catch (error) {
-                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 

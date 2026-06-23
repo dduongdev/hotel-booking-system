@@ -6,8 +6,9 @@
         <script>
             let adminBookingsPage = 0;
             const adminBookingsPageSize = 15;
+            let adminBookingBranchId = null;
 
-            document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded', async () => {
                 if (!TokenManager.isAuthenticated()) {
                     window.location.href = '/login';
                     return;
@@ -17,8 +18,40 @@
                     window.location.href = '/';
                     return;
                 }
+                
+                // Load branches for the filter
+                try {
+                    const result = await BranchAPI.getAll(0, 200);
+                    const branches = result.content || [];
+                    const select = document.getElementById('admin-booking-branch-select');
+                    select.innerHTML = '<option value="">-- Tất cả chi nhánh --</option>';
+                    branches.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.textContent = `${b.name || 'Branch #' + b.id} - ${b.city || ''}`;
+                        select.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error('Failed to load branches for filter', e);
+                }
+                
                 loadAdminBookings();
             });
+
+            function onAdminBookingBranchChange() {
+                const select = document.getElementById('admin-booking-branch-select');
+                adminBookingBranchId = select.value ? parseInt(select.value) : null;
+                adminBookingsPage = 0;
+                loadAdminBookings(0);
+            }
+
+            function resetAdminBookingFilter() {
+                const select = document.getElementById('admin-booking-branch-select');
+                select.value = '';
+                adminBookingBranchId = null;
+                adminBookingsPage = 0;
+                loadAdminBookings(0);
+            }
 
             async function loadAdminBookings(page = 0) {
                 adminBookingsPage = page;
@@ -26,7 +59,9 @@
                 container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải dữ liệu đặt phòng...</p></div>';
                 
                 try {
-                    const result = await BookingAPI.getAll(page, adminBookingsPageSize);
+                    const result = adminBookingBranchId
+                        ? await BookingAPI.getByBranch(adminBookingBranchId, page, adminBookingsPageSize)
+                        : await BookingAPI.getAll(page, adminBookingsPageSize);
                     const bookings = result.content || [];
                     const totalPages = result.totalPages || 0;
                     
@@ -35,7 +70,10 @@
                         return;
                     }
                     
-                    let html = '<div class="ls-card"><div class="ls-table-container"><table class="ls-table"><thead><tr><th>ID</th><th>Khách hàng</th><th>Loại phòng</th><th>Phòng</th><th>Check-in</th><th>Check-out</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>';
+                    const showBranchCol = !adminBookingBranchId;
+                    let html = '<div class="ls-card"><div class="ls-table-container"><table class="ls-table"><thead><tr><th>ID</th><th>Khách hàng</th>';
+                    if (showBranchCol) html += '<th>Chi nhánh</th>';
+                    html += '<th>Loại phòng</th><th>Phòng</th><th>Check-in</th><th>Check-out</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>';
                     
                     bookings.forEach(booking => {
                         const statusClass = getStatusBadgeClass(booking.status);
@@ -43,6 +81,7 @@
                         const customerName = booking.username ? escapeHtml(booking.username) : '#' + (booking.userId || '?');
                         const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color:var(--slate-400);font-style:italic;">Chưa gán</em>';
                         const roomTypeDisplay = booking.roomTypeName ? escapeHtml(booking.roomTypeName) : 'N/A';
+                        const branchDisplay = [booking.branchName, booking.branchAddress, booking.branchCity].filter(Boolean).join(', ') || 'N/A';
                         
                         let actionsHtml = '<span class="ls-badge ls-badge--secondary">-</span>';
                         
@@ -59,8 +98,11 @@
                         
                         html += `<tr>
                             <td><strong>#${booking.id}</strong></td>
-                            <td><span class="ls-badge ls-badge--info">${customerName}</span></td>
-                            <td>${roomTypeDisplay}</td>
+                            <td><span class="ls-badge ls-badge--info">${customerName}</span></td>`;
+                        if (showBranchCol) {
+                            html += `<td><span style="font-size:0.8125rem;color:var(--slate-700);">${escapeHtml(branchDisplay)}</span></td>`;
+                        }
+                        html += `<td>${roomTypeDisplay}</td>
                             <td>${roomDisplay}</td>
                             <td>${formatDateTime(booking.checkIn)}</td>
                             <td>${formatDateTime(booking.checkOut)}</td>
@@ -83,7 +125,7 @@
                     
                     container.innerHTML = html;
                 } catch (error) {
-                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 

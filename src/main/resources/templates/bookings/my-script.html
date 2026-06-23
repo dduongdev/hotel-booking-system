@@ -59,7 +59,7 @@
                         container.appendChild(pagination);
                     }
                 } catch (error) {
-                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__icon">⚠️</div><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
                 }
             }
 
@@ -76,7 +76,7 @@
                     return;
                 }
                 
-                let html = '<div class="ls-table-container"><table class="ls-table"><thead><tr><th>Mã đặt</th><th>Loại phòng</th><th>Phòng</th><th>Nhận phòng</th><th>Trả phòng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>';
+                let html = '<div class="ls-table-container"><table class="ls-table"><thead><tr><th>Mã đặt</th><th>Chi nhánh</th><th>Loại phòng</th><th>Phòng</th><th>Nhận phòng</th><th>Trả phòng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>';
                 
                 filteredMyBookings.forEach(booking => {
                     const statusClass = getStatusBadgeClass(booking.status);
@@ -84,9 +84,11 @@
                     const canCancel = booking.status === 'CONFIRMED';
                     const roomDisplay = booking.roomName ? escapeHtml(booking.roomName) : '<em style="color:var(--slate-400);font-style:italic;">Chưa gán</em>';
                     const roomTypeDisplay = booking.roomTypeName ? escapeHtml(booking.roomTypeName) : 'N/A';
+                    const branchDisplay = [booking.branchName, booking.branchAddress, booking.branchCity].filter(Boolean).join(', ') || 'N/A';
                     
                     html += `<tr>
                         <td><strong>#${booking.id}</strong></td>
+                        <td><span style="font-size:0.8125rem;color:var(--slate-700);">${escapeHtml(branchDisplay)}</span></td>
                         <td>${roomTypeDisplay}</td>
                         <td>${roomDisplay}</td>
                         <td>${formatDateTime(booking.checkIn)}</td>

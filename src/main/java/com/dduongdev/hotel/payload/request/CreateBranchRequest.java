@@ -19,7 +19,6 @@ public class CreateBranchRequest {
     @NotBlank(message = "Branch name cannot be blank")
     private String name;
 
-    @NotBlank(message = "Description cannot be blank")
     private String description;
 
     @NotBlank(message = "Phone number cannot be blank")

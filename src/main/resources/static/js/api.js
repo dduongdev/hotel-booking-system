@@ -241,6 +241,73 @@ const BranchAPI = {
             useAuth: false,
             params: { page, size }
         });
+    },
+
+    async getById(id) {
+        return apiRequest(`/branches/${id}`, {
+            useAuth: false
+        });
+    },
+
+    async create(data, imageFile) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('description', data.description || '');
+        formData.append('phoneNumber', data.phoneNumber);
+        formData.append('email', data.email);
+        formData.append('address', data.address);
+        formData.append('city', data.city);
+        if (data.latitude !== undefined && data.latitude !== null) formData.append('latitude', data.latitude);
+        if (data.longitude !== undefined && data.longitude !== null) formData.append('longitude', data.longitude);
+        formData.append('checkInTime', data.checkInTime);
+        formData.append('checkOutTime', data.checkOutTime);
+        if (imageFile) formData.append('image', imageFile);
+
+        const headers = {};
+        if (TokenManager.getAccessToken()) {
+            headers['Authorization'] = `Bearer ${TokenManager.getAccessToken()}`;
+        }
+
+        const response = await fetch(`${API_BASE}/branches`, {
+            method: 'POST',
+            headers,
+            body: formData
+        });
+        return handleResponse(response);
+    },
+
+    async update(id, data, imageFile) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('description', data.description || '');
+        formData.append('phoneNumber', data.phoneNumber);
+        formData.append('email', data.email);
+        formData.append('address', data.address);
+        formData.append('city', data.city);
+        if (data.latitude !== undefined && data.latitude !== null) formData.append('latitude', data.latitude);
+        if (data.longitude !== undefined && data.longitude !== null) formData.append('longitude', data.longitude);
+        formData.append('checkInTime', data.checkInTime);
+        formData.append('checkOutTime', data.checkOutTime);
+        if (imageFile) formData.append('image', imageFile);
+
+        const headers = {};
+        if (TokenManager.getAccessToken()) {
+            headers['Authorization'] = `Bearer ${TokenManager.getAccessToken()}`;
+        }
+
+        const response = await fetch(`${API_BASE}/branches/${id}`, {
+            method: 'PUT',
+            headers,
+            body: formData
+        });
+        return handleResponse(response);
+    },
+
+    async changeStatus(id, status) {
+        return apiRequest(`/branches/${id}/status`, {
+            method: 'PATCH',
+            body: { status }
+        });
     }
 };
 
@@ -382,6 +449,12 @@ const BookingAPI = {
         });
     },
     
+    async getByBranch(branchId, page = 0, size = 15) {
+        return apiRequest(`/branches/${branchId}/bookings`, {
+            params: { page, size }
+        });
+    },
+
     async cancelByManager(id) {
         return apiRequest(`/bookings/${id}/cancel`, {
             method: 'PATCH'

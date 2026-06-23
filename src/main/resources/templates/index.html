@@ -88,31 +88,16 @@
             </div>
         </section>
 
-        <!-- Rooms Section -->
-        <section class="ls-room-section" id="phong-nghi">
+        <!-- Branches Section -->
+        <section class="ls-branches-section" id="chi-nhanh">
             <div class="ls-container">
-                <div class="ls-room-section__header">
-                    <div>
-                        <span class="ls-room-section__label">Danh mục phòng nghỉ</span>
-                        <h2 class="ls-room-section__title">Chọn Không Gian Của Bạn</h2>
-                    </div>
-                    <a href="/room-types" class="flex items-center gap-2 text-secondary font-bold text-sm">
-                        Xem tất cả <span class="ls-icon ls-icon--sm">arrow_forward</span>
-                    </a>
-                </div>
-
-                <div style="display:flex;gap:12px;align-items:center;margin-bottom:24px;grid-column:1/-1;">
-                    <div class="ls-form-group" style="margin-bottom:0;flex:1;max-width:300px;">
-                        <label class="ls-form-label" for="home-branch-select">Chi nhánh</label>
-                        <select id="home-branch-select" class="ls-form-input" onchange="onHomeBranchChange()">
-                            <option value="">-- Chọn chi nhánh --</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="home-room-types" class="grid grid-cols-12 gap-6">
-                    <div class="ls-loading" style="grid-column: 1/-1;">
+                <span class="ls-branches-section__label">Hệ thống chi nhánh</span>
+                <h2 class="ls-branches-section__title">Khám Phá Các Chi Nhánh Của Chúng Tôi</h2>
+                <p class="ls-branches-section__subtitle">Mỗi chi nhánh LuxeStay mang đến một trải nghiệm độc đáo riêng, từ trung tâm thành phố đến các khu nghỉ dưỡng ven biển.</p>
+                <div id="home-branch-grid" class="ls-branch-grid">
+                    <div class="ls-loading" style="grid-column:1/-1;">
                         <div class="ls-spinner"></div>
-                        <p>Đang tải phòng...</p>
+                        <p>Đang tải danh sách chi nhánh...</p>
                     </div>
                 </div>
             </div>
@@ -251,45 +236,90 @@
                 if (checkIn) checkIn.value = today.toISOString().split('T')[0];
                 if (checkOut) checkOut.value = tomorrow.toISOString().split('T')[0];
                 
-                // Load branches for home page selector
+                // Load branches for home page
                 try {
                     const branchResult = await BranchAPI.getAll(0, 100);
                     const branches = branchResult.content || [];
-                    const select = document.getElementById('home-branch-select');
-                    if (select) {
-                        select.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
-                        branches.forEach(b => {
-                            const opt = document.createElement('option');
-                            opt.value = b.id;
-                            opt.textContent = `${b.address || 'Branch #' + b.id} - ${b.city || ''}`;
-                            select.appendChild(opt);
-                        });
-                    }
-                    if (branches.length > 0) {
-                        homeBranchId = branches[0].id;
-                        if (select) select.value = homeBranchId;
-                    }
+                    renderBranchCards(branches);
                 } catch (e) {
                     console.error('Failed to load branches', e);
+                    document.getElementById('home-branch-grid').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Không thể tải chi nhánh</div><p class="ls-empty__text">Đã có lỗi xảy ra. Vui lòng thử lại sau.</p></div>';
+                }
+            });
+            
+            function renderBranchCards(branches) {
+                const container = document.getElementById('home-branch-grid');
+                if (!branches || branches.length === 0) {
+                    container.innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chưa có chi nhánh</div><p class="ls-empty__text">Hiện chưa có chi nhánh nào. Vui lòng quay lại sau.</p></div>';
+                    return;
                 }
                 
-                // Load room types for home page
-                if (homeBranchId) {
-                    loadHomeRoomTypes();
-                }
-            });
+                let html = '';
+                branches.forEach(b => {
+                    const imageUrl = b.imageUrl || '';
+                    const statusText = getBranchStatusText(b.status);
+                    const statusClass = getBranchStatusClass(b.status);
+                    
+                    html += `
+                        <a href="/room-types?branchId=${b.id}" class="ls-branch-card">
+                            <div class="ls-branch-card__image-wrapper">
+                                ${imageUrl 
+                                    ? `<div class="ls-branch-card__image" style="background-image: url('${escapeHtml(imageUrl)}');"></div>`
+                                    : `<div class="ls-branch-card__image-placeholder"><span class="ls-icon ls-icon--xl">hotel</span></div>`
+                                }
+                                <span class="ls-branch-card__status ls-branch-card__status--${statusClass}">${escapeHtml(statusText)}</span>
+                            </div>
+                            <div class="ls-branch-card__body">
+                                <h3 class="ls-branch-card__name">${escapeHtml(b.name || 'Chi nhánh #' + b.id)}</h3>
+                                <div class="ls-branch-card__location">
+                                    <span class="ls-icon ls-icon--sm" style="font-size:14px;color:var(--color-secondary);">location_on</span>
+                                    <span>${escapeHtml(b.address || '')}${b.city ? ', ' + escapeHtml(b.city) : ''}</span>
+                                </div>
+                                <div class="ls-branch-card__details">
+                                    <div class="ls-branch-card__detail">
+                                        <span class="ls-icon ls-icon--sm ls-branch-card__detail-icon">call</span>
+                                        <span>${escapeHtml(b.phoneNumber || '')}</span>
+                                    </div>
+                                    <div class="ls-branch-card__detail">
+                                        <span class="ls-icon ls-icon--sm ls-branch-card__detail-icon">mail</span>
+                                        <span>${escapeHtml(b.email || '')}</span>
+                                    </div>
+                                    <div class="ls-branch-card__detail">
+                                        <span class="ls-icon ls-icon--sm ls-branch-card__detail-icon">schedule</span>
+                                        <span>Nhận phòng: ${escapeHtml(b.checkInTime || '')} • Trả phòng: ${escapeHtml(b.checkOutTime || '')}</span>
+                                    </div>
+                                </div>
+                                <div class="ls-branch-card__action">
+                                    Đặt phòng ngay
+                                    <span class="ls-icon ls-icon--sm" style="font-size:16px;">arrow_forward</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            }
             
-            function onHomeBranchChange() {
-                const select = document.getElementById('home-branch-select');
-                homeBranchId = select.value ? parseInt(select.value) : null;
-                if (homeBranchId) {
-                    loadHomeRoomTypes();
-                } else {
-                    document.getElementById('home-room-types').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chọn chi nhánh</div><p class="ls-empty__text">Vui lòng chọn một chi nhánh để xem danh sách phòng.</p></div>';
+            function getBranchStatusText(status) {
+                switch (status) {
+                    case 'ACTIVE': return 'Đang hoạt động';
+                    case 'INACTIVE': return 'Tạm ngừng';
+                    case 'MAINTENANCE': return 'Bảo trì';
+                    case 'CLOSED': return 'Đã đóng cửa';
+                    default: return status || '';
                 }
             }
-            });
             
+            function getBranchStatusClass(status) {
+                switch (status) {
+                    case 'ACTIVE': return 'active';
+                    case 'MAINTENANCE': return 'maintenance';
+                    case 'CLOSED': return 'closed';
+                    default: return 'inactive';
+                }
+            }
+
             async function loadHomeRoomTypes() {
                 if (!homeBranchId) {
                     document.getElementById('home-room-types').innerHTML = '<div class="ls-empty" style="grid-column:1/-1;"><div class="ls-empty__title">Chưa có dữ liệu</div><p class="ls-empty__text">Chưa có chi nhánh nào. Vui lòng quay lại sau.</p></div>';

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head></head>
+<body>
+    <th:block th:fragment="script">
+        <script>
+            let adminBranchPage = 0;
+            const adminBranchPageSize = 12;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!TokenManager.isAuthenticated()) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const user = TokenManager.getUser();
+                if (!user || user.role !== 'MANAGER') {
+                    window.location.href = '/';
+                    return;
+                }
+                initTimePicker();
+                loadAdminBranches();
+            });
+
+            async function loadAdminBranches(page = 0) {
+                adminBranchPage = page;
+                const container = document.getElementById('admin-branches-container');
+                container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><p>Đang tải danh sách chi nhánh...</p></div>';
+                
+                try {
+                    const result = await BranchAPI.getAll(page, adminBranchPageSize);
+                    const branches = result.content || [];
+                    const totalPages = result.totalPages || 0;
+                    
+                    if (branches.length === 0) {
+                        container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Chưa có chi nhánh</div><p class="ls-empty__text">Chưa có chi nhánh nào được tạo. Hãy thêm chi nhánh đầu tiên!</p></div>';
+                        return;
+                    }
+                    
+                    let html = '<div class="grid" style="grid-template-columns:repeat(auto-fill, minmax(400px, 1fr));gap:24px;">';
+                    
+                    branches.forEach(b => {
+                        const imageHtml = b.imageUrl 
+                            ? `<img src="${escapeHtml(b.imageUrl)}" alt="${escapeHtml(b.name)}" style="width:100%;height:180px;object-fit:cover;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">`
+                            : `<div style="width:100%;height:180px;background:var(--slate-100);border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;align-items:center;justify-content:center;">
+                                <span class="ls-icon" style="font-size:48px;color:var(--slate-300);">business</span>
+                              </div>`;
+                        
+                        const statusBadge = getBranchStatusBadge(b.status);
+                        
+                        html += `
+                            <div class="ls-card">
+                                ${imageHtml}
+                                <div class="ls-card__header">
+                                    <div>
+                                        <h3>${escapeHtml(b.name)}</h3>
+                                        <div style="margin-top:4px;">${statusBadge}</div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="ls-btn ls-btn--outline ls-btn--sm edit-branch-btn" data-id="${b.id}">Sửa</button>
+                                    </div>
+                                </div>
+                                <div class="ls-card__body">
+                                    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+                                        <div class="flex items-center gap-2" style="font-size:0.8125rem;color:var(--slate-600);">
+                                            <span class="ls-icon ls-icon--sm" style="font-size:16px;color:var(--color-secondary);">location_on</span>
+                                            <span>${escapeHtml(b.address || '')}${b.city ? ', ' + escapeHtml(b.city) : ''}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2" style="font-size:0.8125rem;color:var(--slate-600);">
+                                            <span class="ls-icon ls-icon--sm" style="font-size:16px;color:var(--color-secondary);">call</span>
+                                            <span>${escapeHtml(b.phoneNumber || '')}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2" style="font-size:0.8125rem;color:var(--slate-600);">
+                                            <span class="ls-icon ls-icon--sm" style="font-size:16px;color:var(--color-secondary);">mail</span>
+                                            <span>${escapeHtml(b.email || '')}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2" style="font-size:0.8125rem;color:var(--slate-600);">
+                                            <span class="ls-icon ls-icon--sm" style="font-size:16px;color:var(--color-secondary);">schedule</span>
+                                            <span>Nhận: ${escapeHtml(b.checkInTime || '')} • Trả: ${escapeHtml(b.checkOutTime || '')}</span>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--slate-100);padding-top:16px;">
+                                        <button class="ls-btn ${b.status === 'ACTIVE' ? 'ls-btn--success' : 'ls-btn--outline'} ls-btn--sm status-branch-btn" data-id="${b.id}" data-status="ACTIVE">Kích hoạt</button>
+                                        <button class="ls-btn ${b.status === 'INACTIVE' ? 'ls-btn--outline' : 'ls-btn--outline'} ls-btn--sm status-branch-btn" data-id="${b.id}" data-status="INACTIVE">Tạm ngừng</button>
+                                        <button class="ls-btn ${b.status === 'MAINTENANCE' ? 'ls-btn--outline' : 'ls-btn--outline'} ls-btn--sm status-branch-btn" data-id="${b.id}" data-status="MAINTENANCE">Bảo trì</button>
+                                        <button class="ls-btn ${b.status === 'CLOSED' ? 'ls-btn--danger' : 'ls-btn--outline'} ls-btn--sm status-branch-btn" data-id="${b.id}" data-status="CLOSED">Đóng</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    
+                    if (totalPages > 1) {
+                        html += '<div class="ls-pagination">';
+                        html += `<button onclick="loadAdminBranches(0)" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#171;</button>`;
+                        html += `<button onclick="loadAdminBranches(${page - 1})" class="ls-pagination__btn" ${page === 0 ? 'disabled' : ''}>&#8249;</button>`;
+                        html += `<span class="ls-pagination__info">Trang ${page + 1} / ${totalPages}</span>`;
+                        html += `<button onclick="loadAdminBranches(${page + 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#8250;</button>`;
+                        html += `<button onclick="loadAdminBranches(${totalPages - 1})" class="ls-pagination__btn" ${page >= totalPages - 1 ? 'disabled' : ''}>&#187;</button>`;
+                        html += '</div>';
+                    }
+                    
+                    container.innerHTML = html;
+                    
+                    container.querySelectorAll('.edit-branch-btn').forEach(btn => {
+                        btn.addEventListener('click', () => editBranch(parseInt(btn.dataset.id)));
+                    });
+                    container.querySelectorAll('.status-branch-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const id = parseInt(btn.dataset.id);
+                            const status = btn.dataset.status;
+                            changeBranchStatus(id, status);
+                        });
+                    });
+                } catch (error) {
+                    container.innerHTML = '<div class="ls-empty"><div class="ls-empty__title">Lỗi tải dữ liệu</div><p class="ls-empty__text">' + escapeHtml(error.message) + '</p></div>';
+                }
+            }
+
+            // ===== Time Picker Helpers =====
+            function initTimePicker() {
+                const hourOpts = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+                const minOpts = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+
+                ['branch-check-in', 'branch-check-out'].forEach(prefix => {
+                    const hSelect = document.getElementById(prefix + '-h');
+                    const mSelect = document.getElementById(prefix + '-m');
+                    if (!hSelect || !mSelect) return;
+
+                    hourOpts.forEach(h => {
+                        const opt = document.createElement('option');
+                        opt.value = h;
+                        opt.textContent = h;
+                        hSelect.appendChild(opt);
+                    });
+                    minOpts.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m;
+                        opt.textContent = m;
+                        mSelect.appendChild(opt);
+                    });
+                });
+            }
+
+            function setTimeValue(prefix, timeStr) {
+                const parts = (timeStr || '00:00').split(':');
+                const hSelect = document.getElementById(prefix + '-h');
+                const mSelect = document.getElementById(prefix + '-m');
+                if (hSelect) hSelect.value = parts[0] || '00';
+                if (mSelect) mSelect.value = parts[1] || '00';
+            }
+
+            function getTimeValue(prefix) {
+                const hSelect = document.getElementById(prefix + '-h');
+                const mSelect = document.getElementById(prefix + '-m');
+                const h = hSelect ? hSelect.value : '00';
+                const m = mSelect ? mSelect.value : '00';
+                return h + ':' + m;
+            }
+
+            function getBranchStatusBadge(status) {
+                switch (status) {
+                    case 'ACTIVE': return '<span class="ls-badge ls-badge--visible">Đang hoạt động</span>';
+                    case 'INACTIVE': return '<span class="ls-badge ls-badge--secondary">Tạm ngừng</span>';
+                    case 'MAINTENANCE': return '<span class="ls-badge ls-badge--pending">Bảo trì</span>';
+                    case 'CLOSED': return '<span class="ls-badge ls-badge--cancelled">Đã đóng</span>';
+                    default: return '<span class="ls-badge ls-badge--info">' + escapeHtml(status) + '</span>';
+                }
+            }
+
+            async function editBranch(id) {
+                document.getElementById('branch-modal-title').textContent = 'Sửa chi nhánh';
+                document.getElementById('branch-form-error').style.display = 'none';
+                
+                try {
+                    const branch = await BranchAPI.getById(id);
+                    
+                    document.getElementById('branch-id').value = branch.id;
+                    document.getElementById('branch-name').value = branch.name || '';
+                    document.getElementById('branch-description').value = branch.description || '';
+                    document.getElementById('branch-phone').value = branch.phoneNumber || '';
+                    document.getElementById('branch-email').value = branch.email || '';
+                    document.getElementById('branch-address').value = branch.address || '';
+                    document.getElementById('branch-latitude').value = branch.latitude || '';
+                    document.getElementById('branch-longitude').value = branch.longitude || '';
+                    setTimeValue('branch-check-in', branch.checkInTime || '14:00');
+                    setTimeValue('branch-check-out', branch.checkOutTime || '12:00');
+                    document.getElementById('branch-image').value = '';
+                    
+                    if (branch.imageUrl) {
+                        document.getElementById('branch-image-preview').style.display = 'block';
+                        document.getElementById('branch-image-preview-img').src = branch.imageUrl;
+                    } else {
+                        document.getElementById('branch-image-preview').style.display = 'none';
+                    }
+                    
+                    document.getElementById('branch-status-group').style.display = 'block';
+                    document.getElementById('branch-status-select').value = branch.status || 'ACTIVE';
+                    
+                    await loadProvinces(branch.city || '');
+                    document.getElementById('branch-modal').classList.add('ls-modal-overlay--active');
+                } catch (error) {
+                    ToastManager.show('Lỗi tải thông tin chi nhánh.', 'error');
+                }
+            }
+
+            async function showAddBranchModal() {
+                document.getElementById('branch-modal-title').textContent = 'Thêm chi nhánh';
+                document.getElementById('branch-id').value = '';
+                document.getElementById('branch-name').value = '';
+                document.getElementById('branch-description').value = '';
+                document.getElementById('branch-phone').value = '';
+                document.getElementById('branch-email').value = '';
+                document.getElementById('branch-address').value = '';
+                document.getElementById('branch-latitude').value = '';
+                document.getElementById('branch-longitude').value = '';
+                setTimeValue('branch-check-in', '14:00');
+                setTimeValue('branch-check-out', '12:00');
+                document.getElementById('branch-image').value = '';
+                document.getElementById('branch-image-preview').style.display = 'none';
+                document.getElementById('branch-status-group').style.display = 'none';
+                document.getElementById('branch-form-error').style.display = 'none';
+                await loadProvinces();
+                document.getElementById('branch-modal').classList.add('ls-modal-overlay--active');
+            }
+
+            function closeBranchModal() {
+                document.getElementById('branch-modal').classList.remove('ls-modal-overlay--active');
+            }
+
+            async function saveBranch(event) {
+                event.preventDefault();
+                const errorDiv = document.getElementById('branch-form-error');
+                errorDiv.style.display = 'none';
+                
+                const id = document.getElementById('branch-id').value;
+                const name = document.getElementById('branch-name').value.trim();
+                const description = document.getElementById('branch-description').value.trim();
+                const phoneNumber = document.getElementById('branch-phone').value.trim();
+                const email = document.getElementById('branch-email').value.trim();
+                const address = document.getElementById('branch-address').value.trim();
+                const city = document.getElementById('branch-city').value.trim();
+                const latitude = document.getElementById('branch-latitude').value;
+                const longitude = document.getElementById('branch-longitude').value;
+                const checkInTime = getTimeValue('branch-check-in');
+                const checkOutTime = getTimeValue('branch-check-out');
+                const imageFile = document.getElementById('branch-image').files[0];
+                
+                if (!name || !phoneNumber || !email || !address || !city || !checkInTime || !checkOutTime) {
+                    errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin bắt buộc.';
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
+                
+                const data = {
+                    name, description, phoneNumber, email, address, city,
+                    checkInTime, checkOutTime
+                };
+                if (latitude) data.latitude = parseFloat(latitude);
+                if (longitude) data.longitude = parseFloat(longitude);
+                if (id) {
+                    const statusSelect = document.getElementById('branch-status-select');
+                    data.status = statusSelect ? statusSelect.value : 'ACTIVE';
+                }
+                
+                try {
+                    if (id) {
+                        await BranchAPI.update(parseInt(id), data, imageFile);
+                        ToastManager.show('Cập nhật chi nhánh thành công.', 'success');
+                    } else {
+                        await BranchAPI.create(data, imageFile);
+                        ToastManager.show('Thêm chi nhánh thành công.', 'success');
+                    }
+                    closeBranchModal();
+                    loadAdminBranches(adminBranchPage);
+                } catch (error) {
+                    errorDiv.textContent = error.message || 'Thao tác thất bại.';
+                    errorDiv.style.display = 'block';
+                }
+                return false;
+            }
+
+            async function changeBranchStatus(id, status) {
+                try {
+                    await BranchAPI.changeStatus(id, status);
+                    ToastManager.show('Cập nhật trạng thái chi nhánh thành công.', 'success');
+                    loadAdminBranches(adminBranchPage);
+                } catch (error) {
+                    ToastManager.show(error.message || 'Thao tác thất bại.', 'error');
+                }
+            }
+
+            // ===== Load Provinces from API =====
+
+            let provincesCache = null;
+
+            async function loadProvinces(selectedValue = '') {
+                const select = document.getElementById('branch-city');
+                select.innerHTML = '<option value="">-- Đang tải... --</option>';
+                select.disabled = true;
+
+                try {
+                    if (!provincesCache) {
+                        const response = await fetch('https://provinces.open-api.vn/api/v2/');
+                        if (!response.ok) throw new Error('Failed to load provinces');
+                        provincesCache = await response.json();
+                    }
+
+                    select.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+                    provincesCache.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.name;
+                        opt.textContent = p.name;
+                        select.appendChild(opt);
+                    });
+
+                    if (selectedValue) {
+                        const match = Array.from(select.options).find(o => o.value === selectedValue);
+                        if (match) {
+                            select.value = selectedValue;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to load provinces:', error);
+                    provincesCache = null;
+                    select.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
+                    // Fallback: allow manual input by showing an input
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'branch-city';
+                    input.className = 'ls-form-input';
+                    input.placeholder = 'VD: TP. Hồ Chí Minh';
+                    input.required = true;
+                    if (selectedValue) input.value = selectedValue;
+                    select.replaceWith(input);
+                    ToastManager.show('Không thể tải danh sách tỉnh thành. Vui lòng nhập tay.', 'warning');
+                } finally {
+                    select.disabled = false;
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

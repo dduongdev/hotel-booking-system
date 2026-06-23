@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dduongdev.hotel.dto.RoomTypeAvailability;
+import com.dduongdev.hotel.dto.RoomTypeAvailabilityProjection;
 import com.dduongdev.hotel.entity.Branch;
 import com.dduongdev.hotel.entity.RoomType;
 import com.dduongdev.hotel.exception.ResourceNotFoundException;
@@ -88,7 +88,6 @@ public class RoomTypeService {
         MultipartFile image = request.getImage();
 
         if (image != null && !image.isEmpty()) {
-            // Delete old image if exists
             if (storedroomType.getImageUrl() != null) {
                 storageService.delete(storedroomType.getImageUrl());
             }
@@ -136,7 +135,7 @@ public class RoomTypeService {
         LocalDateTime checkInTime = LocalDateTime.of(checkIn, branch.getCheckInTime());
         LocalDateTime checkOutTime = LocalDateTime.of(checkOut, branch.getCheckOutTime());
 
-        List<RoomTypeAvailability> roomTypes = roomTypeRepository.findAvailabilitiesByBranch(branch.getId(), checkInTime, checkOutTime);
+        List<RoomTypeAvailabilityProjection> roomTypes = roomTypeRepository.findAvailabilitiesByBranch(branch.getId(), checkInTime, checkOutTime);
         return roomTypes.stream().map(roomType -> roomTypeMapper.toRoomTypeAvailabilityResponse(roomType)).toList();
     }
 }

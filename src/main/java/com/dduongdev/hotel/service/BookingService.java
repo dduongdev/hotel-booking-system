@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dduongdev.hotel.dto.RoomTypeAvailability;
+import com.dduongdev.hotel.dto.RoomTypeAvailabilityProjection;
 import com.dduongdev.hotel.entity.Booking;
 import com.dduongdev.hotel.entity.Branch;
 import com.dduongdev.hotel.entity.Room;
@@ -68,9 +68,9 @@ public class BookingService {
         LocalDateTime checkInTime = LocalDateTime.of(request.getCheckIn(), branch.getCheckInTime());
         LocalDateTime checkOutTime = LocalDateTime.of(request.getCheckOut(), branch.getCheckOutTime());
 
-        RoomTypeAvailability roomTypeAvailability = roomTypeRepository.findRoomTypeAvailability(request.getRoomTypeId(), branchId, checkInTime, checkOutTime);
+        RoomTypeAvailabilityProjection roomTypeAvailability = roomTypeRepository.findRoomTypeAvailability(request.getRoomTypeId(), branchId, checkInTime, checkOutTime).orElseThrow(() -> new ResourceNotFoundException("The requested room type is unavailable or does not exist."));
 
-        if (roomTypeAvailability == null || roomTypeAvailability.getAvailableRoomCount() <= 0) {
+        if (roomTypeAvailability == null || roomTypeAvailability.getAvailableRooms() <= 0) {
             throw new RoomTypeNotAvailableException(request.getRoomTypeId(), request.getCheckIn().toString(), request.getCheckOut().toString());
         }
 

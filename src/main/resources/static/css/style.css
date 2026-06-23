@@ -932,6 +932,236 @@ a:hover {
   font-size: 0.875rem;
 }
 
+/* ===== BRANCH CARDS ===== */
+.ls-branches-section {
+  padding: 80px 0;
+  background: var(--slate-50);
+}
+
+.ls-branches-section__label {
+  color: var(--color-secondary);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.ls-branches-section__title {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  line-height: 1.2;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.ls-branches-section__subtitle {
+  color: var(--slate-500);
+  font-size: 1rem;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+
+.ls-branch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.ls-branch-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-100);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  position: relative;
+}
+
+.ls-branch-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-secondary);
+}
+
+.ls-branch-card__image-wrapper {
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+  background: var(--slate-100);
+}
+
+.ls-branch-card__image {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ls-branch-card:hover .ls-branch-card__image {
+  transform: scale(1.08);
+}
+
+.ls-branch-card__image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary-container), var(--slate-800));
+  color: var(--color-secondary-container);
+  font-size: 3rem;
+}
+
+.ls-branch-card__body {
+  padding: 20px 24px 24px;
+}
+
+.ls-branch-card__name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--slate-900);
+  margin-bottom: 4px;
+  transition: color 0.2s ease;
+}
+
+.ls-branch-card:hover .ls-branch-card__name {
+  color: var(--color-secondary);
+}
+
+.ls-branch-card__location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--slate-500);
+  font-size: 0.8125rem;
+  margin-bottom: 12px;
+}
+
+.ls-branch-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ls-branch-card__detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--slate-600);
+  font-size: 0.75rem;
+}
+
+.ls-branch-card__detail-icon {
+  color: var(--color-secondary);
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.ls-branch-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+  transition: gap 0.2s ease;
+}
+
+.ls-branch-card:hover .ls-branch-card__action {
+  gap: 10px;
+}
+
+.ls-branch-card__status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.ls-branch-card__status--active {
+  color: var(--success-text);
+  background: rgba(240, 253, 244, 0.95);
+}
+
+.ls-branch-card__status--inactive {
+  color: var(--slate-500);
+}
+
+.ls-branch-card__status--maintenance {
+  color: var(--warning-text);
+  background: rgba(255, 251, 235, 0.95);
+}
+
+.ls-branch-card__status--closed {
+  color: var(--danger-text);
+  background: rgba(254, 242, 242, 0.95);
+}
+
+@media (max-width: 992px) {
+  .ls-branch-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ls-branch-grid {
+    grid-template-columns: 1fr;
+  }
+  .ls-branches-section__title {
+    font-size: 1.75rem;
+  }
+}
+
+/* ===== TIME PICKER ===== */
+.time-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-picker-group select {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  padding: 10px 8px;
+  font-variant-numeric: tabular-nums;
+  appearance: auto;
+  cursor: pointer;
+}
+
+.time-picker-sep {
+  color: var(--slate-400);
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+
 /* ===== FOOTER ===== */
 .ls-footer {
   background: var(--slate-900);
